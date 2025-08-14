@@ -35,3 +35,11 @@ config :phoenix, :plug_init_mode, :runtime
 # Enable helpful, but potentially expensive runtime checks
 config :phoenix_live_view,
   enable_expensive_runtime_checks: true
+
+config :bubble,
+  twitter_client_req_options: [
+    plug: {Req.Test, Bubble.Sources.TwitterClient},
+    retry: false
+  ]
+
+config :bubble, twitter_bearer_token: "bearer_token_for_testing"

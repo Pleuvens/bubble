@@ -35,4 +35,8 @@ bubble-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Ignore ElixirLS files.
 /.elixir_ls/
+
+# Ignore environment files.
+dev.local.secrets.exs
