@@ -10,7 +10,7 @@
 
 - [x] Initialize new Phoenix project with LiveView support.
 - [x] Set up git (version control) and create initial repository.
-- [ ] Configure database using Ecto (Postgres recommended).
+- [x] Configure database using Ecto (Postgres recommended).
 
 ### User/Account Management
 
