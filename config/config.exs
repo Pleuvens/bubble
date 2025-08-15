@@ -11,7 +11,13 @@ config :bubble, Oban,
   engine: Oban.Engines.Basic,
   notifier: Oban.Notifiers.Postgres,
   queues: [default: 10],
-  repo: Bubble.Repo
+  repo: Bubble.Repo,
+  plugins: [
+    {Oban.Plugins.Cron,
+     crontab: [
+       {"@daily", Bubble.Cron.DailyFeedUpdate}
+     ]}
+  ]
 
 config :bubble,
   ecto_repos: [Bubble.Repo],
