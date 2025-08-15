@@ -15,7 +15,7 @@ config :bubble, Oban,
   plugins: [
     {Oban.Plugins.Cron,
      crontab: [
-       {"@daily", Bubble.Cron.DailyFeedUpdate}
+       {"@daily", Bubble.Feeds.FetchNewsCronJob}
      ]}
   ]
 

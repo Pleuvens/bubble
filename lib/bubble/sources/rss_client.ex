@@ -1,4 +1,4 @@
-defmodule Bubble.Sources.RssClient do
+defmodule Bubble.Sources.RSSClient do
   @moduledoc """
   A simple module to fetch and parse RSS feeds using Req and Quinn.
   """

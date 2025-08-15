@@ -1,11 +1,11 @@
-defmodule Bubble.Feeds.FetchNewCronJob do
+defmodule Bubble.Feeds.FetchNewsCronJob do
   use Oban.Worker
 
   import Ecto.Query
 
   alias Bubble.Feeds.FeedSource
   alias Bubble.Repo
-  alias Bubble.Sources.RssClient
+  alias Bubble.Sources.RSSClient
 
   require Logger
 
@@ -20,7 +20,7 @@ defmodule Bubble.Feeds.FetchNewCronJob do
       )
 
     Logger.info("Fetching new RSS feeds...", sources: sources)
-    RssClient.fetch_feeds(sources)
+    RSSClient.fetch_feeds(sources)
 
     Repo.update_all(
       from(fs in FeedSource,

@@ -1,49 +1,49 @@
-defmodule Bubble.Sources.RssClientTest do
+defmodule Bubble.Sources.RSSClientTest do
   use ExUnit.Case, async: true
 
   describe "fetch_feed/1" do
     test "fetches and parses a valid RSS feed" do
       url = "https://www.reddit.com/r/elixir/.rss"
 
-      Req.Test.stub(Bubble.Sources.RssClient, fn conn ->
+      Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
         Req.Test.text(conn, mock_rss_feed())
       end)
 
       assert {:ok, [%{title: "Phoenix 1.8.0 released!"}]} =
-               Bubble.Sources.RssClient.fetch_feed(url)
+               Bubble.Sources.RSSClient.fetch_feed(url)
     end
 
     test "returns error for invalid URL" do
       url = "https://invalid.url/rss"
 
-      Req.Test.stub(Bubble.Sources.RssClient, fn conn ->
+      Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
         Plug.Conn.send_resp(conn, 404, "not found")
       end)
 
       assert {:error, :invalid_http_request} =
-               Bubble.Sources.RssClient.fetch_feed(url)
+               Bubble.Sources.RSSClient.fetch_feed(url)
     end
 
     test "returns error when call fails" do
       url = "https://www.reddit.com/r/elixir/.rss"
 
-      Req.Test.stub(Bubble.Sources.RssClient, fn conn ->
+      Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
         Req.Test.transport_error(conn, :timeout)
       end)
 
       assert {:error, :http_request_failed} =
-               Bubble.Sources.RssClient.fetch_feed(url)
+               Bubble.Sources.RSSClient.fetch_feed(url)
     end
 
     test "returns error when parsing fails" do
       url = "https://www.reddit.com/r/elixir/.rss"
 
-      Req.Test.stub(Bubble.Sources.RssClient, fn conn ->
+      Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
         Req.Test.text(conn, "not a valid rss feed")
       end)
 
       assert {:error, :rss_parsing_failed} =
-               Bubble.Sources.RssClient.fetch_feed(url)
+               Bubble.Sources.RSSClient.fetch_feed(url)
     end
   end
 
@@ -51,7 +51,7 @@ defmodule Bubble.Sources.RssClientTest do
     test "fetches multiple RSS feeds concurrently" do
       urls = ["https://www.reddit.com/r/elixir/.rss", "https://www.reddit.com/r/phoenix/.rss"]
 
-      Req.Test.stub(Bubble.Sources.RssClient, fn conn ->
+      Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
         case conn.request_path do
           "/r/elixir/.rss" ->
             Req.Test.text(conn, mock_rss_feed())
@@ -61,7 +61,7 @@ defmodule Bubble.Sources.RssClientTest do
         end
       end)
 
-      results = Bubble.Sources.RssClient.fetch_feeds(urls)
+      results = Bubble.Sources.RSSClient.fetch_feeds(urls)
       assert length(results) == 2
       assert Enum.all?(results, fn {_url, {:ok, _feed}} -> true end)
     end

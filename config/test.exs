@@ -39,6 +39,6 @@ config :phoenix_live_view,
 
 config :bubble,
   rss_client_req_options: [
-    plug: {Req.Test, Bubble.Sources.RssClient},
+    plug: {Req.Test, Bubble.Sources.RSSClient},
     retry: false
   ]
