@@ -30,7 +30,11 @@ defmodule Bubble.Feeds.FetchNewsCronJob do
         news_items
       end)
       |> Enum.map(fn news ->
-        %{news | published_at: DateTime.from_iso8601(news.published_at) |> elem(1)}
+        %{
+          news
+          | published_at: DateTime.from_iso8601(news.published_at) |> elem(1),
+            content: HtmlSanitizeEx.basic_html(news.content)
+        }
       end)
       |> dbg()
 

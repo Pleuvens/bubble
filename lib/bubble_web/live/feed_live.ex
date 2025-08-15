@@ -8,23 +8,21 @@ defmodule BubbleWeb.FeedLive do
   def render(assigns) do
     ~H"""
     <div class="feed">
-      <h1>Feed</h1>
-      <p>Welcome to the feed page!</p>
       <ul>
         <%= if @news == [] do %>
           <li>No news available at the moment.</li>
         <% else %>
           <%= for news_item <- @news do %>
             <li>
-              <.card>
+              <.card class="mb-4">
                 <.card_header>
                   <.card_title>{news_item.title}</.card_title>
                   <.card_description>{news_item.description}</.card_description>
                 </.card_header>
                 <.card_content>
-                  {news_item.content}
+                  {raw(HtmlSanitizeEx.basic_html(news_item.content))}
                 </.card_content>
-                <.card_footer class="flex justify-between">
+                <.card_footer>
                   <a href={news_item.url} target="_blank">Go to</a>
                 </.card_footer>
               </.card>
