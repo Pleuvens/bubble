@@ -37,9 +37,7 @@ config :phoenix_live_view,
   enable_expensive_runtime_checks: true
 
 config :bubble,
-  twitter_client_req_options: [
-    plug: {Req.Test, Bubble.Sources.TwitterClient},
+  rss_client_req_options: [
+    plug: {Req.Test, Bubble.Sources.RssClient},
     retry: false
   ]
-
-config :bubble, twitter_bearer_token: "bearer_token_for_testing"
