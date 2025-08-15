@@ -18,6 +18,7 @@ defmodule BubbleWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    live "/feed", FeedLive, :index
   end
 
   # Other scopes may use custom stacks.
