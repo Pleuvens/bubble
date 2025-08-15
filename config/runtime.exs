@@ -20,6 +20,19 @@ if System.get_env("PHX_SERVER") do
   config :bubble, BubbleWeb.Endpoint, server: true
 end
 
+config :bubble, Bubble.Repo,
+  migration_timestamps: [
+    type: :timestamptz,
+    inserted_at: :created_at,
+    updated_at: :updated_at,
+    default: Ecto.Migration.fragment("NOW()")
+  ],
+  migration_primary_key: [
+    type: :binary_id,
+    name: :id,
+    default: Ecto.Migration.fragment("gen_random_uuid()")
+  ]
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

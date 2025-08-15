@@ -9,7 +9,7 @@ import Config
 
 config :bubble,
   ecto_repos: [Bubble.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [binary_id: true]
 
 # Configures the endpoint
 config :bubble, BubbleWeb.Endpoint,
