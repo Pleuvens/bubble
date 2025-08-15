@@ -1,16 +1,35 @@
 defmodule BubbleWeb.FeedLive do
   use BubbleWeb, :live_view
 
+  import SaladUI.Card
+
+  alias Bubble.Feeds
+
   def render(assigns) do
     ~H"""
     <div class="feed">
       <h1>Feed</h1>
       <p>Welcome to the feed page!</p>
       <ul>
-        <%= for news_item <- @news do %>
-          <li>
-            <strong><%= news_item.title %></strong>: {news_item.content}
-          </li>
+        <%= if @news == [] do %>
+          <li>No news available at the moment.</li>
+        <% else %>
+          <%= for news_item <- @news do %>
+            <li>
+              <.card>
+                <.card_header>
+                  <.card_title>{news_item.title}</.card_title>
+                  <.card_description>{news_item.description}</.card_description>
+                </.card_header>
+                <.card_content>
+                  {news_item.content}
+                </.card_content>
+                <.card_footer class="flex justify-between">
+                  <a href={news_item.link}>Go to</a>
+                </.card_footer>
+              </.card>
+            </li>
+          <% end %>
         <% end %>
       </ul>
     </div>
@@ -18,11 +37,7 @@ defmodule BubbleWeb.FeedLive do
   end
 
   def mount(_params, _session, socket) do
-    news = [
-      %{title: "Breaking News 1", content: "Content for breaking news 1"},
-      %{title: "Breaking News 2", content: "Content for breaking news 2"},
-      %{title: "Breaking News 3", content: "Content for breaking news 3"}
-    ]
+    news = Feeds.list_news()
 
     {:ok, assign(socket, :news, news)}
   end

@@ -61,7 +61,8 @@ defmodule Bubble.MixProject do
       {:req, "~> 0.5.0"},
       {:sweet_xml, "~> 0.7.5"},
       {:oban, "~> 2.19"},
-      {:igniter, "~> 0.5", only: [:dev]}
+      {:igniter, "~> 0.5"},
+      {:salad_ui, "~> 1.0.0-beta.3"}
     ]
   end
 
