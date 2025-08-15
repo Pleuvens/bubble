@@ -20,10 +20,10 @@ defmodule BubbleWeb.FeedLive do
                   <.card_description>{news_item.description}</.card_description>
                 </.card_header>
                 <.card_content>
-                  {raw(HtmlSanitizeEx.basic_html(news_item.content))}
+                  {raw(HtmlSanitizeEx.strip_tags(news_item.content))}
                 </.card_content>
                 <.card_footer>
-                  <a href={news_item.url} target="_blank">Go to</a>
+                  <a href={news_item.url} target="_blank" rel="noopener noreferrer">Go to</a>
                 </.card_footer>
               </.card>
             </li>

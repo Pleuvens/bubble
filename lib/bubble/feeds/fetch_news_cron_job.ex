@@ -33,7 +33,7 @@ defmodule Bubble.Feeds.FetchNewsCronJob do
         %{
           news
           | published_at: DateTime.from_iso8601(news.published_at) |> elem(1),
-            content: HtmlSanitizeEx.basic_html(news.content)
+            content: HtmlSanitizeEx.strip_tags(news.content)
         }
       end)
       |> dbg()
