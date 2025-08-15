@@ -1,4 +1,5 @@
 import Config
+config :bubble, Oban, testing: :manual
 
 # Configure your database
 #

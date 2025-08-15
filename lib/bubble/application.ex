@@ -11,6 +11,7 @@ defmodule Bubble.Application do
       BubbleWeb.Telemetry,
       Bubble.Repo,
       {DNSCluster, query: Application.get_env(:bubble, :dns_cluster_query) || :ignore},
+      {Oban, Application.fetch_env!(:bubble, Oban)},
       {Phoenix.PubSub, name: Bubble.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: Bubble.Finch},

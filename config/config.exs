@@ -7,6 +7,12 @@
 # General application configuration
 import Config
 
+config :bubble, Oban,
+  engine: Oban.Engines.Basic,
+  notifier: Oban.Notifiers.Postgres,
+  queues: [default: 10],
+  repo: Bubble.Repo
+
 config :bubble,
   ecto_repos: [Bubble.Repo],
   generators: [binary_id: true]
