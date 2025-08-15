@@ -25,7 +25,7 @@ defmodule BubbleWeb.FeedLive do
                   {news_item.content}
                 </.card_content>
                 <.card_footer class="flex justify-between">
-                  <a href={news_item.link}>Go to</a>
+                  <a href={news_item.url} target="_blank">Go to</a>
                 </.card_footer>
               </.card>
             </li>

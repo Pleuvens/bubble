@@ -19,6 +19,7 @@ defmodule BubbleWeb.Router do
 
     get "/", PageController, :home
     live "/feed", FeedLive, :index
+    live "/settings", SettingsLive, :index
   end
 
   # Other scopes may use custom stacks.

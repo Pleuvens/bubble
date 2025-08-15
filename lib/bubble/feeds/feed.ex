@@ -6,7 +6,7 @@ defmodule Bubble.Feeds.Feed do
   schema "feeds" do
     field :title, :string
     field :url, :string
-    field :published_at, :utc_datetime_usec
+    field :published_at, :utc_datetime
     field :content, :string
     field :description, :string
 

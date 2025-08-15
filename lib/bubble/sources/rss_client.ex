@@ -47,9 +47,10 @@ defmodule Bubble.Sources.RSSClient do
     |> xpath(
       ~x"//entry"l,
       title: ~x"./title/text()"s,
-      link: ~x"./link/@href"s,
-      category: ~x"./category/text()"s,
-      content: ~x"./content/text()"s
+      url: ~x"./link/@href"s,
+      description: ~x"./description/text()"s,
+      content: ~x"./content/text()"s,
+      published_at: ~x"./published/text()"s
     )
   catch
     :exit, {:fatal, _} ->
