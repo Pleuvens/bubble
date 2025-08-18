@@ -62,8 +62,8 @@ defmodule Bubble.MixProject do
       {:sweet_xml, "~> 0.7.5"},
       {:oban, "~> 2.19"},
       {:igniter, "~> 0.5"},
-      {:salad_ui, "~> 1.0.0-beta.3"},
-      {:html_sanitize_ex, "~> 1.4"}
+      {:html_sanitize_ex, "~> 1.4"},
+      {:lucide_live_view, "~> 0.1.0"}
     ]
   end
 

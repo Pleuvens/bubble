@@ -21,26 +21,77 @@ import "phoenix_html"
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
-import SaladUI from "salad_ui";
-import "salad_ui/components/dialog";
-import "salad_ui/components/select";
-import "salad_ui/components/tabs";
-import "salad_ui/components/radio_group";
-import "salad_ui/components/popover";
-import "salad_ui/components/hover-card";
-import "salad_ui/components/collapsible";
-import "salad_ui/components/tooltip";
-import "salad_ui/components/accordion";
-import "salad_ui/components/slider";
-import "salad_ui/components/switch";
-import "salad_ui/components/dropdown_menu";
+
+let Hooks = {}
+
+Hooks.FeedNav = {
+  mounted() {
+    const live = this;
+
+    let timeout
+
+    const handleKeyDown = (e) => {
+      if (["ArrowDown", "j"].includes(e.key)) {
+        e.preventDefault();
+        live.pushEvent("set_index", { index: live.currentIndex() + 1 });
+      } else if (["ArrowUp", "k"].includes(e.key)) {
+        e.preventDefault();
+        live.pushEvent("set_index", { index: live.currentIndex() - 1 });
+      } else if (["Enter", " "].includes(e.key)) {
+        e.preventDefault();
+        const idx = live.currentIndex();
+        const el = document.getElementById(`news-item-${idx}`);
+        if (el) {
+          live.pushEvent("toggle_expanded", { });
+        }
+      }
+    }
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const viewportHeight = window.innerHeight;
+      const newIndex = Math.round(scrollY / viewportHeight);
+      live.pushEvent("set_index", { index: newIndex });
+    };
+
+    this.handleKeyDown = handleKeyDown;
+    this.handleScroll = handleScroll;
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("scroll", handleScroll);
+  },
+   destroyed() {
+    window.removeEventListener("keydown", this.handleKeyDown);
+    window.removeEventListener("scroll", this.handleScroll);
+  },
+  updated() {
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+    }
+    this.timeoutId = setTimeout(() => {
+      console.log("Scrolling to current index");
+    const idx = this.currentIndex();
+    const element = document.getElementById(`news-item-${idx}`);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+    this.timeoutId = null;
+    }, 800);
+  },
+  currentIndex() {
+    const active = document.querySelector("#feed");
+    console.log(active);
+    if (!active) return 0;
+    return parseInt(active.getAttribute("data-active"), 10);
+  }
+}
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken}
 ,
-  hooks: { SaladUI: SaladUI.SaladUIHook }})
+  hooks: Hooks})
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})

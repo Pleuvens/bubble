@@ -8,7 +8,6 @@ defmodule Bubble.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      TwMerge.Cache,
       BubbleWeb.Telemetry,
       Bubble.Repo,
       {DNSCluster, query: Application.get_env(:bubble, :dns_cluster_query) || :ignore},
