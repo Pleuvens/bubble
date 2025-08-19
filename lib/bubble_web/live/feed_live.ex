@@ -77,23 +77,6 @@ defmodule BubbleWeb.FeedLive do
         <div>↑↓ Navigate • Enter/Space Expand • Arrow→ Read article • Scroll to browse</div>
       </div>
     </div>
-    <%!-- <div class="feed"> --%>
-    <%!--   <ul> --%>
-    <%!--     <%= if @news == [] do %> --%>
-    <%!--       <li>No news available at the moment.</li> --%>
-    <%!--     <% else %> --%>
-    <%!--       <%= for news_item <- @news do %> --%>
-    <%!--         <li> --%>
-    <%!--           <div class="mb-6 mt-6 flex flex-row items-center"> --%>
-    <%!--             <a href={news_item.url} target="_blank" rel="noopener noreferrer"> --%>
-    <%!--               {news_item.title} --%>
-    <%!--             </a> --%>
-    <%!--           </div> --%>
-    <%!--         </li> --%>
-    <%!--       <% end %> --%>
-    <%!--     <% end %> --%>
-    <%!--   </ul> --%>
-    <%!-- </div> --%>
     """
   end
 
