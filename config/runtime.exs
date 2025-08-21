@@ -22,8 +22,8 @@ end
 
 config :bubble, Bubble.Repo,
   migration_timestamps: [
-    type: :timestamptz,
-    inserted_at: :created_at,
+    type: :utc_datetime_usec,
+    inserted_at: :inserted_at,
     updated_at: :updated_at,
     default: Ecto.Migration.fragment("NOW()")
   ],

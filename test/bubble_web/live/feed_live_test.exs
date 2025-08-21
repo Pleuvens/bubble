@@ -25,7 +25,7 @@ defmodule BubbleWeb.FeedLiveTest do
         assert view.assigns.expanded == false
       rescue
         # If rendering fails due to empty list, just check mount assigns
-        KeyError -> 
+        KeyError ->
           # This is expected with current template implementation
           assert true
       end
@@ -80,7 +80,7 @@ defmodule BubbleWeb.FeedLiveTest do
 
       # Initially at index 0
       assert has_element?(view, "[data-active='0']")
-      
+
       # Test that set_index event handler exists by trying to send the event
       # Since there's no direct UI for this event, we'll just verify the handler exists
       assert render_hook(view, "set_index", %{"index" => 2}) =~ "Test News Title"

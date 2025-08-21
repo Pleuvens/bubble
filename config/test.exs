@@ -42,3 +42,5 @@ config :bubble,
     plug: {Req.Test, Bubble.Sources.RSSClient},
     retry: false
   ]
+
+config :bubble, firecrawl_api_key: "test_firecrawl_api_key"

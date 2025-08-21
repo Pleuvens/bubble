@@ -45,12 +45,12 @@ defmodule Bubble.Sources.RSSClient do
     xml
     |> SweetXml.parse(dtd: :none)
     |> xpath(
-      ~x"//entry"l,
+      ~x"//entry | //item"l,
       title: ~x"./title/text()"s,
-      url: ~x"./link/@href"s,
+      url: ~x"./link/@href | ./link/text()"s,
       description: ~x"./description/text()"s,
       content: ~x"./content/text()"s,
-      published_at: ~x"./published/text()"s
+      published_at: ~x"./published/text() | ./pubDate/text()"s
     )
   catch
     :exit, {:fatal, _} ->

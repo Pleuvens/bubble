@@ -1,4 +1,5 @@
 defmodule Bubble.Feeds.FetchNewsCronJob do
+  alias Bubble.Sources.FirecrawlClient
   use Oban.Worker
 
   import Ecto.Query
@@ -30,13 +31,24 @@ defmodule Bubble.Feeds.FetchNewsCronJob do
         news_items
       end)
       |> Enum.map(fn news ->
+        content =
+          case FirecrawlClient.fetch_feed_content(news.url) do
+            {:ok, summary} -> summary
+            _ -> nil
+          end
+
+        published_at =
+          case DateTime.from_iso8601(news.published_at) |> elem(1) do
+            :invalid_format -> DateTime.utc_now() |> DateTime.truncate(:second)
+            dt -> dt
+          end
+
         %{
           news
-          | published_at: DateTime.from_iso8601(news.published_at) |> elem(1),
-            content: HtmlSanitizeEx.strip_tags(news.content)
+          | published_at: published_at,
+            content: content || "No description available"
         }
       end)
-      |> dbg()
 
     Repo.insert_all(Feed, news_to_insert)
 
