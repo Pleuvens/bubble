@@ -12,29 +12,37 @@ defmodule Bubble.Feeds.FetchNewsCronJobTest do
 
   describe "perform/1" do
     test "fetches feeds from sources that haven't been fetched recently" do
-      old_source = insert_feed_source(%{
-        name: "Old Source",
-        url: "https://old.example.com/rss",
-        last_fetched_at: DateTime.add(DateTime.utc_now(), -2, :day)
-      })
+      old_source =
+        insert_feed_source(%{
+          name: "Old Source",
+          url: "https://old.example.com/rss",
+          last_fetched_at: DateTime.add(DateTime.utc_now(), -2, :day)
+        })
 
-      recent_source = insert_feed_source(%{
-        name: "Recent Source", 
-        url: "https://recent.example.com/rss",
-        last_fetched_at: DateTime.add(DateTime.utc_now(), -12, :hour)
-      })
+      recent_source =
+        insert_feed_source(%{
+          name: "Recent Source",
+          url: "https://recent.example.com/rss",
+          last_fetched_at: DateTime.add(DateTime.utc_now(), -12, :hour)
+        })
 
-      never_fetched_source = insert_feed_source(%{
-        name: "Never Fetched",
-        url: "https://never.example.com/rss",
-        last_fetched_at: nil
-      })
+      never_fetched_source =
+        insert_feed_source(%{
+          name: "Never Fetched",
+          url: "https://never.example.com/rss",
+          last_fetched_at: nil
+        })
 
       Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
         case conn.host do
-          "old.example.com" -> Req.Test.text(conn, mock_rss_feed("https://example.com/news/old"))
-          "never.example.com" -> Req.Test.text(conn, mock_rss_feed("https://example.com/news/never"))
-          "recent.example.com" -> Req.Test.text(conn, mock_rss_feed("https://example.com/news/recent"))
+          "old.example.com" ->
+            Req.Test.text(conn, mock_rss_feed("https://example.com/news/old"))
+
+          "never.example.com" ->
+            Req.Test.text(conn, mock_rss_feed("https://example.com/news/never"))
+
+          "recent.example.com" ->
+            Req.Test.text(conn, mock_rss_feed("https://example.com/news/recent"))
         end
       end)
 
@@ -49,12 +57,13 @@ defmodule Bubble.Feeds.FetchNewsCronJobTest do
       assert updated_old_source.last_fetched_at
 
       updated_recent_source = Repo.get(FeedSource, recent_source.id)
-      assert DateTime.diff(updated_recent_source.last_fetched_at, recent_source.last_fetched_at) > 0
+
+      assert DateTime.diff(updated_recent_source.last_fetched_at, recent_source.last_fetched_at) >
+               0
 
       updated_never_source = Repo.get(FeedSource, never_fetched_source.id)
       assert updated_never_source.last_fetched_at
     end
-
 
     test "handles FirecrawlClient errors gracefully" do
       insert_feed_source(%{
@@ -119,11 +128,12 @@ defmodule Bubble.Feeds.FetchNewsCronJobTest do
     end
 
     test "updates last_fetched_at for processed sources" do
-      source = insert_feed_source(%{
-        name: "Test Source",
-        url: "https://test5.example.com/rss",
-        last_fetched_at: nil
-      })
+      source =
+        insert_feed_source(%{
+          name: "Test Source",
+          url: "https://test5.example.com/rss",
+          last_fetched_at: nil
+        })
 
       Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
         Req.Test.text(conn, mock_rss_feed("https://example.com/news/5"))
@@ -152,9 +162,14 @@ defmodule Bubble.Feeds.FetchNewsCronJobTest do
         case conn.request_path do
           "/rss" ->
             case conn.host do
-              "source1.example.com" -> Req.Test.text(conn, mock_rss_feed("https://example.com/news/6"))
-              "source2.example.com" -> Req.Test.text(conn, mock_rss_feed("https://example.com/news/7"))
-              "source3.example.com" -> Req.Test.text(conn, mock_rss_feed("https://example.com/news/8"))
+              "source1.example.com" ->
+                Req.Test.text(conn, mock_rss_feed("https://example.com/news/6"))
+
+              "source2.example.com" ->
+                Req.Test.text(conn, mock_rss_feed("https://example.com/news/7"))
+
+              "source3.example.com" ->
+                Req.Test.text(conn, mock_rss_feed("https://example.com/news/8"))
             end
         end
       end)

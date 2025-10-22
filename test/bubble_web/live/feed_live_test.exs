@@ -134,7 +134,7 @@ defmodule BubbleWeb.FeedLiveTest do
 
       {:ok, _view, html} = live(conn, ~p"/feed")
 
-      assert html =~ "2024-01-01T00:00:00Z"
+      assert html =~ "1 January 2024 - 00:00"
     end
 
     test "renders multiple news items", %{conn: conn} do

@@ -2,6 +2,7 @@ defmodule BubbleWeb.FeedLive do
   use BubbleWeb, :live_view
 
   alias Bubble.Feeds
+  alias Utils.DateFormatter
 
   def render(assigns) do
     ~H"""
@@ -53,7 +54,7 @@ defmodule BubbleWeb.FeedLive do
                     <%!--   day: 'numeric', --%>
                     <%!--   year: 'numeric' --%>
                     <%!-- })} --%>
-                    {Enum.at(@news, index).published_at}
+                    {DateFormatter.format_news_date(Enum.at(@news, index).published_at)}
                   </div>
                   <%!-- Expanded content section --%>
                   <%= if @expanded do %>
