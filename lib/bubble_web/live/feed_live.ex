@@ -20,35 +20,53 @@ defmodule BubbleWeb.FeedLive do
             <div id={"news-item-#{index}"}>
               <div
                 phx-click="toggle_expanded"
-                class="min-h-screen flex flex-col items-center justify-center p-8 cursor-pointer transition-all duration-300 hover:bg-gray-50"
+                class={"min-h-screen flex flex-col p-8 cursor-pointer hover:bg-gray-50 #{if @expanded, do: "justify-start pt-16", else: "items-center justify-center"}"}
+                style="transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);"
               >
-                <div class="max-w-4xl mx-auto text-center">
+                <div class="max-w-4xl mx-auto text-center w-full">
                   <%!-- decorative line --%>
-                  <div class="flex justify-center mb-8">
+                  <div
+                    class="flex justify-center mb-8 overflow-hidden"
+                    style={"transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); #{if @expanded, do: "max-height: 0; margin-bottom: 0; opacity: 0;", else: "max-height: 100px; opacity: 1;"}"}
+                  >
                     <div class="w-px h-16 bg-gradient-to-b from-transparent via-orange-400 to-transparent opacity-60">
                     </div>
                   </div>
                   <%!-- Title with arrow --%>
-                  <div class="relative mb-8">
-                    <h1 class="text-4xl md:text-5xl lg:text-6xl text-orange-400 tracking-wide leading-tight uppercase font-light">
+                  <div
+                    class="relative mb-8"
+                    style="transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);"
+                  >
+                    <h1
+                      class="text-4xl md:text-5xl lg:text-6xl text-orange-400 tracking-wide leading-tight uppercase font-light"
+                      style={"will-change: transform; transition: transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); transform-origin: center; #{if @expanded, do: "transform: scale(0.5);", else: "transform: scale(1);"}"}
+                    >
                       {Enum.at(@news, index).title}
                     </h1>
                     <a
                       href={Enum.at(@news, index).url}
                       target="_blank"
+                      phx-click="noop"
                       class="absolute top-1/2 -translate-y-1/2 left-[calc(100%+8rem)] p-3 text-orange-400 hover:text-orange-500 transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-opacity-50 rounded-full"
                       aria-label="Read full article from source"
+                      onclick="event.stopPropagation();"
                     >
                       <Lucide.arrow_right size="48" class="md:w-10 md:h-10 lg:w-12 lg:h-12" />
                     </a>
                   </div>
                   <%!-- Decorative line below --%>
-                  <div class="flex justify-center mb-8">
+                  <div
+                    class="flex justify-center mb-8 overflow-hidden"
+                    style={"transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); #{if @expanded, do: "max-height: 0; margin-bottom: 0; opacity: 0;", else: "max-height: 100px; opacity: 1;"}"}
+                  >
                     <div class="w-px h-16 bg-gradient-to-b from-transparent via-orange-400 to-transparent opacity-60">
                     </div>
                   </div>
                   <%!-- sorce and date --%>
-                  <div class="text-xs text-gray-500 uppercase tracking-widest mb-4">
+                  <div
+                    class={"text-xs text-gray-500 uppercase tracking-widest #{if @expanded, do: "mb-8", else: "mb-4"}"}
+                    style="transition: margin 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);"
+                  >
                     <%!-- {source} — {new Date(publishedAt).toLocaleDateString('en-US', {  --%>
                     <%!--   month: 'short',  --%>
                     <%!--   day: 'numeric', --%>
@@ -57,11 +75,17 @@ defmodule BubbleWeb.FeedLive do
                     {DateFormatter.format_news_date(Enum.at(@news, index).published_at)}
                   </div>
                   <%!-- Expanded content section --%>
-                  <%= if @expanded do %>
-                    <div class="mt-8 text-sm text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                  <div
+                    class="flex items-center justify-center overflow-hidden"
+                    style={"transition: max-height 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); #{if @expanded, do: "max-height: 2000px;", else: "max-height: 0;"}"}
+                  >
+                    <div
+                      class="text-base md:text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed text-left px-4 py-4"
+                      style={"#{if @expanded, do: "opacity: 1; transition: opacity 0.4s ease-in 0.6s;", else: "opacity: 0; transition: opacity 0.15s ease-out;"}"}
+                    >
                       {Enum.at(@news, index).content}
                     </div>
-                  <% end %>
+                  </div>
                   <%!-- Hint text at the bottom --%>
                   <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-gray-400 uppercase tracking-wider">
                     <%= if @expanded do %>
