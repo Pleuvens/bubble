@@ -1,9 +1,11 @@
 defmodule Bubble.Sources.RSSClient do
   @moduledoc """
-  A simple module to fetch and parse RSS feeds using Req and Quinn.
+  A simple module to fetch RSS feeds using Req.
+
+  Parsing and validation is delegated to `Bubble.Sources.RSSValidator`.
   """
 
-  import SweetXml
+  alias Bubble.Sources.RSSValidator
 
   require Logger
 
@@ -15,20 +17,20 @@ defmodule Bubble.Sources.RSSClient do
       Keyword.merge([url: url], Application.get_env(:bubble, :rss_client_req_options, []))
 
     with {:ok, %{status: 200, body: body}} <- Req.get(get_params),
-         parsed_feed when is_list(parsed_feed) <- parse_rss(body) do
+         {:ok, parsed_feed} <- RSSValidator.parse_and_validate(body) do
       {:ok, parsed_feed}
     else
       {:ok, %{status: status}} ->
         Logger.warning("Failed to fetch RSS feed: HTTP status #{status} for URL #{url}")
         {:error, :invalid_http_request}
 
+      {:error, reason} when reason in [:invalid_xml, :item_extraction_failed, :no_valid_items] ->
+        Logger.warning("Failed to parse RSS feed: #{reason} for URL #{url}")
+        {:error, :rss_parsing_failed}
+
       {:error, reason} ->
         Logger.warning("Failed to fetch RSS feed: #{inspect(reason)} for URL #{url}")
         {:error, :http_request_failed}
-
-      other ->
-        Logger.warning("Failed to parse RSS feed: #{inspect(other)} for URL #{url}")
-        {:error, :rss_parsing_failed}
     end
   end
 
@@ -39,21 +41,5 @@ defmodule Bubble.Sources.RSSClient do
     urls
     |> Task.async_stream(&{&1, fetch_feed(&1)}, timeout: 10_000, max_concurrency: 5)
     |> Enum.map(fn {:ok, result} -> result end)
-  end
-
-  defp parse_rss(xml) do
-    xml
-    |> SweetXml.parse(dtd: :none)
-    |> xpath(
-      ~x"//entry | //item"l,
-      title: ~x"./title/text()"s,
-      url: ~x"./link/@href | ./link/text()"s,
-      description: ~x"./description/text()"s,
-      content: ~x"./content/text()"s,
-      published_at: ~x"./published/text() | ./pubDate/text()"s
-    )
-  catch
-    :exit, {:fatal, _} ->
-      :rss_parsing_failed
   end
 end
