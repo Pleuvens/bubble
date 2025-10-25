@@ -1,5 +1,4 @@
 defmodule Bubble.Feeds.FetchNewsCronJob do
-  alias Bubble.Sources.FirecrawlClient
   alias Bubble.Sources.MetaScraper
   use Oban.Worker
 
@@ -59,7 +58,7 @@ defmodule Bubble.Feeds.FetchNewsCronJob do
     :ok
   end
 
-  # Hybrid approach: Try RSS data first, then MetaScraper, then Firecrawl as last resort
+  # Hybrid approach: Try RSS data first, then MetaScraper
   defp fetch_content_with_fallback(news) do
     cond do
       # First: Use RSS content if available and substantial
@@ -78,15 +77,7 @@ defmodule Bubble.Feeds.FetchNewsCronJob do
             description
 
           {:error, _reason} ->
-            # Fourth: Fall back to Firecrawl as last resort (expensive!)
-            case FirecrawlClient.fetch_feed_content(news.url) do
-              {:ok, summary} ->
-                Logger.info("Used Firecrawl API for #{news.url}")
-                summary
-
-              _ ->
-                "No description available"
-            end
+            "No description available"
         end
     end
   end

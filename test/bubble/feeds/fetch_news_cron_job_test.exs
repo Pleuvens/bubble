@@ -46,8 +46,6 @@ defmodule Bubble.Feeds.FetchNewsCronJobTest do
         end
       end)
 
-      stub_firecrawl_responses()
-
       job = %Oban.Job{args: %{}}
       assert :ok = FetchNewsCronJob.perform(job)
 
@@ -65,7 +63,7 @@ defmodule Bubble.Feeds.FetchNewsCronJobTest do
       assert updated_never_source.last_fetched_at
     end
 
-    test "handles FirecrawlClient errors gracefully" do
+    test "handles MetaScraper errors gracefully" do
       insert_feed_source(%{
         name: "Test Source",
         url: "https://test2.example.com/rss",
@@ -74,10 +72,6 @@ defmodule Bubble.Feeds.FetchNewsCronJobTest do
 
       Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
         Req.Test.text(conn, mock_rss_feed("https://example.com/news/2"))
-      end)
-
-      Req.Test.stub(Bubble.Sources.FirecrawlClient, fn conn ->
-        Req.Test.transport_error(conn, :timeout)
       end)
 
       job = %Oban.Job{args: %{}}
@@ -98,8 +92,6 @@ defmodule Bubble.Feeds.FetchNewsCronJobTest do
         Req.Test.text(conn, mock_rss_feed("https://example.com/news/3"))
       end)
 
-      stub_firecrawl_responses()
-
       job = %Oban.Job{args: %{}}
       assert :ok = FetchNewsCronJob.perform(job)
 
@@ -117,8 +109,6 @@ defmodule Bubble.Feeds.FetchNewsCronJobTest do
       Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
         Req.Test.text(conn, mock_rss_feed_with_invalid_date("https://example.com/news/4"))
       end)
-
-      stub_firecrawl_responses()
 
       job = %Oban.Job{args: %{}}
       assert :ok = FetchNewsCronJob.perform(job)
@@ -138,8 +128,6 @@ defmodule Bubble.Feeds.FetchNewsCronJobTest do
       Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
         Req.Test.text(conn, mock_rss_feed("https://example.com/news/5"))
       end)
-
-      stub_firecrawl_responses()
 
       job = %Oban.Job{args: %{}}
       assert :ok = FetchNewsCronJob.perform(job)
@@ -174,8 +162,6 @@ defmodule Bubble.Feeds.FetchNewsCronJobTest do
         end
       end)
 
-      stub_firecrawl_responses()
-
       job = %Oban.Job{args: %{}}
       assert :ok = FetchNewsCronJob.perform(job)
 
@@ -187,12 +173,6 @@ defmodule Bubble.Feeds.FetchNewsCronJobTest do
     %FeedSource{}
     |> FeedSource.changeset(attrs)
     |> Repo.insert!()
-  end
-
-  defp stub_firecrawl_responses do
-    Req.Test.stub(Bubble.Sources.FirecrawlClient, fn conn ->
-      Req.Test.json(conn, %{"data" => %{"content" => "Test content summary"}})
-    end)
   end
 
   defp mock_rss_feed(news_url) do

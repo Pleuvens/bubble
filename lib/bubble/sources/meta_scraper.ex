@@ -6,9 +6,6 @@ defmodule Bubble.Sources.MetaScraper do
   1. Fetches HTML content using HttpClient
   2. Tries extractors in priority order (OpenGraph → Twitter Card → HTML)
   3. Returns the first successful extraction
-
-  This provides a free alternative to services like Firecrawl for basic
-  metadata extraction from web pages.
   """
 
   alias Bubble.Sources.HttpClient
