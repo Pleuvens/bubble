@@ -41,4 +41,8 @@ config :bubble,
   rss_client_req_options: [
     plug: {Req.Test, Bubble.Sources.RSSClient},
     retry: false
+  ],
+  http_client_req_options: [
+    plug: {Req.Test, Bubble.Sources.HttpClient},
+    retry: false
   ]

@@ -35,12 +35,15 @@ defmodule Bubble.Sources.HttpClient do
     timeout = Keyword.get(opts, :timeout, 10_000)
     max_size = Keyword.get(opts, :max_size, 51_200)
 
-    request_opts = [
-      url: url,
-      max_redirects: max_redirects,
-      receive_timeout: timeout,
-      into: :self
-    ]
+    request_opts =
+      Keyword.merge(
+        [
+          url: url,
+          max_redirects: max_redirects,
+          receive_timeout: timeout
+        ],
+        Application.get_env(:bubble, :http_client_req_options, [])
+      )
 
     url
     |> Req.get(request_opts)
@@ -54,13 +57,6 @@ defmodule Bubble.Sources.HttpClient do
     # Meta tags are typically in the <head> which is at the start
     truncated = binary_part(body, 0, min(byte_size(body), max_size))
     {:ok, truncated}
-  end
-
-  # Redirects
-  defp handle_response({:ok, %{status: status}}, url, _max_size)
-       when status in 300..399 do
-    Logger.debug("Redirect encountered for #{url}")
-    {:error, :redirect}
   end
 
   # Not found

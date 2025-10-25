@@ -3,14 +3,6 @@ defmodule Bubble.Sources.HttpClientTest do
 
   alias Bubble.Sources.HttpClient
 
-  setup do
-    Req.Test.stub(HttpClient, fn conn ->
-      Req.Test.json(conn, %{stubbed: true})
-    end)
-
-    :ok
-  end
-
   describe "fetch_html/2" do
     test "returns HTML content for successful 200 response" do
       Req.Test.expect(HttpClient, fn conn ->
@@ -34,7 +26,7 @@ defmodule Bubble.Sources.HttpClientTest do
 
     test "returns error for 404 response" do
       Req.Test.expect(HttpClient, fn conn ->
-        Req.Test.json(conn, %{error: "Not Found"}, status: 404)
+        Plug.Conn.send_resp(conn, 404, "Not Found")
       end)
 
       assert {:error, :not_found} = HttpClient.fetch_html("https://example.com/missing")
@@ -42,33 +34,34 @@ defmodule Bubble.Sources.HttpClientTest do
 
     test "returns error for 500 server error" do
       Req.Test.expect(HttpClient, fn conn ->
-        Req.Test.text(conn, "Internal Server Error", status: 500)
+        Plug.Conn.send_resp(conn, 500, "Internal Server Error")
       end)
 
       assert {:error, :server_error} = HttpClient.fetch_html("https://example.com")
     end
 
     test "returns error for redirect responses" do
-      Req.Test.expect(HttpClient, fn conn ->
+      Req.Test.stub(HttpClient, fn conn ->
         conn
         |> Plug.Conn.put_resp_header("location", "https://example.com/new")
-        |> Req.Test.text("Redirecting...", status: 302)
+        |> Plug.Conn.send_resp(302, "Redirecting...")
       end)
 
-      assert {:error, :redirect} = HttpClient.fetch_html("https://example.com", max_redirects: 0)
+      assert {:error, :request_failed} =
+               HttpClient.fetch_html("https://example.com", max_redirects: 0)
     end
 
     test "returns error for timeout" do
-      Req.Test.expect(HttpClient, fn _conn ->
-        {:error, %{reason: :timeout}}
+      Req.Test.expect(HttpClient, fn conn ->
+        Req.Test.transport_error(conn, :timeout)
       end)
 
       assert {:error, :timeout} = HttpClient.fetch_html("https://example.com")
     end
 
     test "returns error for other request failures" do
-      Req.Test.expect(HttpClient, fn _conn ->
-        {:error, %{reason: :nxdomain}}
+      Req.Test.expect(HttpClient, fn conn ->
+        Req.Test.transport_error(conn, :nxdomain)
       end)
 
       assert {:error, :request_failed} = HttpClient.fetch_html("https://invalid.example")
