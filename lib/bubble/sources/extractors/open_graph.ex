@@ -9,42 +9,21 @@ defmodule Bubble.Sources.Extractors.OpenGraph do
   More info: https://ogp.me/
   """
 
-  alias Bubble.Sources.Extractors.Utils
+  use Bubble.Sources.Extractors.Extractor
 
-  defstruct []
+  @impl true
+  def description_patterns do
+    [
+      ~r/<meta\s+property=["']og:description["']\s+content=["']([^"']+)["']/i,
+      ~r/<meta\s+content=["']([^"']+)["']\s+property=["']og:description["']/i
+    ]
+  end
 
-  @type t :: %__MODULE__{}
-
-  @doc """
-  Creates a new OpenGraph extractor.
-  """
-  def new, do: %__MODULE__{}
-
-  defimpl Bubble.Sources.Extractors.Extractor do
-    alias Bubble.Sources.Extractors.Utils
-
-    def extract_description(_extractor, html) do
-      patterns = [
-        ~r/<meta\s+property=["']og:description["']\s+content=["']([^"']+)["']/i,
-        ~r/<meta\s+content=["']([^"']+)["']\s+property=["']og:description["']/i
-      ]
-
-      case Utils.extract_meta_content(html, patterns) do
-        nil -> {:error, :not_found}
-        description -> {:ok, description}
-      end
-    end
-
-    def extract_title(_extractor, html) do
-      patterns = [
-        ~r/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i,
-        ~r/<meta\s+content=["']([^"']+)["']\s+property=["']og:title["']/i
-      ]
-
-      case Utils.extract_meta_content(html, patterns) do
-        nil -> {:error, :not_found}
-        title -> {:ok, title}
-      end
-    end
+  @impl true
+  def title_patterns do
+    [
+      ~r/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i,
+      ~r/<meta\s+content=["']([^"']+)["']\s+property=["']og:title["']/i
+    ]
   end
 end

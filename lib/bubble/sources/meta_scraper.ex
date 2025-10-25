@@ -12,14 +12,14 @@ defmodule Bubble.Sources.MetaScraper do
   """
 
   alias Bubble.Sources.HttpClient
-  alias Bubble.Sources.Extractors.{Extractor, OpenGraph, TwitterCard, Html}
+  alias Bubble.Sources.Extractors.{OpenGraph, TwitterCard, Html}
 
   require Logger
 
   @default_extractors [
-    OpenGraph.new(),
-    TwitterCard.new(),
-    Html.new()
+    OpenGraph,
+    TwitterCard,
+    Html
   ]
 
   @doc """
@@ -34,7 +34,7 @@ defmodule Bubble.Sources.MetaScraper do
 
   ## Options
 
-    * `:extractors` - List of extractor implementations to use (default: OpenGraph → TwitterCard → Html)
+    * `:extractors` - List of extractor modules to use (default: [OpenGraph, TwitterCard, Html])
     * `:http_opts` - Options to pass to HttpClient.fetch_html/2
 
   ## Examples
@@ -71,7 +71,7 @@ defmodule Bubble.Sources.MetaScraper do
 
   ## Options
 
-    * `:extractors` - List of extractor implementations to use (default: OpenGraph → TwitterCard → Html)
+    * `:extractors` - List of extractor modules to use (default: [OpenGraph, TwitterCard, Html])
     * `:http_opts` - Options to pass to HttpClient.fetch_html/2
 
   ## Examples
@@ -96,8 +96,8 @@ defmodule Bubble.Sources.MetaScraper do
   # Try each extractor until one succeeds
   defp try_extractors(html, extractors, type) do
     result =
-      Enum.find_value(extractors, fn extractor ->
-        case extract(extractor, html, type) do
+      Enum.find_value(extractors, fn extractor_module ->
+        case extract(extractor_module, html, type) do
           {:ok, value} -> value
           {:error, :not_found} -> nil
         end
@@ -109,12 +109,12 @@ defmodule Bubble.Sources.MetaScraper do
     end
   end
 
-  # Extract using the protocol
-  defp extract(extractor, html, :description) do
-    Extractor.extract_description(extractor, html)
+  # Extract using the behavior module
+  defp extract(extractor_module, html, :description) do
+    extractor_module.extract_description(html)
   end
 
-  defp extract(extractor, html, :title) do
-    Extractor.extract_title(extractor, html)
+  defp extract(extractor_module, html, :title) do
+    extractor_module.extract_title(html)
   end
 end

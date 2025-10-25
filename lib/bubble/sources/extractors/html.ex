@@ -8,45 +8,37 @@ defmodule Bubble.Sources.Extractors.Html do
   - <title> elements
   """
 
+  use Bubble.Sources.Extractors.Extractor
+
   alias Bubble.Sources.Extractors.Utils
 
-  defstruct []
+  @impl true
+  def description_patterns do
+    [
+      ~r/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i,
+      ~r/<meta\s+content=["']([^"']+)["']\s+name=["']description["']/i
+    ]
+  end
 
-  @type t :: %__MODULE__{}
+  @impl true
+  def title_patterns do
+    [~r/<title[^>]*>([^<]+)<\/title>/i]
+  end
 
-  @doc """
-  Creates a new HTML extractor.
-  """
-  def new, do: %__MODULE__{}
+  # Override to use custom title extraction logic
+  @impl true
+  def extract_title(html) do
+    pattern = ~r/<title[^>]*>([^<]+)<\/title>/i
 
-  defimpl Bubble.Sources.Extractors.Extractor do
-    alias Bubble.Sources.Extractors.Utils
+    case Regex.run(pattern, html) do
+      [_, title] ->
+        case Utils.clean_text(title) do
+          nil -> {:error, :not_found}
+          cleaned_title -> {:ok, cleaned_title}
+        end
 
-    def extract_description(_extractor, html) do
-      patterns = [
-        ~r/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i,
-        ~r/<meta\s+content=["']([^"']+)["']\s+name=["']description["']/i
-      ]
-
-      case Utils.extract_meta_content(html, patterns) do
-        nil -> {:error, :not_found}
-        description -> {:ok, description}
-      end
-    end
-
-    def extract_title(_extractor, html) do
-      pattern = ~r/<title[^>]*>([^<]+)<\/title>/i
-
-      case Regex.run(pattern, html) do
-        [_, title] ->
-          case Utils.clean_text(title) do
-            nil -> {:error, :not_found}
-            cleaned_title -> {:ok, cleaned_title}
-          end
-
-        _ ->
-          {:error, :not_found}
-      end
+      _ ->
+        {:error, :not_found}
     end
   end
 end
