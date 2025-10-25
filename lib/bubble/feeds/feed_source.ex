@@ -6,6 +6,8 @@ defmodule Bubble.Feeds.FeedSource do
   schema "feed_sources" do
     field :name, :string
     field :url, :string
+    field :description, :string
+    field :is_active, :boolean, default: true
     field :last_fetched_at, :utc_datetime_usec
 
     timestamps()
@@ -13,7 +15,7 @@ defmodule Bubble.Feeds.FeedSource do
 
   def changeset(feed_source, attrs) do
     feed_source
-    |> cast(attrs, [:name, :url, :last_fetched_at])
+    |> cast(attrs, [:name, :url, :description, :is_active, :last_fetched_at])
     |> validate_required([:name, :url])
     |> unique_constraint(:url)
   end

@@ -17,4 +17,14 @@ defmodule Bubble.Sources do
     |> FeedSource.changeset(attrs)
     |> Repo.insert()
   end
+
+  def get_source(id) do
+    Repo.get(FeedSource, id)
+  end
+
+  def update_source(source, attrs) do
+    source
+    |> FeedSource.changeset(attrs)
+    |> Repo.update()
+  end
 end
