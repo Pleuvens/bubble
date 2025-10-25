@@ -18,7 +18,7 @@ defmodule Bubble.Feeds.FetchNewsCronJob do
       Repo.all(
         from(fs in FeedSource,
           where:
-            is_nil(fs.last_fetched_at) or fragment("now() - ? < '1 day'", fs.last_fetched_at),
+            is_nil(fs.last_fetched_at) or fragment("now() - ? > '1 day'", fs.last_fetched_at),
           select: fs.url
         )
       )
