@@ -8,11 +8,30 @@ defmodule BubbleWeb.FeedLive do
     ~H"""
     <div id="feed" class="bg-gray-50 min-h-screen" data-active={@current_index} phx-hook="FeedNav">
       <!-- Header -->
-      <%!-- <div class="fixed top-0 left-0 right-0 z-10 bg-white/80 backdrop-blur-sm"> --%>
-      <%!--   <div class="flex items-center justify-center px-6 py-4"> --%>
-      <%!--     <h1 class="text-sm uppercase tracking-wider text-gray-600">Bubble</h1> --%>
-      <%!--   </div> --%>
-      <%!-- </div> --%>
+      <div class="fixed top-0 left-0 right-0 z-10 bg-white/80 backdrop-blur-sm">
+        <div class="flex items-center justify-between px-6 py-4">
+          <h1 class="text-sm uppercase tracking-wider text-gray-600">Bubble</h1>
+          <.link
+            navigate={~p"/settings"}
+            class="text-gray-600 hover:text-orange-400 transition-colors p-2 rounded-md hover:bg-gray-100"
+            aria-label="Settings"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-5 h-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </.link>
+        </div>
+      </div>
       <%!-- Current news --%>
       <div class="pt-16">
         <%= if length(@news) > 0 do %>
