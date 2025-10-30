@@ -44,13 +44,15 @@ defmodule BubbleWeb.FeedLive do
               >
                 <div class="max-w-4xl mx-auto text-center w-full">
                   <%!-- decorative line --%>
-                  <div
-                    class="flex justify-center mb-8 overflow-hidden"
-                    style={"transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); #{if @expanded, do: "max-height: 0; margin-bottom: 0; opacity: 0;", else: "max-height: 100px; opacity: 1;"}"}
-                  >
-                    <div class="w-px h-16 bg-gradient-to-b from-transparent via-orange-400 to-transparent opacity-60">
+                  <%= if index > 0 do %>
+                    <div
+                      class="flex justify-center mb-8 overflow-hidden"
+                      style={"transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); #{if @expanded, do: "max-height: 0; margin-bottom: 0; opacity: 0;", else: "max-height: 100px; opacity: 1;"}"}
+                    >
+                      <div class="w-px h-16 bg-gradient-to-b from-transparent via-orange-400 to-transparent opacity-60">
+                      </div>
                     </div>
-                  </div>
+                  <% end %>
                   <%!-- Title with arrow --%>
                   <div
                     class="relative mb-8"
@@ -74,13 +76,15 @@ defmodule BubbleWeb.FeedLive do
                     </a>
                   </div>
                   <%!-- Decorative line below --%>
-                  <div
-                    class="flex justify-center mb-8 overflow-hidden"
-                    style={"transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); #{if @expanded, do: "max-height: 0; margin-bottom: 0; opacity: 0;", else: "max-height: 100px; opacity: 1;"}"}
-                  >
-                    <div class="w-px h-16 bg-gradient-to-b from-transparent via-orange-400 to-transparent opacity-60">
+                  <%= if index < length(@news) - 1 do %>
+                    <div
+                      class="flex justify-center mb-8 overflow-hidden"
+                      style={"transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); #{if @expanded, do: "max-height: 0; margin-bottom: 0; opacity: 0;", else: "max-height: 100px; opacity: 1;"}"}
+                    >
+                      <div class="w-px h-16 bg-gradient-to-b from-transparent via-orange-400 to-transparent opacity-60">
+                      </div>
                     </div>
-                  </div>
+                  <% end %>
                   <%!-- sorce and date --%>
                   <div
                     class={"text-xs text-gray-500 uppercase tracking-widest #{if @expanded, do: "mb-8", else: "mb-4"}"}
