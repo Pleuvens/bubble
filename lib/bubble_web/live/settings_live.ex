@@ -23,7 +23,7 @@ defmodule BubbleWeb.SettingsLive do
         <!-- RSS Sources Section -->
         <div>
           <!-- Section title -->
-          <h2 class="text-3xl md:text-4xl text-orange-400 tracking-wide uppercase font-light text-center mb-8">
+          <h2 class="text-3xl md:text-4xl text-orange-400 tracking-wide uppercase font-light text-center mb-8 mt-8">
             RSS Sources
           </h2>
           <!-- Add new source button -->
