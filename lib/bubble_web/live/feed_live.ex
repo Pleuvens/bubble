@@ -73,27 +73,23 @@ defmodule BubbleWeb.FeedLive do
               <div
                 phx-click="toggle_expanded"
                 class={"min-h-screen flex flex-col p-8 cursor-pointer hover:bg-gray-50 #{if @expanded, do: "justify-start pt-16", else: "items-center justify-center"}"}
-                style="transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);"
               >
                 <div class="max-w-4xl mx-auto text-center w-full">
                   <%!-- decorative line --%>
                   <%= if index > 0 do %>
                     <div
                       class="flex justify-center mb-8 overflow-hidden"
-                      style={"transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); #{if @expanded, do: "max-height: 0; margin-bottom: 0; opacity: 0;", else: "max-height: 100px; opacity: 1;"}"}
+                      style={"#{if @expanded, do: "max-height: 0; margin-bottom: 0; opacity: 0;", else: "max-height: 100px; opacity: 1;"}"}
                     >
                       <div class="w-px h-16 bg-gradient-to-b from-transparent via-orange-400 to-transparent opacity-60">
                       </div>
                     </div>
                   <% end %>
                   <%!-- Title with arrow --%>
-                  <div
-                    class="relative mb-8"
-                    style="transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);"
-                  >
+                  <div class="relative mb-8">
                     <h1
                       class="text-4xl md:text-5xl lg:text-6xl text-orange-400 tracking-wide leading-tight uppercase font-light"
-                      style={"will-change: transform; transition: transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); transform-origin: center; #{if @expanded, do: "transform: scale(0.5);", else: "transform: scale(1);"}"}
+                      style={"transform-origin: center; #{if @expanded, do: "transform: scale(0.5);", else: "transform: scale(1);"}"}
                     >
                       {Enum.at(@news, index).title}
                     </h1>
@@ -112,17 +108,14 @@ defmodule BubbleWeb.FeedLive do
                   <%= if index < length(@news) - 1 do %>
                     <div
                       class="flex justify-center mb-8 overflow-hidden"
-                      style={"transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); #{if @expanded, do: "max-height: 0; margin-bottom: 0; opacity: 0;", else: "max-height: 100px; opacity: 1;"}"}
+                      style={"#{if @expanded, do: "max-height: 0; margin-bottom: 0; opacity: 0;", else: "max-height: 100px; opacity: 1;"}"}
                     >
                       <div class="w-px h-16 bg-gradient-to-b from-transparent via-orange-400 to-transparent opacity-60">
                       </div>
                     </div>
                   <% end %>
                   <%!-- sorce and date --%>
-                  <div
-                    class={"text-xs text-gray-500 uppercase tracking-widest #{if @expanded, do: "mb-8", else: "mb-4"}"}
-                    style="transition: margin 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);"
-                  >
+                  <div class={"text-xs text-gray-500 uppercase tracking-widest #{if @expanded, do: "mb-8", else: "mb-4"}"}>
                     <%!-- {source} — {new Date(publishedAt).toLocaleDateString('en-US', {  --%>
                     <%!--   month: 'short',  --%>
                     <%!--   day: 'numeric', --%>
@@ -133,11 +126,11 @@ defmodule BubbleWeb.FeedLive do
                   <%!-- Expanded content section --%>
                   <div
                     class="flex items-center justify-center overflow-hidden"
-                    style={"transition: max-height 1s cubic-bezier(0.25, 0.46, 0.45, 0.94); #{if @expanded, do: "max-height: 2000px;", else: "max-height: 0;"}"}
+                    style={"#{if @expanded, do: "max-height: 2000px; margin-top: 8rem;", else: "max-height: 0;"}"}
                   >
                     <div
                       class="text-base md:text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed text-left px-4 py-4"
-                      style={"#{if @expanded, do: "opacity: 1; transition: opacity 0.4s ease-in 0.6s;", else: "opacity: 0; transition: opacity 0.15s ease-out;"}"}
+                      style={"#{if @expanded, do: "opacity: 1;", else: "opacity: 0;"}"}
                     >
                       {Enum.at(@news, index).content}
                     </div>
