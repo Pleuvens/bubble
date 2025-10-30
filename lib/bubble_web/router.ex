@@ -17,8 +17,7 @@ defmodule BubbleWeb.Router do
   scope "/", BubbleWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
-    live "/feed", FeedLive, :index
+    live "/", FeedLive, :index
     live "/settings", SettingsLive, :index
   end
 

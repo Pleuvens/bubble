@@ -10,7 +10,7 @@ defmodule BubbleWeb.FeedLiveTest do
     test "mounts successfully with news data", %{conn: conn} do
       insert_test_feed()
 
-      {:ok, _view, html} = live(conn, ~p"/feed")
+      {:ok, _view, html} = live(conn, ~p"/")
 
       assert html =~ "Test News Title"
     end
@@ -19,7 +19,7 @@ defmodule BubbleWeb.FeedLiveTest do
       # Since the current template doesn't handle empty lists gracefully,
       # we'll test that the assigns are correct even if rendering fails
       try do
-        {:ok, view, _html} = live(conn, ~p"/feed")
+        {:ok, view, _html} = live(conn, ~p"/")
         assert view.assigns.news == []
         assert view.assigns.current_index == 0
         assert view.assigns.expanded == false
@@ -34,7 +34,7 @@ defmodule BubbleWeb.FeedLiveTest do
     test "assigns initial state correctly", %{conn: conn} do
       insert_test_feed()
 
-      {:ok, view, _html} = live(conn, ~p"/feed")
+      {:ok, view, _html} = live(conn, ~p"/")
 
       assert has_element?(view, "[data-active='0']")
     end
@@ -44,7 +44,7 @@ defmodule BubbleWeb.FeedLiveTest do
     test "toggles expanded state from false to true", %{conn: conn} do
       insert_test_feed()
 
-      {:ok, view, html} = live(conn, ~p"/feed")
+      {:ok, view, html} = live(conn, ~p"/")
 
       # Initially shows collapsed state
       assert html =~ "Click to expand • Arrow to read full article • Scroll to navigate"
@@ -59,15 +59,16 @@ defmodule BubbleWeb.FeedLiveTest do
     test "toggles expanded state from true to false", %{conn: conn} do
       insert_test_feed()
 
-      {:ok, view, _html} = live(conn, ~p"/feed")
+      {:ok, view, _html} = live(conn, ~p"/")
 
       # First click to expand
       html = view |> element("#news-item-0 [phx-click='toggle_expanded']") |> render_click()
       assert html =~ "Test content for the news article"
 
-      # Second click to collapse
+      # Second click to collapse - content is still present but hidden with CSS
       html = view |> element("#news-item-0 [phx-click='toggle_expanded']") |> render_click()
-      refute html =~ "Test content for the news article"
+      assert html =~ "Test content for the news article"
+      assert html =~ "max-height: 0"
       assert html =~ "Click to expand • Arrow to read full article • Scroll to navigate"
     end
   end
@@ -76,7 +77,7 @@ defmodule BubbleWeb.FeedLiveTest do
     test "sets current_index correctly", %{conn: conn} do
       insert_multiple_test_feeds()
 
-      {:ok, view, _html} = live(conn, ~p"/feed")
+      {:ok, view, _html} = live(conn, ~p"/")
 
       # Initially at index 0
       assert has_element?(view, "[data-active='0']")
@@ -91,7 +92,7 @@ defmodule BubbleWeb.FeedLiveTest do
     test "displays news content when expanded", %{conn: conn} do
       insert_test_feed()
 
-      {:ok, view, _html} = live(conn, ~p"/feed")
+      {:ok, view, _html} = live(conn, ~p"/")
 
       view |> element("#news-item-0 [phx-click='toggle_expanded']") |> render_click()
 
@@ -102,15 +103,17 @@ defmodule BubbleWeb.FeedLiveTest do
     test "hides news content when not expanded", %{conn: conn} do
       insert_test_feed()
 
-      {:ok, _view, html} = live(conn, ~p"/feed")
+      {:ok, _view, html} = live(conn, ~p"/")
 
-      refute html =~ "Test content for the news article"
+      # Content is present but hidden with CSS
+      assert html =~ "Test content for the news article"
+      assert html =~ "max-height: 0"
     end
 
     test "displays correct hint text based on expanded state", %{conn: conn} do
       insert_test_feed()
 
-      {:ok, view, html} = live(conn, ~p"/feed")
+      {:ok, view, html} = live(conn, ~p"/")
 
       assert html =~ "Click to expand • Arrow to read full article • Scroll to navigate"
 
@@ -123,7 +126,7 @@ defmodule BubbleWeb.FeedLiveTest do
     test "displays external link to article source", %{conn: conn} do
       insert_test_feed()
 
-      {:ok, _view, html} = live(conn, ~p"/feed")
+      {:ok, _view, html} = live(conn, ~p"/")
 
       assert html =~ "href=\"https://example.com/test\""
       assert html =~ "target=\"_blank\""
@@ -132,7 +135,7 @@ defmodule BubbleWeb.FeedLiveTest do
     test "displays published date", %{conn: conn} do
       insert_test_feed()
 
-      {:ok, _view, html} = live(conn, ~p"/feed")
+      {:ok, _view, html} = live(conn, ~p"/")
 
       assert html =~ "1 January 2024 - 00:00"
     end
@@ -140,7 +143,7 @@ defmodule BubbleWeb.FeedLiveTest do
     test "renders multiple news items", %{conn: conn} do
       insert_multiple_test_feeds()
 
-      {:ok, _view, html} = live(conn, ~p"/feed")
+      {:ok, _view, html} = live(conn, ~p"/")
 
       assert html =~ "Test News Title 1"
       assert html =~ "Test News Title 2"
@@ -150,7 +153,7 @@ defmodule BubbleWeb.FeedLiveTest do
     test "includes navigation hints at bottom", %{conn: conn} do
       insert_test_feed()
 
-      {:ok, _view, html} = live(conn, ~p"/feed")
+      {:ok, _view, html} = live(conn, ~p"/")
 
       assert html =~ "↑↓ Navigate • Enter/Space Expand • Arrow→ Read article • Scroll to browse"
     end
@@ -160,7 +163,7 @@ defmodule BubbleWeb.FeedLiveTest do
     test "complete user flow - browse and expand news", %{conn: conn} do
       insert_multiple_test_feeds()
 
-      {:ok, view, html} = live(conn, ~p"/feed")
+      {:ok, view, html} = live(conn, ~p"/")
 
       # Initially shows first news item
       assert html =~ "Test News Title 1"
@@ -172,10 +175,11 @@ defmodule BubbleWeb.FeedLiveTest do
       assert html =~ "Test content for the news article 1"
       assert html =~ "Click to collapse • Arrow to read full article"
 
-      # Collapse back
+      # Collapse back - content is still present but hidden with CSS
       html = view |> element("#news-item-0 [phx-click='toggle_expanded']") |> render_click()
 
-      refute html =~ "Test content for the news article 1"
+      assert html =~ "Test content for the news article 1"
+      assert html =~ "max-height: 0"
       assert html =~ "Click to expand • Arrow to read full article • Scroll to navigate"
     end
   end
