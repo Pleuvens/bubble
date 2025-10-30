@@ -62,7 +62,9 @@ defmodule BubbleWeb.UserRegistrationLive do
                 />
                 <%= if @form[:email].errors && @form[:email].errors != [] do %>
                   <%= for error <- @form[:email].errors do %>
-                    <p class="text-red-600 text-xs mt-1">{elem(error, 0)}</p>
+                    <p class="text-red-600 text-xs mt-1">
+                      {BubbleWeb.CoreComponents.translate_error(error)}
+                    </p>
                   <% end %>
                 <% end %>
               </div>
@@ -83,7 +85,9 @@ defmodule BubbleWeb.UserRegistrationLive do
                 />
                 <%= if @form[:password].errors && @form[:password].errors != [] do %>
                   <%= for error <- @form[:password].errors do %>
-                    <p class="text-red-600 text-xs mt-1">{elem(error, 0)}</p>
+                    <p class="text-red-600 text-xs mt-1">
+                      {BubbleWeb.CoreComponents.translate_error(error)}
+                    </p>
                   <% end %>
                 <% end %>
               </div>

@@ -46,6 +46,13 @@ defmodule Bubble.Feeds.FetchNewsCronJobTest do
         end
       end)
 
+      Req.Test.stub(Bubble.Sources.HttpClient, fn conn ->
+        Req.Test.html(
+          conn,
+          "<html><head><meta name=\"description\" content=\"Test description\"></head></html>"
+        )
+      end)
+
       job = %Oban.Job{args: %{}}
       assert :ok = FetchNewsCronJob.perform(job)
 
@@ -74,6 +81,12 @@ defmodule Bubble.Feeds.FetchNewsCronJobTest do
         Req.Test.text(conn, mock_rss_feed("https://example.com/news/2"))
       end)
 
+      Req.Test.stub(Bubble.Sources.HttpClient, fn conn ->
+        conn
+        |> Plug.Conn.put_status(404)
+        |> Req.Test.html("<html></html>")
+      end)
+
       job = %Oban.Job{args: %{}}
       assert :ok = FetchNewsCronJob.perform(job)
 
@@ -90,6 +103,13 @@ defmodule Bubble.Feeds.FetchNewsCronJobTest do
 
       Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
         Req.Test.text(conn, mock_rss_feed("https://example.com/news/3"))
+      end)
+
+      Req.Test.stub(Bubble.Sources.HttpClient, fn conn ->
+        Req.Test.html(
+          conn,
+          "<html><head><meta name=\"description\" content=\"Test description\"></head></html>"
+        )
       end)
 
       job = %Oban.Job{args: %{}}
@@ -110,6 +130,13 @@ defmodule Bubble.Feeds.FetchNewsCronJobTest do
         Req.Test.text(conn, mock_rss_feed_with_invalid_date("https://example.com/news/4"))
       end)
 
+      Req.Test.stub(Bubble.Sources.HttpClient, fn conn ->
+        Req.Test.html(
+          conn,
+          "<html><head><meta name=\"description\" content=\"Test description\"></head></html>"
+        )
+      end)
+
       job = %Oban.Job{args: %{}}
       assert :ok = FetchNewsCronJob.perform(job)
 
@@ -127,6 +154,13 @@ defmodule Bubble.Feeds.FetchNewsCronJobTest do
 
       Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
         Req.Test.text(conn, mock_rss_feed("https://example.com/news/5"))
+      end)
+
+      Req.Test.stub(Bubble.Sources.HttpClient, fn conn ->
+        Req.Test.html(
+          conn,
+          "<html><head><meta name=\"description\" content=\"Test description\"></head></html>"
+        )
       end)
 
       job = %Oban.Job{args: %{}}
@@ -160,6 +194,13 @@ defmodule Bubble.Feeds.FetchNewsCronJobTest do
                 Req.Test.text(conn, mock_rss_feed("https://example.com/news/8"))
             end
         end
+      end)
+
+      Req.Test.stub(Bubble.Sources.HttpClient, fn conn ->
+        Req.Test.html(
+          conn,
+          "<html><head><meta name=\"description\" content=\"Test description\"></head></html>"
+        )
       end)
 
       job = %Oban.Job{args: %{}}

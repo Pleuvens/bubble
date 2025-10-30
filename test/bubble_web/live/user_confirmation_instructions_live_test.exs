@@ -14,7 +14,7 @@ defmodule BubbleWeb.UserConfirmationInstructionsLiveTest do
   describe "Resend confirmation" do
     test "renders the resend confirmation page", %{conn: conn} do
       {:ok, _lv, html} = live(conn, ~p"/users/confirm")
-      assert html =~ "Resend confirmation instructions"
+      assert html =~ "Resend Confirmation"
     end
 
     test "sends a new confirmation token", %{conn: conn, user: user} do

@@ -5,6 +5,7 @@ defmodule BubbleWeb.UserSettingsLive do
 
   def render(assigns) do
     ~H"""
+    <.flash_group flash={@flash} />
     <div class="min-h-screen bg-gray-50 py-16">
       <!-- Header -->
       <div class="fixed top-0 left-0 right-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200">
@@ -45,7 +46,9 @@ defmodule BubbleWeb.UserSettingsLive do
                   />
                   <%= if @email_form[:email].errors && @email_form[:email].errors != [] do %>
                     <%= for error <- @email_form[:email].errors do %>
-                      <p class="text-red-600 text-xs mt-1">{elem(error, 0)}</p>
+                      <p class="text-red-600 text-xs mt-1">
+                        {BubbleWeb.CoreComponents.translate_error(error)}
+                      </p>
                     <% end %>
                   <% end %>
                 </div>
@@ -66,6 +69,11 @@ defmodule BubbleWeb.UserSettingsLive do
                     required
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
                   />
+                  <%= if @email_form.errors[:current_password] do %>
+                    <p class="text-red-600 text-xs mt-1">
+                      {BubbleWeb.CoreComponents.translate_error(@email_form.errors[:current_password])}
+                    </p>
+                  <% end %>
                 </div>
                 
     <!-- Submit Button -->
@@ -119,7 +127,9 @@ defmodule BubbleWeb.UserSettingsLive do
                   />
                   <%= if @password_form[:password].errors && @password_form[:password].errors != [] do %>
                     <%= for error <- @password_form[:password].errors do %>
-                      <p class="text-red-600 text-xs mt-1">{elem(error, 0)}</p>
+                      <p class="text-red-600 text-xs mt-1">
+                        {BubbleWeb.CoreComponents.translate_error(error)}
+                      </p>
                     <% end %>
                   <% end %>
                 </div>
@@ -143,7 +153,9 @@ defmodule BubbleWeb.UserSettingsLive do
                   <%= if @password_form[:password_confirmation].errors &&
                         @password_form[:password_confirmation].errors != [] do %>
                     <%= for error <- @password_form[:password_confirmation].errors do %>
-                      <p class="text-red-600 text-xs mt-1">{elem(error, 0)}</p>
+                      <p class="text-red-600 text-xs mt-1">
+                        {BubbleWeb.CoreComponents.translate_error(error)}
+                      </p>
                     <% end %>
                   <% end %>
                 </div>
@@ -164,6 +176,13 @@ defmodule BubbleWeb.UserSettingsLive do
                     required
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
                   />
+                  <%= if @password_form.errors[:current_password] do %>
+                    <p class="text-red-600 text-xs mt-1">
+                      {BubbleWeb.CoreComponents.translate_error(
+                        @password_form.errors[:current_password]
+                      )}
+                    </p>
+                  <% end %>
                 </div>
                 
     <!-- Submit Button -->
