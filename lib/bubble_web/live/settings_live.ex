@@ -1,6 +1,8 @@
 defmodule BubbleWeb.SettingsLive do
   use BubbleWeb, :live_view
 
+  on_mount {BubbleWeb.UserAuth, :mount_current_user}
+
   alias Bubble.Sources
 
   def render(assigns) do

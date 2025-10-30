@@ -1,6 +1,8 @@
 defmodule BubbleWeb.FeedLive do
   use BubbleWeb, :live_view
 
+  on_mount {BubbleWeb.UserAuth, :mount_current_user}
+
   alias Bubble.Feeds
   alias Utils.DateFormatter
 
@@ -11,25 +13,56 @@ defmodule BubbleWeb.FeedLive do
       <div class="fixed top-0 left-0 right-0 z-10 bg-white/80 backdrop-blur-sm">
         <div class="flex items-center justify-between px-6 py-4">
           <h1 class="text-sm uppercase tracking-wider text-gray-600">Bubble</h1>
-          <.link
-            navigate={~p"/settings"}
-            class="text-gray-600 hover:text-orange-400 transition-colors p-2 rounded-md hover:bg-gray-100"
-            aria-label="Settings"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-5 h-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+          <div class="flex items-center gap-4">
+            <%= if @current_user do %>
+              <span class="text-xs text-gray-600">{@current_user.email}</span>
+              <.link
+                href={~p"/users/settings"}
+                class="text-xs uppercase tracking-wider text-gray-600 hover:text-orange-400 transition-colors"
+              >
+                Account
+              </.link>
+              <.link
+                href={~p"/users/log_out"}
+                method="delete"
+                class="text-xs uppercase tracking-wider text-gray-600 hover:text-orange-400 transition-colors"
+              >
+                Log out
+              </.link>
+            <% else %>
+              <.link
+                navigate={~p"/users/log_in"}
+                class="text-xs uppercase tracking-wider text-gray-600 hover:text-orange-400 transition-colors"
+              >
+                Log in
+              </.link>
+              <.link
+                navigate={~p"/users/register"}
+                class="text-xs uppercase tracking-wider text-gray-600 hover:text-orange-400 transition-colors"
+              >
+                Register
+              </.link>
+            <% end %>
+            <.link
+              navigate={~p"/settings"}
+              class="text-gray-600 hover:text-orange-400 transition-colors p-2 rounded-md hover:bg-gray-100"
+              aria-label="Settings"
             >
-              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          </.link>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-5 h-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </.link>
+          </div>
         </div>
       </div>
       <%!-- Current news --%>
