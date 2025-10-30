@@ -1,6 +1,8 @@
 defmodule BubbleWeb.UserRegistrationLive do
   use BubbleWeb, :live_view
 
+  import Plug.CSRFProtection, only: [get_csrf_token: 0]
+
   alias Bubble.Accounts
   alias Bubble.Accounts.User
 
@@ -34,6 +36,8 @@ defmodule BubbleWeb.UserRegistrationLive do
             action={~p"/users/log_in?_action=registered"}
             method="post"
           >
+            <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
             <div class="space-y-4">
               <!-- Error Message -->
               <%= if @check_errors do %>
