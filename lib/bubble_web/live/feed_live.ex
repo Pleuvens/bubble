@@ -159,7 +159,11 @@ defmodule BubbleWeb.FeedLive do
   end
 
   def mount(_params, _session, socket) do
-    news = Feeds.list_news()
+    news =
+      case socket.assigns.current_user do
+        nil -> []
+        user -> Feeds.list_user_news(user.id)
+      end
 
     {:ok,
      socket

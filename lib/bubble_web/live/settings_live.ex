@@ -37,13 +37,97 @@ defmodule BubbleWeb.SettingsLive do
               <span class="inline-block mr-2">+</span> Add RSS Source
             </button>
           </div>
-          <!-- Add new source form -->
-          <%= if @is_adding_source do %>
+          <!-- Step 1: URL Input -->
+          <%= if @modal_step == :url_input do %>
+            <div class="max-w-md mx-auto mb-8 p-6 bg-white rounded-lg border border-gray-200 shadow-sm">
+              <h3 class="text-sm uppercase tracking-wider text-gray-600 mb-4 text-center">
+                Enter RSS URL
+              </h3>
+              <form phx-submit="check_url" class="space-y-4">
+                <div class="space-y-2">
+                  <label for="url" class="text-xs uppercase tracking-wider text-gray-600">
+                    RSS URL
+                  </label>
+                  <input
+                    type="url"
+                    id="url"
+                    name="url"
+                    value={@url_input}
+                    placeholder="https://example.com/rss"
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
+                  />
+                </div>
+                <div class="flex gap-2">
+                  <button
+                    type="submit"
+                    class="flex-1 bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
+                  >
+                    Next
+                  </button>
+                  <button
+                    type="button"
+                    phx-click="cancel_add"
+                    class="flex-1 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          <% end %>
+          <!-- Step 2a: Confirm Existing Source -->
+          <%= if @modal_step == :confirm_existing do %>
+            <div class="max-w-md mx-auto mb-8 p-6 bg-white rounded-lg border border-gray-200 shadow-sm">
+              <h3 class="text-sm uppercase tracking-wider text-gray-600 mb-4 text-center">
+                Subscribe to Existing Source
+              </h3>
+              <div class="space-y-4">
+                <div class="bg-gray-50 p-4 rounded-md">
+                  <h4 class="text-orange-400 uppercase tracking-wide mb-2">
+                    {@found_source.name}
+                  </h4>
+                  <p class="text-xs text-gray-600 mb-2 break-all">{@found_source.url}</p>
+                  <p class="text-sm text-gray-700">
+                    {@found_source.description || "No description"}
+                  </p>
+                </div>
+                <p class="text-xs text-gray-600 text-center">
+                  This RSS source already exists. Would you like to subscribe to it?
+                </p>
+                <div class="flex gap-2">
+                  <button
+                    type="button"
+                    phx-click="confirm_existing_source"
+                    class="flex-1 bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
+                  >
+                    Subscribe
+                  </button>
+                  <button
+                    type="button"
+                    phx-click="cancel_add"
+                    class="flex-1 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          <% end %>
+          <!-- Step 2b: New Source Form -->
+          <%= if @modal_step == :new_source_form do %>
             <div class="max-w-md mx-auto mb-8 p-6 bg-white rounded-lg border border-gray-200 shadow-sm">
               <h3 class="text-sm uppercase tracking-wider text-gray-600 mb-4 text-center">
                 Add New Source
               </h3>
-              <form phx-submit="add_source" class="space-y-4">
+              <form phx-submit="add_new_source" class="space-y-4">
+                <div class="space-y-2">
+                  <label class="text-xs uppercase tracking-wider text-gray-600">RSS URL</label>
+                  <input type="hidden" name="url" value={@new_source.url} />
+                  <p class="text-sm text-gray-700 bg-gray-50 px-3 py-2 rounded-md break-all">
+                    {@new_source.url}
+                  </p>
+                </div>
                 <div class="space-y-2">
                   <label for="name" class="text-xs uppercase tracking-wider text-gray-600">
                     Name
@@ -54,20 +138,6 @@ defmodule BubbleWeb.SettingsLive do
                     name="name"
                     value={@new_source.name}
                     placeholder="e.g. Tech News"
-                    required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label for="url" class="text-xs uppercase tracking-wider text-gray-600">
-                    RSS URL
-                  </label>
-                  <input
-                    type="url"
-                    id="url"
-                    name="url"
-                    value={@new_source.url}
-                    placeholder="https://example.com/rss"
                     required
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
                   />
@@ -221,7 +291,7 @@ defmodule BubbleWeb.SettingsLive do
                         <button
                           phx-click="delete_source"
                           phx-value-id={source.id}
-                          data-confirm="Are you sure you want to delete this RSS source?"
+                          data-confirm="Are you sure you want to unsubscribe from this RSS source?"
                           class="text-gray-600 hover:text-red-500 transition-colors p-2 rounded-md hover:bg-gray-50"
                         >
                           <svg
@@ -251,29 +321,86 @@ defmodule BubbleWeb.SettingsLive do
   end
 
   def mount(_params, _session, socket) do
-    sources = Sources.list_sources()
+    user_id = socket.assigns.current_user.id
+    sources = Sources.list_user_sources(user_id)
 
     {:ok,
      socket
      |> assign(:sources, sources)
-     |> assign(:is_adding_source, false)
+     |> assign(:modal_step, nil)
      |> assign(:editing_source_id, nil)
+     |> assign(:url_input, "")
+     |> assign(:found_source, nil)
      |> assign(:new_source, %{name: "", url: "", description: ""})
      |> assign(:edit_form, %{name: "", url: "", description: ""})}
   end
 
   def handle_event("show_add_form", _params, socket) do
-    {:noreply, assign(socket, :is_adding_source, true)}
+    {:noreply, assign(socket, :modal_step, :url_input)}
   end
 
   def handle_event("cancel_add", _params, socket) do
     {:noreply,
      socket
-     |> assign(:is_adding_source, false)
+     |> assign(:modal_step, nil)
+     |> assign(:url_input, "")
+     |> assign(:found_source, nil)
      |> assign(:new_source, %{name: "", url: "", description: ""})}
   end
 
-  def handle_event("add_source", params, socket) do
+  def handle_event("check_url", %{"url" => url}, socket) do
+    case Sources.get_source_by_url(url) do
+      nil ->
+        # URL doesn't exist, show new source form
+        {:noreply,
+         socket
+         |> assign(:modal_step, :new_source_form)
+         |> assign(:url_input, url)
+         |> assign(:found_source, nil)
+         |> assign(:new_source, %{name: "", url: url, description: ""})}
+
+      source ->
+        # URL exists, show confirmation
+        user_id = socket.assigns.current_user.id
+
+        if Sources.user_subscribed?(user_id, source.id) do
+          {:noreply,
+           socket
+           |> assign(:modal_step, nil)
+           |> assign(:url_input, "")
+           |> put_flash(:error, "You are already subscribed to this source.")}
+        else
+          {:noreply,
+           socket
+           |> assign(:modal_step, :confirm_existing)
+           |> assign(:url_input, url)
+           |> assign(:found_source, source)}
+        end
+    end
+  end
+
+  def handle_event("confirm_existing_source", _params, socket) do
+    user_id = socket.assigns.current_user.id
+    source = socket.assigns.found_source
+
+    case Sources.add_user_source(user_id, source.id) do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> assign(:sources, Sources.list_user_sources(user_id))
+         |> assign(:modal_step, nil)
+         |> assign(:url_input, "")
+         |> assign(:found_source, nil)
+         |> put_flash(:info, "Successfully subscribed to #{source.name}.")}
+
+      {:error, _} ->
+        {:noreply, socket |> put_flash(:error, "Failed to subscribe to source.")}
+    end
+  end
+
+  def handle_event("add_new_source", params, socket) do
+    user_id = socket.assigns.current_user.id
+
     attrs = %{
       name: params["name"],
       url: params["url"],
@@ -281,12 +408,13 @@ defmodule BubbleWeb.SettingsLive do
       is_active: true
     }
 
-    case Sources.add_source(attrs) do
+    case Sources.create_and_add_user_source(user_id, attrs) do
       {:ok, _source} ->
         {:noreply,
          socket
-         |> assign(:sources, Sources.list_sources())
-         |> assign(:is_adding_source, false)
+         |> assign(:sources, Sources.list_user_sources(user_id))
+         |> assign(:modal_step, nil)
+         |> assign(:url_input, "")
          |> assign(:new_source, %{name: "", url: "", description: ""})
          |> put_flash(:info, "Source added successfully.")}
 
@@ -316,6 +444,7 @@ defmodule BubbleWeb.SettingsLive do
   end
 
   def handle_event("save_source", %{"id" => id} = params, socket) do
+    user_id = socket.assigns.current_user.id
     source = Sources.get_source(id)
 
     attrs = %{
@@ -328,7 +457,7 @@ defmodule BubbleWeb.SettingsLive do
       {:ok, _source} ->
         {:noreply,
          socket
-         |> assign(:sources, Sources.list_sources())
+         |> assign(:sources, Sources.list_user_sources(user_id))
          |> assign(:editing_source_id, nil)
          |> assign(:edit_form, %{name: "", url: "", description: ""})
          |> put_flash(:info, "Source updated successfully.")}
@@ -339,11 +468,12 @@ defmodule BubbleWeb.SettingsLive do
   end
 
   def handle_event("toggle_active", %{"id" => id}, socket) do
+    user_id = socket.assigns.current_user.id
     source = Sources.get_source(id)
 
     case Sources.update_source(source, %{is_active: !source.is_active}) do
       {:ok, _source} ->
-        {:noreply, assign(socket, :sources, Sources.list_sources())}
+        {:noreply, assign(socket, :sources, Sources.list_user_sources(user_id))}
 
       {:error, _changeset} ->
         {:noreply, socket |> put_flash(:error, "Failed to toggle source status.")}
@@ -351,15 +481,18 @@ defmodule BubbleWeb.SettingsLive do
   end
 
   def handle_event("delete_source", %{"id" => id}, socket) do
-    case Sources.delete_source(id) do
+    user_id = socket.assigns.current_user.id
+    source_id = String.to_integer(id)
+
+    case Sources.remove_user_source(user_id, source_id) do
       {1, _} ->
         {:noreply,
          socket
-         |> assign(:sources, Sources.list_sources())
-         |> put_flash(:info, "Source deleted successfully.")}
+         |> assign(:sources, Sources.list_user_sources(user_id))
+         |> put_flash(:info, "Successfully unsubscribed from source.")}
 
       {0, _} ->
-        {:noreply, socket |> put_flash(:error, "Failed to delete source.")}
+        {:noreply, socket |> put_flash(:error, "Failed to unsubscribe from source.")}
     end
   end
 end

@@ -16,34 +16,40 @@ defmodule Bubble.Feeds.FetchNewsCronJob do
     sources =
       Repo.all(
         from(fs in FeedSource,
-          where:
-            is_nil(fs.last_fetched_at) or fragment("now() - ? > '1 day'", fs.last_fetched_at),
-          select: fs.url
+          where: is_nil(fs.last_fetched_at) or fragment("now() - ? > '1 day'", fs.last_fetched_at)
         )
       )
 
-    Logger.info("Fetching new RSS feeds...", sources: sources)
+    source_urls = Enum.map(sources, & &1.url)
 
-    fetched_news = RSSClient.fetch_feeds(sources)
+    Logger.info("Fetching new RSS feeds...", sources: source_urls)
+
+    fetched_news = RSSClient.fetch_feeds(source_urls)
+
+    # Create a map of url -> feed_source_id for quick lookup
+    url_to_source_id =
+      sources
+      |> Enum.map(fn source -> {source.url, source.id} end)
+      |> Map.new()
 
     news_to_insert =
-      Enum.flat_map(fetched_news, fn {_source_url, {:ok, news_items}} ->
-        news_items
-      end)
-      |> Enum.map(fn news ->
-        content = fetch_content_with_fallback(news)
+      Enum.flat_map(fetched_news, fn {source_url, {:ok, news_items}} ->
+        feed_source_id = Map.get(url_to_source_id, source_url)
 
-        published_at =
-          case DateTime.from_iso8601(news.published_at) |> elem(1) do
-            :invalid_format -> DateTime.utc_now() |> DateTime.truncate(:second)
-            dt -> dt
-          end
+        Enum.map(news_items, fn news ->
+          content = fetch_content_with_fallback(news)
 
-        %{
+          published_at =
+            case DateTime.from_iso8601(news.published_at) |> elem(1) do
+              :invalid_format -> DateTime.utc_now() |> DateTime.truncate(:second)
+              dt -> dt
+            end
+
           news
-          | published_at: published_at,
-            content: content
-        }
+          |> Map.put(:published_at, published_at)
+          |> Map.put(:content, content)
+          |> Map.put(:feed_source_id, feed_source_id)
+        end)
       end)
 
     Repo.insert_all(Feed, news_to_insert)

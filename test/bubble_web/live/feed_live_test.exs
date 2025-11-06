@@ -2,13 +2,13 @@ defmodule BubbleWeb.FeedLiveTest do
   use BubbleWeb.ConnCase
 
   import Phoenix.LiveViewTest
+  import Bubble.FeedsFixtures
 
-  alias Bubble.Feeds.Feed
-  alias Bubble.Repo
+  setup :register_and_log_in_user
 
   describe "mount/3" do
-    test "mounts successfully with news data", %{conn: conn} do
-      insert_test_feed()
+    test "mounts successfully with news data", %{conn: conn, user: user} do
+      {_feed_source, _feed} = insert_test_feed_with_subscription(user.id)
 
       {:ok, _view, html} = live(conn, ~p"/")
 
@@ -31,8 +31,23 @@ defmodule BubbleWeb.FeedLiveTest do
       end
     end
 
-    test "assigns initial state correctly", %{conn: conn} do
-      insert_test_feed()
+    test "only shows feeds from subscribed sources", %{conn: conn, user: user} do
+      # Create a feed source and subscribe the user
+      {_feed_source, _feed} =
+        insert_test_feed_with_subscription(user.id, title: "Subscribed Feed")
+
+      # Create another feed source that user is NOT subscribed to
+      other_source = feed_source_fixture(name: "Other Source")
+      feed_fixture(title: "Unsubscribed Feed", feed_source_id: other_source.id)
+
+      {:ok, _view, html} = live(conn, ~p"/")
+
+      assert html =~ "Subscribed Feed"
+      refute html =~ "Unsubscribed Feed"
+    end
+
+    test "assigns initial state correctly", %{conn: conn, user: user} do
+      {_feed_source, _feed} = insert_test_feed_with_subscription(user.id)
 
       {:ok, view, _html} = live(conn, ~p"/")
 
@@ -41,8 +56,8 @@ defmodule BubbleWeb.FeedLiveTest do
   end
 
   describe "handle_event/3 - toggle_expanded" do
-    test "toggles expanded state from false to true", %{conn: conn} do
-      insert_test_feed()
+    test "toggles expanded state from false to true", %{conn: conn, user: user} do
+      {_feed_source, _feed} = insert_test_feed_with_subscription(user.id)
 
       {:ok, view, html} = live(conn, ~p"/")
 
@@ -56,8 +71,8 @@ defmodule BubbleWeb.FeedLiveTest do
       assert html =~ "Click to collapse • Arrow to read full article"
     end
 
-    test "toggles expanded state from true to false", %{conn: conn} do
-      insert_test_feed()
+    test "toggles expanded state from true to false", %{conn: conn, user: user} do
+      {_feed_source, _feed} = insert_test_feed_with_subscription(user.id)
 
       {:ok, view, _html} = live(conn, ~p"/")
 
@@ -74,8 +89,8 @@ defmodule BubbleWeb.FeedLiveTest do
   end
 
   describe "handle_event/3 - set_index" do
-    test "sets current_index correctly", %{conn: conn} do
-      insert_multiple_test_feeds()
+    test "sets current_index correctly", %{conn: conn, user: user} do
+      insert_multiple_test_feeds_with_subscription(user.id)
 
       {:ok, view, _html} = live(conn, ~p"/")
 
@@ -89,8 +104,8 @@ defmodule BubbleWeb.FeedLiveTest do
   end
 
   describe "render/1" do
-    test "displays news content when expanded", %{conn: conn} do
-      insert_test_feed()
+    test "displays news content when expanded", %{conn: conn, user: user} do
+      {_feed_source, _feed} = insert_test_feed_with_subscription(user.id)
 
       {:ok, view, _html} = live(conn, ~p"/")
 
@@ -100,8 +115,8 @@ defmodule BubbleWeb.FeedLiveTest do
       assert html =~ "Test content for the news article"
     end
 
-    test "hides news content when not expanded", %{conn: conn} do
-      insert_test_feed()
+    test "hides news content when not expanded", %{conn: conn, user: user} do
+      {_feed_source, _feed} = insert_test_feed_with_subscription(user.id)
 
       {:ok, _view, html} = live(conn, ~p"/")
 
@@ -110,8 +125,8 @@ defmodule BubbleWeb.FeedLiveTest do
       assert html =~ "max-height: 0"
     end
 
-    test "displays correct hint text based on expanded state", %{conn: conn} do
-      insert_test_feed()
+    test "displays correct hint text based on expanded state", %{conn: conn, user: user} do
+      {_feed_source, _feed} = insert_test_feed_with_subscription(user.id)
 
       {:ok, view, html} = live(conn, ~p"/")
 
@@ -123,25 +138,25 @@ defmodule BubbleWeb.FeedLiveTest do
       assert html =~ "Click to collapse • Arrow to read full article"
     end
 
-    test "displays external link to article source", %{conn: conn} do
-      insert_test_feed()
+    test "displays external link to article source", %{conn: conn, user: user} do
+      {_feed_source, feed} = insert_test_feed_with_subscription(user.id)
 
       {:ok, _view, html} = live(conn, ~p"/")
 
-      assert html =~ "href=\"https://example.com/test\""
+      assert html =~ "href=\"#{feed.url}\""
       assert html =~ "target=\"_blank\""
     end
 
-    test "displays published date", %{conn: conn} do
-      insert_test_feed()
+    test "displays published date", %{conn: conn, user: user} do
+      {_feed_source, _feed} = insert_test_feed_with_subscription(user.id)
 
       {:ok, _view, html} = live(conn, ~p"/")
 
       assert html =~ "1 January 2024 - 00:00"
     end
 
-    test "renders multiple news items", %{conn: conn} do
-      insert_multiple_test_feeds()
+    test "renders multiple news items", %{conn: conn, user: user} do
+      insert_multiple_test_feeds_with_subscription(user.id)
 
       {:ok, _view, html} = live(conn, ~p"/")
 
@@ -150,8 +165,8 @@ defmodule BubbleWeb.FeedLiveTest do
       assert html =~ "Test News Title 3"
     end
 
-    test "includes navigation hints at bottom", %{conn: conn} do
-      insert_test_feed()
+    test "includes navigation hints at bottom", %{conn: conn, user: user} do
+      {_feed_source, _feed} = insert_test_feed_with_subscription(user.id)
 
       {:ok, _view, html} = live(conn, ~p"/")
 
@@ -160,8 +175,8 @@ defmodule BubbleWeb.FeedLiveTest do
   end
 
   describe "integration tests" do
-    test "complete user flow - browse and expand news", %{conn: conn} do
-      insert_multiple_test_feeds()
+    test "complete user flow - browse and expand news", %{conn: conn, user: user} do
+      insert_multiple_test_feeds_with_subscription(user.id)
 
       {:ok, view, html} = live(conn, ~p"/")
 
@@ -185,27 +200,38 @@ defmodule BubbleWeb.FeedLiveTest do
   end
 
   # Helper functions
-  defp insert_test_feed do
-    %Feed{
-      title: "Test News Title",
-      description: "Test description for the news article",
-      content: "Test content for the news article",
-      url: "https://example.com/test",
-      published_at: ~U[2024-01-01 00:00:00Z]
-    }
-    |> Repo.insert!()
+  defp insert_test_feed_with_subscription(user_id, attrs \\ []) do
+    feed_source = feed_source_fixture()
+    subscribe_user_to_source(user_id, feed_source.id)
+
+    feed_attrs =
+      Keyword.merge(
+        [
+          title: "Test News Title",
+          description: "Test description for the news article",
+          content: "Test content for the news article",
+          published_at: ~U[2024-01-01 00:00:00Z],
+          feed_source_id: feed_source.id
+        ],
+        attrs
+      )
+
+    feed = feed_fixture(feed_attrs)
+    {feed_source, feed}
   end
 
-  defp insert_multiple_test_feeds do
+  defp insert_multiple_test_feeds_with_subscription(user_id) do
+    feed_source = feed_source_fixture()
+    subscribe_user_to_source(user_id, feed_source.id)
+
     for i <- 1..3 do
-      %Feed{
+      feed_fixture(
         title: "Test News Title #{i}",
         description: "Test description for the news article #{i}",
         content: "Test content for the news article #{i}",
-        url: "https://example.com/test#{i}",
-        published_at: DateTime.add(~U[2024-01-01 00:00:00Z], i * 3600, :second)
-      }
-      |> Repo.insert!()
+        published_at: DateTime.add(~U[2024-01-01 00:00:00Z], i * 3600, :second),
+        feed_source_id: feed_source.id
+      )
     end
   end
 end
