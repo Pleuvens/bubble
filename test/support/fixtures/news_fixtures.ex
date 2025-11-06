@@ -1,17 +1,17 @@
-defmodule Bubble.FeedsFixtures do
+defmodule Bubble.NewsFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `Bubble.Feeds` and `Bubble.Sources` contexts.
+  entities via the `Bubble.News` and `Bubble.NewsSources` contexts.
   """
 
-  alias Bubble.Feeds.Feed
-  alias Bubble.Sources
+  alias Bubble.News.News
+  alias Bubble.NewsSources
   alias Bubble.Repo
 
   @doc """
-  Generate a feed source.
+  Generate a news source.
   """
-  def feed_source_fixture(attrs \\ %{}) do
+  def news_source_fixture(attrs \\ %{}) do
     attrs =
       Enum.into(attrs, %{
         name: "Test Source #{System.unique_integer()}",
@@ -20,14 +20,14 @@ defmodule Bubble.FeedsFixtures do
         is_active: true
       })
 
-    {:ok, feed_source} = Sources.create_source(attrs)
-    feed_source
+    {:ok, news_source} = NewsSources.create_source(attrs)
+    news_source
   end
 
   @doc """
-  Generate a feed.
+  Generate news.
   """
-  def feed_fixture(attrs \\ %{}) do
+  def news_fixture(attrs \\ %{}) do
     attrs =
       Enum.into(attrs, %{
         title: "Test News Title",
@@ -37,15 +37,19 @@ defmodule Bubble.FeedsFixtures do
         published_at: ~U[2024-01-01 00:00:00Z]
       })
 
-    %Feed{}
-    |> Feed.changeset(attrs)
+    %News{}
+    |> News.changeset(attrs)
     |> Repo.insert!()
   end
 
   @doc """
-  Subscribe a user to a feed source.
+  Subscribe a user to a news source.
   """
-  def subscribe_user_to_source(user_id, feed_source_id) do
-    {:ok, _} = Sources.add_user_source(user_id, feed_source_id)
+  def subscribe_user_to_source(user_id, news_source_id) do
+    {:ok, _} = NewsSources.add_user_source(user_id, news_source_id)
   end
+
+  # Backward compatibility aliases
+  def feed_source_fixture(attrs \\ %{}), do: news_source_fixture(attrs)
+  def feed_fixture(attrs \\ %{}), do: news_fixture(attrs)
 end

@@ -2,7 +2,7 @@ defmodule BubbleWeb.PageControllerTest do
   use BubbleWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import Bubble.FeedsFixtures
+  import Bubble.NewsFixtures
 
   setup :register_and_log_in_user
 
@@ -15,7 +15,7 @@ defmodule BubbleWeb.PageControllerTest do
       title: "Test News",
       description: "Test description",
       content: "Test content",
-      feed_source_id: feed_source.id
+      news_source_id: feed_source.id
     )
 
     {:ok, _view, html} = live(conn, ~p"/")

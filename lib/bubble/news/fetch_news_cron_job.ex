@@ -1,11 +1,11 @@
-defmodule Bubble.Feeds.FetchNewsCronJob do
+defmodule Bubble.News.FetchNewsCronJob do
   alias Bubble.Sources.MetaScraper
   use Oban.Worker
 
   import Ecto.Query
 
-  alias Bubble.Feeds.Feed
-  alias Bubble.Feeds.FeedSource
+  alias Bubble.News.News
+  alias Bubble.News.NewsSource
   alias Bubble.Repo
   alias Bubble.Sources.RSSClient
 
@@ -15,8 +15,8 @@ defmodule Bubble.Feeds.FetchNewsCronJob do
   def perform(%Oban.Job{}) do
     sources =
       Repo.all(
-        from(fs in FeedSource,
-          where: is_nil(fs.last_fetched_at) or fragment("now() - ? > '1 day'", fs.last_fetched_at)
+        from(ns in NewsSource,
+          where: is_nil(ns.last_fetched_at) or fragment("now() - ? > '1 day'", ns.last_fetched_at)
         )
       )
 
@@ -26,7 +26,7 @@ defmodule Bubble.Feeds.FetchNewsCronJob do
 
     fetched_news = RSSClient.fetch_feeds(source_urls)
 
-    # Create a map of url -> feed_source_id for quick lookup
+    # Create a map of url -> news_source_id for quick lookup
     url_to_source_id =
       sources
       |> Enum.map(fn source -> {source.url, source.id} end)
@@ -34,7 +34,7 @@ defmodule Bubble.Feeds.FetchNewsCronJob do
 
     news_to_insert =
       Enum.flat_map(fetched_news, fn {source_url, {:ok, news_items}} ->
-        feed_source_id = Map.get(url_to_source_id, source_url)
+        news_source_id = Map.get(url_to_source_id, source_url)
 
         Enum.map(news_items, fn news ->
           content = fetch_content_with_fallback(news)
@@ -48,15 +48,15 @@ defmodule Bubble.Feeds.FetchNewsCronJob do
           news
           |> Map.put(:published_at, published_at)
           |> Map.put(:content, content)
-          |> Map.put(:feed_source_id, feed_source_id)
+          |> Map.put(:news_source_id, news_source_id)
         end)
       end)
 
-    Repo.insert_all(Feed, news_to_insert)
+    Repo.insert_all(News, news_to_insert)
 
     Repo.update_all(
-      from(fs in FeedSource,
-        where: is_nil(fs.last_fetched_at) or fragment("now() - ? < '1 day'", fs.last_fetched_at)
+      from(ns in NewsSource,
+        where: is_nil(ns.last_fetched_at) or fragment("now() - ? < '1 day'", ns.last_fetched_at)
       ),
       set: [last_fetched_at: DateTime.utc_now()]
     )

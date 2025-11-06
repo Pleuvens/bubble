@@ -3,7 +3,7 @@ defmodule BubbleWeb.SettingsLive do
 
   on_mount {BubbleWeb.UserAuth, :mount_current_user}
 
-  alias Bubble.Sources
+  alias Bubble.NewsSources
 
   def render(assigns) do
     ~H"""
@@ -322,7 +322,7 @@ defmodule BubbleWeb.SettingsLive do
 
   def mount(_params, _session, socket) do
     user_id = socket.assigns.current_user.id
-    sources = Sources.list_user_sources(user_id)
+    sources = NewsSources.list_user_sources(user_id)
 
     {:ok,
      socket
@@ -349,7 +349,7 @@ defmodule BubbleWeb.SettingsLive do
   end
 
   def handle_event("check_url", %{"url" => url}, socket) do
-    case Sources.get_source_by_url(url) do
+    case NewsSources.get_source_by_url(url) do
       nil ->
         # URL doesn't exist, show new source form
         {:noreply,
@@ -363,7 +363,7 @@ defmodule BubbleWeb.SettingsLive do
         # URL exists, show confirmation
         user_id = socket.assigns.current_user.id
 
-        if Sources.user_subscribed?(user_id, source.id) do
+        if NewsSources.user_subscribed?(user_id, source.id) do
           {:noreply,
            socket
            |> assign(:modal_step, nil)
@@ -383,11 +383,11 @@ defmodule BubbleWeb.SettingsLive do
     user_id = socket.assigns.current_user.id
     source = socket.assigns.found_source
 
-    case Sources.add_user_source(user_id, source.id) do
+    case NewsSources.add_user_source(user_id, source.id) do
       {:ok, _} ->
         {:noreply,
          socket
-         |> assign(:sources, Sources.list_user_sources(user_id))
+         |> assign(:sources, NewsSources.list_user_sources(user_id))
          |> assign(:modal_step, nil)
          |> assign(:url_input, "")
          |> assign(:found_source, nil)
@@ -407,11 +407,11 @@ defmodule BubbleWeb.SettingsLive do
       description: params["description"] || ""
     }
 
-    case Sources.create_and_add_user_source(user_id, attrs) do
+    case NewsSources.create_and_add_user_source(user_id, attrs) do
       {:ok, _source} ->
         {:noreply,
          socket
-         |> assign(:sources, Sources.list_user_sources(user_id))
+         |> assign(:sources, NewsSources.list_user_sources(user_id))
          |> assign(:modal_step, nil)
          |> assign(:url_input, "")
          |> assign(:new_source, %{name: "", url: "", description: ""})
@@ -423,7 +423,7 @@ defmodule BubbleWeb.SettingsLive do
   end
 
   def handle_event("edit_source", %{"id" => id}, socket) do
-    source = Sources.get_source(id)
+    source = NewsSources.get_source(id)
 
     {:noreply,
      socket
@@ -444,7 +444,7 @@ defmodule BubbleWeb.SettingsLive do
 
   def handle_event("save_source", %{"id" => id} = params, socket) do
     user_id = socket.assigns.current_user.id
-    source = Sources.get_source(id)
+    source = NewsSources.get_source(id)
 
     attrs = %{
       name: params["name"],
@@ -452,11 +452,11 @@ defmodule BubbleWeb.SettingsLive do
       description: params["description"] || ""
     }
 
-    case Sources.update_source(source, attrs) do
+    case NewsSources.update_source(source, attrs) do
       {:ok, _source} ->
         {:noreply,
          socket
-         |> assign(:sources, Sources.list_user_sources(user_id))
+         |> assign(:sources, NewsSources.list_user_sources(user_id))
          |> assign(:editing_source_id, nil)
          |> assign(:edit_form, %{name: "", url: "", description: ""})
          |> put_flash(:info, "Source updated successfully.")}
@@ -469,13 +469,13 @@ defmodule BubbleWeb.SettingsLive do
   def handle_event("toggle_active", %{"id" => source_id}, socket) do
     user_id = socket.assigns.current_user.id
 
-    user_feed_source = Sources.get_user_feed_source(user_id, source_id)
+    user_feed_source = NewsSources.get_user_news_source(user_id, source_id)
 
-    case Sources.update_user_feed_source(user_feed_source, %{
+    case NewsSources.update_user_news_source(user_feed_source, %{
            is_active: !user_feed_source.is_active
          }) do
       {:ok, _user_feed_source} ->
-        {:noreply, assign(socket, :sources, Sources.list_user_sources(user_id))}
+        {:noreply, assign(socket, :sources, NewsSources.list_user_sources(user_id))}
 
       {:error, _changeset} ->
         {:noreply, socket |> put_flash(:error, "Failed to toggle source status.")}
@@ -486,11 +486,11 @@ defmodule BubbleWeb.SettingsLive do
     user_id = socket.assigns.current_user.id
     source_id = String.to_integer(id)
 
-    case Sources.remove_user_source(user_id, source_id) do
+    case NewsSources.remove_user_source(user_id, source_id) do
       {1, _} ->
         {:noreply,
          socket
-         |> assign(:sources, Sources.list_user_sources(user_id))
+         |> assign(:sources, NewsSources.list_user_sources(user_id))
          |> put_flash(:info, "Successfully unsubscribed from source.")}
 
       {0, _} ->

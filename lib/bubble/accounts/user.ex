@@ -2,8 +2,8 @@ defmodule Bubble.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias Bubble.Feeds.FeedSource
-  alias Bubble.Feeds.UserFeedSource
+  alias Bubble.News.NewsSource
+  alias Bubble.News.UserNewsSource
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -14,7 +14,7 @@ defmodule Bubble.Accounts.User do
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :naive_datetime
 
-    many_to_many :feed_sources, FeedSource, join_through: UserFeedSource
+    many_to_many :news_sources, NewsSource, join_through: UserNewsSource
 
     timestamps()
   end

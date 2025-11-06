@@ -1,25 +1,25 @@
-defmodule Bubble.Feeds.Feed do
+defmodule Bubble.News.News do
   use Bubble.Schema
 
   import Ecto.Changeset
 
-  alias Bubble.Feeds.FeedSource
+  alias Bubble.News.NewsSource
 
-  schema "feeds" do
+  schema "news" do
     field :title, :string
     field :url, :string
     field :published_at, :utc_datetime
     field :content, :string
     field :description, :string
 
-    belongs_to :feed_source, FeedSource
+    belongs_to :news_source, NewsSource
 
     timestamps()
   end
 
-  def changeset(feed, attrs) do
-    feed
-    |> cast(attrs, [:title, :url, :published_at, :content, :description, :feed_source_id])
+  def changeset(news, attrs) do
+    news
+    |> cast(attrs, [:title, :url, :published_at, :content, :description, :news_source_id])
     |> validate_required([:title, :url, :published_at, :description])
     |> unique_constraint(:url)
   end

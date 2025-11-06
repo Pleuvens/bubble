@@ -3,7 +3,7 @@ defmodule BubbleWeb.FeedLive do
 
   on_mount {BubbleWeb.UserAuth, :mount_current_user}
 
-  alias Bubble.Feeds
+  alias Bubble.News
   alias Utils.DateFormatter
 
   def render(assigns) do
@@ -162,7 +162,7 @@ defmodule BubbleWeb.FeedLive do
     news =
       case socket.assigns.current_user do
         nil -> []
-        user -> Feeds.list_user_news(user.id)
+        user -> News.list_user_news(user.id)
       end
 
     {:ok,

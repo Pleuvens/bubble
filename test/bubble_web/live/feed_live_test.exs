@@ -2,7 +2,7 @@ defmodule BubbleWeb.FeedLiveTest do
   use BubbleWeb.ConnCase
 
   import Phoenix.LiveViewTest
-  import Bubble.FeedsFixtures
+  import Bubble.NewsFixtures
 
   setup :register_and_log_in_user
 
@@ -38,7 +38,7 @@ defmodule BubbleWeb.FeedLiveTest do
 
       # Create another feed source that user is NOT subscribed to
       other_source = feed_source_fixture(name: "Other Source")
-      feed_fixture(title: "Unsubscribed Feed", feed_source_id: other_source.id)
+      feed_fixture(title: "Unsubscribed Feed", news_source_id: other_source.id)
 
       {:ok, _view, html} = live(conn, ~p"/")
 
@@ -211,7 +211,7 @@ defmodule BubbleWeb.FeedLiveTest do
           description: "Test description for the news article",
           content: "Test content for the news article",
           published_at: ~U[2024-01-01 00:00:00Z],
-          feed_source_id: feed_source.id
+          news_source_id: feed_source.id
         ],
         attrs
       )
@@ -230,7 +230,7 @@ defmodule BubbleWeb.FeedLiveTest do
         description: "Test description for the news article #{i}",
         content: "Test content for the news article #{i}",
         published_at: DateTime.add(~U[2024-01-01 00:00:00Z], i * 3600, :second),
-        feed_source_id: feed_source.id
+        news_source_id: feed_source.id
       )
     end
   end
