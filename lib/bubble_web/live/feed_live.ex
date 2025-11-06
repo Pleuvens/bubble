@@ -148,7 +148,57 @@ defmodule BubbleWeb.FeedLive do
             </div>
           <% end %>
         <% else %>
-          <div>No news</div>
+          <%= if @current_user do %>
+            <div class="min-h-screen flex items-center justify-center">
+              <div class="text-center">
+                <p class="text-gray-500 text-lg">No news available</p>
+                <p class="text-gray-400 text-sm mt-2">
+                  Add some news sources in
+                  <.link
+                    navigate={~p"/settings"}
+                    class="text-orange-400 hover:text-orange-500 underline"
+                  >
+                    settings
+                  </.link>
+                  to get started
+                </p>
+              </div>
+            </div>
+          <% else %>
+            <%!-- Landing page for non-authenticated users --%>
+            <div class="min-h-screen flex items-center justify-center px-6">
+              <div class="max-w-3xl mx-auto text-center">
+                <h2 class="text-5xl md:text-6xl lg:text-7xl text-orange-400 tracking-wide leading-tight uppercase font-light mb-8">
+                  Welcome to Bubble
+                </h2>
+                <div class="space-y-6 text-gray-600 text-lg leading-relaxed">
+                  <p class="text-xl md:text-2xl font-light">
+                    Your personalized RSS news aggregator
+                  </p>
+                  <p>
+                    Bubble helps you stay informed by aggregating news from your favorite RSS feeds in one beautiful, distraction-free interface.
+                  </p>
+                  <p>
+                    Subscribe to multiple sources, manage your feeds, and read news in a clean, minimalist layout designed for focus.
+                  </p>
+                </div>
+                <div class="flex items-center justify-center gap-6 mt-12">
+                  <.link
+                    navigate={~p"/users/register"}
+                    class="px-8 py-4 bg-orange-400 text-white uppercase tracking-wider text-sm hover:bg-orange-500 transition-colors rounded-md"
+                  >
+                    Get Started
+                  </.link>
+                  <.link
+                    navigate={~p"/users/log_in"}
+                    class="px-8 py-4 border-2 border-gray-300 text-gray-600 uppercase tracking-wider text-sm hover:border-orange-400 hover:text-orange-400 transition-colors rounded-md"
+                  >
+                    Log In
+                  </.link>
+                </div>
+              </div>
+            </div>
+          <% end %>
         <% end %>
       </div>
       <div class="fixed bottom-4 left-4 text-xs text-gray-400 bg-white/80 backdrop-blur-sm px-3 py-2 rounded-lg">
