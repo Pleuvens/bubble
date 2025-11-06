@@ -174,7 +174,7 @@ defmodule BubbleWeb.SettingsLive do
           <% end %>
           <!-- RSS sources list -->
           <div class="max-w-2xl mx-auto space-y-4">
-            <%= for source <- @sources do %>
+            <%= for {source, user_source} <- @sources do %>
               <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
                 <%= if @editing_source_id == source.id do %>
                   <!-- Edit mode -->
@@ -255,11 +255,11 @@ defmodule BubbleWeb.SettingsLive do
                           phx-click="toggle_active"
                           phx-value-id={source.id}
                           class={
-                            "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 #{if source.is_active, do: "bg-orange-400", else: "bg-gray-200"}"
+                            "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 #{if user_source.is_active, do: "bg-orange-400", else: "bg-gray-200"}"
                           }
                         >
                           <span class={
-                            "inline-block h-4 w-4 transform rounded-full bg-white transition-transform #{if source.is_active, do: "translate-x-6", else: "translate-x-1"}"
+                            "inline-block h-4 w-4 transform rounded-full bg-white transition-transform #{if user_source.is_active, do: "translate-x-6", else: "translate-x-1"}"
                           }>
                           </span>
                         </button>
@@ -267,7 +267,7 @@ defmodule BubbleWeb.SettingsLive do
                     </div>
                     <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                       <p class="text-xs text-gray-500 uppercase tracking-wider">
-                        Added {Calendar.strftime(source.created_at, "%b %d, %Y")}
+                        Subscribed {Calendar.strftime(user_source.created_at, "%b %d, %Y")}
                       </p>
                       <div class="flex gap-2">
                         <button
@@ -404,8 +404,7 @@ defmodule BubbleWeb.SettingsLive do
     attrs = %{
       name: params["name"],
       url: params["url"],
-      description: params["description"] || "",
-      is_active: true
+      description: params["description"] || ""
     }
 
     case Sources.create_and_add_user_source(user_id, attrs) do
@@ -467,12 +466,15 @@ defmodule BubbleWeb.SettingsLive do
     end
   end
 
-  def handle_event("toggle_active", %{"id" => id}, socket) do
+  def handle_event("toggle_active", %{"id" => source_id}, socket) do
     user_id = socket.assigns.current_user.id
-    source = Sources.get_source(id)
 
-    case Sources.update_source(source, %{is_active: !source.is_active}) do
-      {:ok, _source} ->
+    user_feed_source = Sources.get_user_feed_source(user_id, source_id)
+
+    case Sources.update_user_feed_source(user_feed_source, %{
+           is_active: !user_feed_source.is_active
+         }) do
+      {:ok, _user_feed_source} ->
         {:noreply, assign(socket, :sources, Sources.list_user_sources(user_id))}
 
       {:error, _changeset} ->

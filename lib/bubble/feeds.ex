@@ -18,14 +18,14 @@ defmodule Bubble.Feeds do
   end
 
   @doc """
-  Lists news from sources the user is subscribed to.
+  Lists news from sources the user is subscribed to and has active.
   """
   def list_user_news(user_id) do
     Repo.all(
       from(f in Feed,
         join: ufs in UserFeedSource,
         on: ufs.feed_source_id == f.feed_source_id,
-        where: ufs.user_id == ^user_id,
+        where: ufs.user_id == ^user_id and ufs.is_active == true,
         order_by: [desc: f.published_at],
         limit: 10
       )

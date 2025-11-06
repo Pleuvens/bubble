@@ -13,14 +13,16 @@ defmodule Bubble.Sources do
   end
 
   @doc """
-  Lists all feed sources for a specific user.
+  Lists all feed sources for a specific user with their subscription details.
+  Returns a list of tuples: {feed_source, user_feed_source}
   """
   def list_user_sources(user_id) do
     from(fs in FeedSource,
       join: ufs in UserFeedSource,
       on: ufs.feed_source_id == fs.id,
       where: ufs.user_id == ^user_id,
-      order_by: [desc: ufs.created_at]
+      order_by: [desc: ufs.created_at],
+      select: {fs, ufs}
     )
     |> Repo.all()
   end
@@ -106,5 +108,21 @@ defmodule Bubble.Sources do
       from ufs in UserFeedSource,
         where: ufs.user_id == ^user_id and ufs.feed_source_id == ^feed_source_id
     )
+  end
+
+  @doc """
+  Gets a user's subscription to a feed source.
+  """
+  def get_user_feed_source(user_id, feed_source_id) do
+    Repo.get_by(UserFeedSource, user_id: user_id, feed_source_id: feed_source_id)
+  end
+
+  @doc """
+  Updates a user's subscription to a feed source (e.g., toggling is_active).
+  """
+  def update_user_feed_source(user_feed_source, attrs) do
+    user_feed_source
+    |> UserFeedSource.changeset(attrs)
+    |> Repo.update()
   end
 end
