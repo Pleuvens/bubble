@@ -97,6 +97,7 @@ The following environment variables can be configured:
 - `SECRET_KEY_BASE` - Secret key for encryption (required, generate with `mix phx.gen.secret`)
 - `PHX_HOST` - Your production domain (required)
 - `PORT` - Port to run the server on (optional, defaults to 4000)
+- `CHECK_ORIGIN` - WebSocket origin checking for LiveView (see Self-Hosting section below)
 
 **Optional API Keys:**
 
@@ -253,6 +254,67 @@ mix ecto.gen.migration migration_name
    ```
 
 For more detailed deployment instructions, refer to the [Phoenix deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+
+### Self-Hosting with Docker
+
+Bubble is designed to be easily self-hosted. A Dockerfile is included for containerized deployments.
+
+**Build the Docker image:**
+
+```bash
+docker build -t bubble:latest .
+```
+
+**Run the container:**
+
+```bash
+docker run -d \
+  --name bubble \
+  -p 4000:4000 \
+  -e DATABASE_URL="ecto://user:pass@host/database" \
+  -e SECRET_KEY_BASE="your-secret-key-base" \
+  -e PHX_HOST="yourdomain.com" \
+  -e CHECK_ORIGIN="false" \
+  -e PHX_SERVER="true" \
+  bubble:latest
+```
+
+### WebSocket Configuration for Self-Hosting
+
+LiveView requires WebSocket connections to function. By default, Phoenix validates that WebSocket connections come from trusted origins to prevent CSRF attacks. For self-hosted deployments where users may access the application from different domains or IP addresses, you need to configure the `CHECK_ORIGIN` environment variable:
+
+**Option 1: Allow all origins (most flexible for self-hosting)**
+
+```bash
+CHECK_ORIGIN=false
+```
+
+This is the simplest option for self-hosted deployments where you trust your network environment. It allows WebSocket connections from any origin.
+
+**Option 2: Specify allowed origins (more secure)**
+
+```bash
+CHECK_ORIGIN=https://yourdomain.com,https://www.yourdomain.com,https://192.168.1.100:4000
+```
+
+List all domains, subdomains, and IP addresses that users will access the application from. Separate multiple origins with commas.
+
+**Option 3: Default behavior (most secure, single domain)**
+
+If `CHECK_ORIGIN` is not set, it defaults to only allowing connections from your `PHX_HOST` domain. This is the most secure option but only works if all users access the application from the same domain.
+
+**Troubleshooting WebSocket Issues:**
+
+If LiveView doesn't work in your browser:
+
+1. Open browser DevTools (F12) → Console tab
+2. Look for WebSocket connection errors
+3. Enable debug mode in the browser console:
+   ```javascript
+   liveSocket.enableDebug()
+   ```
+4. Refresh the page and check the detailed connection logs
+5. Verify your `CHECK_ORIGIN` configuration matches how you're accessing the application
 
 ## Contributing
 

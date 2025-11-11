@@ -66,6 +66,17 @@ if config_env() == :prod do
 
   config :bubble, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
+  # Configure WebSocket origin checking for self-hosted deployments
+  # Set CHECK_ORIGIN to false to allow all origins (less secure, but flexible for self-hosting)
+  # Or set it to a comma-separated list of allowed origins like:
+  # CHECK_ORIGIN=https://yourdomain.com,https://www.yourdomain.com
+  check_origin =
+    case System.get_env("CHECK_ORIGIN") do
+      "false" -> false
+      nil -> ["//#{host}"]
+      origins -> String.split(origins, ",")
+    end
+
   config :bubble, BubbleWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
     http: [
@@ -76,6 +87,7 @@ if config_env() == :prod do
       ip: {0, 0, 0, 0, 0, 0, 0, 0},
       port: port
     ],
+    check_origin: check_origin,
     secret_key_base: secret_key_base
 
   # ## SSL Support
