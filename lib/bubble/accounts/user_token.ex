@@ -58,7 +58,7 @@ defmodule Bubble.Accounts.UserToken do
     query =
       from token in by_token_and_context_query(token, "session"),
         join: user in assoc(token, :user),
-        where: token.created_at > ago(@session_validity_in_days, "day"),
+        where: token.inserted_at > ago(@session_validity_in_days, "day"),
         select: user
 
     {:ok, query}
@@ -116,7 +116,7 @@ defmodule Bubble.Accounts.UserToken do
         query =
           from token in by_token_and_context_query(hashed_token, context),
             join: user in assoc(token, :user),
-            where: token.created_at > ago(^days, "day") and token.sent_to == user.email,
+            where: token.inserted_at > ago(^days, "day") and token.sent_to == user.email,
             select: user
 
         {:ok, query}
@@ -150,7 +150,7 @@ defmodule Bubble.Accounts.UserToken do
 
         query =
           from token in by_token_and_context_query(hashed_token, context),
-            where: token.created_at > ago(@change_email_validity_in_days, "day")
+            where: token.inserted_at > ago(@change_email_validity_in_days, "day")
 
         {:ok, query}
 

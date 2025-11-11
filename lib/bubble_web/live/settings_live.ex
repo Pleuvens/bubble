@@ -267,7 +267,7 @@ defmodule BubbleWeb.SettingsLive do
                     </div>
                     <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                       <p class="text-xs text-gray-500 uppercase tracking-wider">
-                        Subscribed {Calendar.strftime(user_source.created_at, "%b %d, %Y")}
+                        Subscribed {Calendar.strftime(user_source.inserted_at, "%b %d, %Y")}
                       </p>
                       <div class="flex gap-2">
                         <button

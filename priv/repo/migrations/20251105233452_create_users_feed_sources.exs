@@ -7,7 +7,7 @@ defmodule Bubble.Repo.Migrations.CreateUsersFeedSources do
       add :user_id, references(:users, type: :binary_id, on_delete: :delete_all), null: false
       add :feed_source_id, references(:feed_sources, on_delete: :delete_all), null: false
 
-      timestamps(type: :utc_datetime_usec, inserted_at: :created_at)
+      timestamps(type: :utc_datetime_usec)
     end
 
     create unique_index(:users_feed_sources, [:user_id, :feed_source_id])

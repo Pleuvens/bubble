@@ -21,7 +21,7 @@ defmodule Bubble.NewsSources do
       join: uns in UserNewsSource,
       on: uns.news_source_id == ns.id,
       where: uns.user_id == ^user_id,
-      order_by: [desc: uns.created_at],
+      order_by: [desc: uns.inserted_at],
       select: {ns, uns}
     )
     |> Repo.all()
