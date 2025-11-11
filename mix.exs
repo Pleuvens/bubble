@@ -9,7 +9,8 @@ defmodule Bubble.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      releases: releases()
     ]
   end
 
@@ -86,6 +87,15 @@ defmodule Bubble.MixProject do
         "tailwind bubble --minify",
         "esbuild bubble --minify",
         "phx.digest"
+      ]
+    ]
+  end
+
+  defp releases do
+    [
+      bubble: [
+        include_executables_for: [:unix],
+        steps: [:assemble, :tar]
       ]
     ]
   end
