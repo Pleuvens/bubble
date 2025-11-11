@@ -1,12 +1,10 @@
 defmodule Bubble.Accounts.User do
-  use Ecto.Schema
+  use Bubble.Schema
   import Ecto.Changeset
 
   alias Bubble.News.NewsSource
   alias Bubble.News.UserNewsSource
 
-  @primary_key {:id, :binary_id, autogenerate: true}
-  @foreign_key_type :binary_id
   schema "users" do
     field :email, :string
     field :password, :string, virtual: true, redact: true
