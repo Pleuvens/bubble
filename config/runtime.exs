@@ -124,19 +124,102 @@ if config_env() == :prod do
 
   # ## Configuring the mailer
   #
-  # In production you need to configure the mailer to use a different adapter.
-  # Also, you may need to configure the Swoosh API client of your choice if you
-  # are not using SMTP. Here is an example of the configuration:
+  # Swoosh adapter can be configured via environment variables to support different email providers.
+  # Set SWOOSH_ADAPTER to choose your email provider:
   #
-  #     config :bubble, Bubble.Mailer,
-  #       adapter: Swoosh.Adapters.Mailgun,
-  #       api_key: System.get_env("MAILGUN_API_KEY"),
-  #       domain: System.get_env("MAILGUN_DOMAIN")
+  # - "postal" (default): Uses Postal mail server
+  #   Required env vars: POSTAL_API_KEY, POSTAL_DOMAIN
   #
-  # For this example you need include a HTTP client required by Swoosh API client.
-  # Swoosh supports Hackney and Finch out of the box:
+  # - "smtp": Uses any SMTP server
+  #   Required env vars: SMTP_RELAY, SMTP_USERNAME, SMTP_PASSWORD, SMTP_PORT (optional, defaults to 587)
+  #   Optional: SMTP_TLS (true/false, defaults to true), SMTP_AUTH (always/never/if_available, defaults to always)
   #
-  #     config :swoosh, :api_client, Swoosh.ApiClient.Hackney
+  # - "sendgrid": Uses SendGrid
+  #   Required env vars: SENDGRID_API_KEY
   #
-  # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
+  # - "mailgun": Uses Mailgun
+  #   Required env vars: MAILGUN_API_KEY, MAILGUN_DOMAIN
+  #
+  # - "ses": Uses Amazon SES
+  #   Required env vars: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION
+  #
+  # Example for Postal (default):
+  #   SWOOSH_ADAPTER=postal
+  #   POSTAL_API_KEY=your_api_key
+  #   POSTAL_DOMAIN=your_domain
+  #
+  # Example for SMTP:
+  #   SWOOSH_ADAPTER=smtp
+  #   SMTP_RELAY=smtp.example.com
+  #   SMTP_USERNAME=user@example.com
+  #   SMTP_PASSWORD=your_password
+  #   SMTP_PORT=587
+
+  adapter_config =
+    case System.get_env("SWOOSH_ADAPTER", "postal") do
+      "postal" ->
+        [
+          adapter: Swoosh.Adapters.Postal,
+          api_key: System.get_env("POSTAL_API_KEY") || raise("POSTAL_API_KEY not set"),
+          domain: System.get_env("POSTAL_DOMAIN") || raise("POSTAL_DOMAIN not set")
+        ]
+
+      "smtp" ->
+        smtp_tls =
+          case System.get_env("SMTP_TLS") do
+            "false" -> :never
+            "if_available" -> :if_available
+            _ -> :always
+          end
+
+        smtp_auth =
+          case System.get_env("SMTP_AUTH") do
+            "never" -> :never
+            "if_available" -> :if_available
+            _ -> :always
+          end
+
+        [
+          adapter: Swoosh.Adapters.SMTP,
+          relay: System.get_env("SMTP_RELAY") || raise("SMTP_RELAY not set"),
+          username: System.get_env("SMTP_USERNAME") || raise("SMTP_USERNAME not set"),
+          password: System.get_env("SMTP_PASSWORD") || raise("SMTP_PASSWORD not set"),
+          port: String.to_integer(System.get_env("SMTP_PORT") || "587"),
+          tls: smtp_tls,
+          auth: smtp_auth
+        ]
+
+      "sendgrid" ->
+        [
+          adapter: Swoosh.Adapters.Sendgrid,
+          api_key: System.get_env("SENDGRID_API_KEY") || raise("SENDGRID_API_KEY not set")
+        ]
+
+      "mailgun" ->
+        [
+          adapter: Swoosh.Adapters.Mailgun,
+          api_key: System.get_env("MAILGUN_API_KEY") || raise("MAILGUN_API_KEY not set"),
+          domain: System.get_env("MAILGUN_DOMAIN") || raise("MAILGUN_DOMAIN not set")
+        ]
+
+      "ses" ->
+        [
+          adapter: Swoosh.Adapters.AmazonSES,
+          access_key: System.get_env("AWS_ACCESS_KEY_ID") || raise("AWS_ACCESS_KEY_ID not set"),
+          secret:
+            System.get_env("AWS_SECRET_ACCESS_KEY") || raise("AWS_SECRET_ACCESS_KEY not set"),
+          region: System.get_env("AWS_REGION") || raise("AWS_REGION not set")
+        ]
+
+      adapter ->
+        raise "Unknown SWOOSH_ADAPTER: #{adapter}. Valid options are: postal, smtp, sendgrid, mailgun, ses"
+    end
+
+  config :bubble, Bubble.Mailer, adapter_config
 end
+
+# Configure the sender email address for transactional emails
+# This applies to all environments (dev, test, prod)
+config :bubble, :mailer,
+  from_email: System.get_env("MAIL_FROM_EMAIL", "contact@example.com"),
+  from_name: System.get_env("MAIL_FROM_NAME", "Bubble")
