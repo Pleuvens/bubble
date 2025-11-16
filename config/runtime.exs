@@ -61,7 +61,14 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  host = System.get_env("PHX_HOST") || "example.com"
+  host =
+    System.get_env("PHX_HOST") ||
+      raise """
+      environment variable PHX_HOST is missing.
+      This is required in production for generating URLs in emails and other contexts.
+      Example: PHX_HOST=yourdomain.com
+      """
+
   port = String.to_integer(System.get_env("PORT") || "4000")
 
   config :bubble, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
@@ -161,7 +168,7 @@ if config_env() == :prod do
         [
           adapter: Swoosh.Adapters.Postal,
           api_key: System.get_env("POSTAL_API_KEY") || raise("POSTAL_API_KEY not set"),
-          domain: System.get_env("POSTAL_DOMAIN") || raise("POSTAL_DOMAIN not set")
+          base_url: System.get_env("POSTAL_DOMAIN") || raise("POSTAL_DOMAIN not set")
         ]
 
       "smtp" ->
@@ -220,6 +227,8 @@ end
 
 # Configure the sender email address for transactional emails
 # This applies to all environments (dev, test, prod)
+# In production, set MAIL_FROM_EMAIL to use your actual domain (e.g., contact@yourdomain.com)
+# to avoid emails being sent from the default example.com address
 config :bubble, :mailer,
   from_email: System.get_env("MAIL_FROM_EMAIL", "contact@example.com"),
   from_name: System.get_env("MAIL_FROM_NAME", "Bubble")
