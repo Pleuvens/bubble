@@ -59,15 +59,14 @@ defmodule Bubble.News.FetchNewsCronJobTest do
       assert Repo.aggregate(News, :count) == 2
 
       updated_old_source = Repo.get(NewsSource, old_source.id)
-      assert updated_old_source.last_fetched_at
+      assert DateTime.diff(updated_old_source.last_fetched_at, old_source.last_fetched_at) > 0
 
       updated_recent_source = Repo.get(NewsSource, recent_source.id)
 
-      assert DateTime.diff(updated_recent_source.last_fetched_at, recent_source.last_fetched_at) >
-               0
+      assert updated_recent_source.last_fetched_at == recent_source.last_fetched_at
 
       updated_never_source = Repo.get(NewsSource, never_fetched_source.id)
-      assert updated_never_source.last_fetched_at
+      assert not is_nil(updated_never_source.last_fetched_at)
     end
 
     test "handles MetaScraper errors gracefully" do

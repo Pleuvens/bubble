@@ -1,6 +1,7 @@
 defmodule Bubble.NewsSources do
   import Ecto.Query
 
+  alias Bubble.News.FetchSingleSourceJob
   alias Bubble.News.NewsSource
   alias Bubble.News.UserNewsSource
   alias Bubble.Repo
@@ -80,11 +81,16 @@ defmodule Bubble.NewsSources do
 
   @doc """
   Creates a new news source and subscribes the user to it.
+  Triggers an immediate fetch of the RSS feed.
   """
   def create_and_add_user_source(user_id, attrs) do
     Repo.transact(fn ->
       with {:ok, source} <- create_source(attrs),
            {:ok, _user_news_source} <- add_user_source(user_id, source.id) do
+        %{news_source_id: source.id}
+        |> FetchSingleSourceJob.new()
+        |> Oban.insert()
+
         {:ok, source}
       end
     end)
