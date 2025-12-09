@@ -82,11 +82,17 @@ defmodule Bubble.Sources.NewsProcessor do
 
     Repo.insert_all(News, news_to_insert)
 
-    # Update last_fetched_at for all sources
-    source_ids = Enum.map(sources, & &1.id)
+    # Update last_fetched_at only for successfully fetched sources
+    successfully_fetched_source_ids =
+      fetched_news
+      |> Enum.filter(fn {_url, result} -> match?({:ok, _}, result) end)
+      |> Enum.map(fn {source_url, _result} -> Map.get(url_to_source_id, source_url) end)
+      |> Enum.reject(&is_nil/1)
 
-    from(ns in NewsSource, where: ns.id in ^source_ids)
-    |> Repo.update_all(set: [last_fetched_at: DateTime.utc_now()])
+    if successfully_fetched_source_ids != [] do
+      from(ns in NewsSource, where: ns.id in ^successfully_fetched_source_ids)
+      |> Repo.update_all(set: [last_fetched_at: DateTime.utc_now()])
+    end
 
     :ok
   end
