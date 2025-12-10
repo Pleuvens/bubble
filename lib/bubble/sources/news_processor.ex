@@ -36,7 +36,8 @@ defmodule Bubble.Sources.NewsProcessor do
         |> Map.put(:news_source_id, source.id)
       end)
 
-    Repo.insert_all(News, news_to_insert)
+    # Insert news items, skipping any that violate the unique URL constraint
+    Repo.insert_all(News, news_to_insert, on_conflict: :nothing)
 
     source
     |> Ecto.Changeset.change(last_fetched_at: DateTime.utc_now())
@@ -80,7 +81,8 @@ defmodule Bubble.Sources.NewsProcessor do
         end)
       end)
 
-    Repo.insert_all(News, news_to_insert)
+    # Insert news items, skipping any that violate the unique URL constraint
+    Repo.insert_all(News, news_to_insert, on_conflict: :nothing)
 
     # Update last_fetched_at only for successfully fetched sources
     successfully_fetched_source_ids =

@@ -207,6 +207,52 @@ defmodule Bubble.News.FetchNewsCronJobTest do
 
       assert Repo.aggregate(News, :count) == 3
     end
+
+    test "handles duplicate URLs gracefully without crashing" do
+      # First, create an existing news item
+      source1 =
+        insert_news_source(%{
+          name: "Source 1",
+          url: "https://duplicate.example.com/rss",
+          last_fetched_at: DateTime.add(DateTime.utc_now(), -2, :day)
+        })
+
+      existing_url = "https://example.com/duplicate-article"
+
+      %News{
+        title: "Existing Article",
+        url: existing_url,
+        published_at: DateTime.utc_now() |> DateTime.truncate(:second),
+        content: "Existing content",
+        description: "Existing description",
+        news_source_id: source1.id
+      }
+      |> Repo.insert!()
+
+      # Now try to fetch the same URL again (simulating RSS feed with duplicate)
+      Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
+        Req.Test.text(conn, mock_rss_feed(existing_url))
+      end)
+
+      Req.Test.stub(Bubble.Sources.HttpClient, fn conn ->
+        Req.Test.html(
+          conn,
+          "<html><head><meta name=\"description\" content=\"Test description\"></head></html>"
+        )
+      end)
+
+      job = %Oban.Job{args: %{}}
+
+      # Should not crash and should still update last_fetched_at
+      assert :ok = FetchNewsCronJob.perform(job)
+
+      # Should still have only 1 news item (duplicate was skipped)
+      assert Repo.aggregate(News, :count) == 1
+
+      # last_fetched_at should be updated despite the duplicate
+      updated_source = Repo.get(NewsSource, source1.id)
+      assert DateTime.diff(updated_source.last_fetched_at, source1.last_fetched_at) > 0
+    end
   end
 
   defp insert_news_source(attrs) do
