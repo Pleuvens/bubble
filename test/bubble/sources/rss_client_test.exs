@@ -65,6 +65,75 @@ defmodule Bubble.Sources.RSSClientTest do
       assert length(results) == 2
       assert Enum.all?(results, fn {_url, {:ok, _feed}} -> true end)
     end
+
+    test "handles mixed success and failure results" do
+      urls = ["https://www.reddit.com/r/elixir/.rss", "https://www.reddit.com/r/phoenix/.rss"]
+
+      Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
+        case conn.request_path do
+          "/r/elixir/.rss" ->
+            Req.Test.text(conn, mock_rss_feed())
+
+          "/r/phoenix/.rss" ->
+            Req.Test.transport_error(conn, :timeout)
+        end
+      end)
+
+      results = Bubble.Sources.RSSClient.fetch_feeds(urls)
+      assert length(results) == 2
+
+      # One should succeed
+      assert Enum.any?(results, fn
+        {_url, {:ok, _feed}} -> true
+        _ -> false
+      end)
+
+      # One should fail
+      assert Enum.any?(results, fn
+        {_url, {:error, _reason}} -> true
+        _ -> false
+      end)
+    end
+
+    test "handles multiple failures without crashing" do
+      urls = [
+        "https://www.reddit.com/r/elixir/.rss",
+        "https://www.reddit.com/r/phoenix/.rss",
+        "https://www.reddit.com/r/erlang/.rss"
+      ]
+
+      Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
+        case conn.request_path do
+          "/r/elixir/.rss" ->
+            Req.Test.text(conn, mock_rss_feed())
+
+          "/r/phoenix/.rss" ->
+            Req.Test.transport_error(conn, :timeout)
+
+          "/r/erlang/.rss" ->
+            Plug.Conn.send_resp(conn, 500, "Server Error")
+        end
+      end)
+
+      # This should not crash despite multiple failures
+      results = Bubble.Sources.RSSClient.fetch_feeds(urls)
+      assert length(results) == 3
+
+      # At least one should succeed
+      assert Enum.any?(results, fn
+        {_url, {:ok, _feed}} -> true
+        _ -> false
+      end)
+
+      # At least two should fail
+      error_count =
+        Enum.count(results, fn
+          {_url, {:error, _reason}} -> true
+          _ -> false
+        end)
+
+      assert error_count >= 2
+    end
   end
 
   defp mock_rss_feed do
