@@ -71,10 +71,17 @@ defmodule Bubble.Sources.RSSValidator do
         |> xpath(
           ~x"//entry | //item"l,
           title: ~x"./title/text()"s,
-          url: ~x"./link/@href | ./link/text() | ./guid/text()"s,
-          description: ~x"./description/text() | ./summary/text()"s,
+          # Extract each URL source separately to avoid concatenation
+          link_href: ~x"./link/@href"s,
+          link_text: ~x"./link/text()"s,
+          guid: ~x"./guid/text()"s,
+          # Extract each description source separately to avoid concatenation
+          description: ~x"./description/text()"s,
+          summary: ~x"./summary/text()"s,
           content: ~x"./content/text()"s,
-          published_at: ~x"./published/text() | ./pubDate/text()"s
+          # Extract each date source separately to avoid concatenation
+          published: ~x"./published/text()"s,
+          pub_date: ~x"./pubDate/text()"s
         )
 
       {:ok, items}
@@ -101,12 +108,40 @@ defmodule Bubble.Sources.RSSValidator do
 
   # Normalize an item to ensure all fields are present
   defp normalize_item(item) when is_map(item) do
+    # Select the first non-empty URL from the available sources
+    url =
+      [
+        Map.get(item, :link_href, ""),
+        Map.get(item, :link_text, ""),
+        Map.get(item, :guid, "")
+      ]
+      |> Enum.map(&clean_string/1)
+      |> Enum.find("", fn url -> url != "" end)
+
+    # Select the first non-empty description from the available sources
+    description =
+      [
+        Map.get(item, :description, ""),
+        Map.get(item, :summary, "")
+      ]
+      |> Enum.map(&clean_string/1)
+      |> Enum.find("", fn desc -> desc != "" end)
+
+    # Select the first non-empty published date from the available sources
+    published_at =
+      [
+        Map.get(item, :published, ""),
+        Map.get(item, :pub_date, "")
+      ]
+      |> Enum.map(&clean_string/1)
+      |> Enum.find("", fn date -> date != "" end)
+
     %{
       title: clean_string(Map.get(item, :title, "")),
-      url: clean_string(Map.get(item, :url, "")),
-      description: clean_string(Map.get(item, :description, "")),
+      url: url,
+      description: description,
       content: clean_string(Map.get(item, :content, "")),
-      published_at: clean_string(Map.get(item, :published_at, ""))
+      published_at: published_at
     }
   end
 

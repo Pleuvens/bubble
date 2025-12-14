@@ -184,6 +184,89 @@ defmodule Bubble.Sources.RSSValidatorTest do
       assert item.url == "https://example.com/item-guid"
     end
 
+    test "handles feed with both link and guid (selects first non-empty)" do
+      xml = ~s"""
+      <?xml version="1.0" encoding="UTF-8"?>
+      <rss version="2.0">
+      <channel>
+      <item>
+      <title>Item with both link and GUID</title>
+      <link>https://example.com/primary-link</link>
+      <guid>https://example.com/secondary-guid</guid>
+      <description>Item with multiple URL sources</description>
+      </item>
+      </channel>
+      </rss>
+      """
+
+      assert {:ok, [item]} = RSSValidator.parse_and_validate(xml)
+      # Should select the link (first non-empty), not concatenate
+      assert item.url == "https://example.com/primary-link"
+      # Ensure it's not concatenated
+      refute String.contains?(item.url, "https://example.com/secondary-guid")
+    end
+
+    test "handles Atom feed with href attribute" do
+      xml = ~s"""
+      <?xml version="1.0" encoding="UTF-8"?>
+      <feed xmlns="http://www.w3.org/2005/Atom">
+      <entry>
+      <title>Atom Entry</title>
+      <link href="https://example.com/atom-link" />
+      <summary>Atom entry with href attribute</summary>
+      </entry>
+      </feed>
+      """
+
+      assert {:ok, [item]} = RSSValidator.parse_and_validate(xml)
+      assert item.url == "https://example.com/atom-link"
+    end
+
+    test "handles feed with both description and summary (selects first non-empty)" do
+      xml = ~s"""
+      <?xml version="1.0" encoding="UTF-8"?>
+      <rss version="2.0">
+      <channel>
+      <item>
+      <title>Item with multiple descriptions</title>
+      <link>https://example.com/item</link>
+      <description>Primary description from RSS</description>
+      <summary>Secondary summary from Atom</summary>
+      </item>
+      </channel>
+      </rss>
+      """
+
+      assert {:ok, [item]} = RSSValidator.parse_and_validate(xml)
+      # Should select description (first non-empty), not concatenate
+      assert item.description == "Primary description from RSS"
+      # Ensure it's not concatenated
+      refute String.contains?(item.description, "Secondary summary")
+    end
+
+    test "handles feed with both published and pubDate (selects first non-empty)" do
+      xml = ~s"""
+      <?xml version="1.0" encoding="UTF-8"?>
+      <rss version="2.0">
+      <channel>
+      <item>
+      <title>Item with multiple dates</title>
+      <link>https://example.com/item</link>
+      <description>Item with multiple date fields</description>
+      <published>2025-08-05T21:44:41+00:00</published>
+      <pubDate>Mon, 05 Aug 2025 22:00:00 +0000</pubDate>
+      </item>
+      </channel>
+      </rss>
+      """
+
+      assert {:ok, [item]} = RSSValidator.parse_and_validate(xml)
+      # Should select published (first non-empty), not concatenate
+      assert item.published_at == "2025-08-05T21:44:41+00:00"
+      # Ensure it's not concatenated
+      refute String.contains?(item.published_at, "Mon")
+    end
+
     test "trims whitespace from fields" do
       xml = ~s"""
       <?xml version="1.0" encoding="UTF-8"?>
