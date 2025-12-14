@@ -15,7 +15,8 @@ config :bubble, Oban,
   plugins: [
     {Oban.Plugins.Cron,
      crontab: [
-       {"@daily", Bubble.News.FetchNewsCronJob}
+       {"@daily", Bubble.News.FetchNewsCronJob},
+       {"0 3 * * *", Bubble.News.DeleteOldNewsJob}
      ]}
   ]
 
