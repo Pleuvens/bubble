@@ -84,15 +84,15 @@ defmodule Bubble.Sources.RSSClientTest do
 
       # One should succeed
       assert Enum.any?(results, fn
-        {_url, {:ok, _feed}} -> true
-        _ -> false
-      end)
+               {_url, {:ok, _feed}} -> true
+               _ -> false
+             end)
 
       # One should fail
       assert Enum.any?(results, fn
-        {_url, {:error, _reason}} -> true
-        _ -> false
-      end)
+               {_url, {:error, _reason}} -> true
+               _ -> false
+             end)
     end
 
     test "handles multiple failures without crashing" do
@@ -121,9 +121,9 @@ defmodule Bubble.Sources.RSSClientTest do
 
       # At least one should succeed
       assert Enum.any?(results, fn
-        {_url, {:ok, _feed}} -> true
-        _ -> false
-      end)
+               {_url, {:ok, _feed}} -> true
+               _ -> false
+             end)
 
       # At least two should fail
       error_count =

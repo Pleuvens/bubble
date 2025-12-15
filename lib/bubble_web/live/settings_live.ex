@@ -482,9 +482,8 @@ defmodule BubbleWeb.SettingsLive do
     end
   end
 
-  def handle_event("delete_source", %{"id" => id}, socket) do
+  def handle_event("delete_source", %{"id" => source_id}, socket) do
     user_id = socket.assigns.current_user.id
-    source_id = String.to_integer(id)
 
     case NewsSources.remove_user_source(user_id, source_id) do
       {1, _} ->
