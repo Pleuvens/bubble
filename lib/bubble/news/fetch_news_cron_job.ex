@@ -15,7 +15,8 @@ defmodule Bubble.News.FetchNewsCronJob do
     sources =
       Repo.all(
         from(ns in NewsSource,
-          where: is_nil(ns.last_fetched_at) or fragment("now() - ? > '1 day'", ns.last_fetched_at)
+          where:
+            is_nil(ns.last_fetched_at) or fragment("now() - ? > '23 hours'", ns.last_fetched_at)
         )
       )
 
