@@ -104,16 +104,39 @@ defmodule BubbleWeb.FeedLive do
                       class="text-base md:text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed text-left px-4 py-4"
                       style={"#{if @expanded, do: "opacity: 1;", else: "opacity: 0;"}"}
                     >
-                      {Enum.at(@news, index).content}
-                      <a
-                        href={Enum.at(@news, index).url}
-                        target="_blank"
-                        phx-click="noop"
-                        class="inline-block mt-4 text-orange-400 hover:text-orange-500 transition-colors uppercase tracking-wider text-sm font-medium"
-                        onclick="event.stopPropagation();"
-                      >
-                        Read more →
-                      </a>
+                      <%= if Enum.at(@news, index).video_id not in [nil, ""] do %>
+                        <div class="w-full aspect-video mb-4" phx-click="noop" onclick="event.stopPropagation();">
+                          <iframe
+                            src={"https://www.youtube.com/embed/#{Enum.at(@news, index).video_id}"}
+                            class="w-full h-full rounded-md"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen
+                          >
+                          </iframe>
+                        </div>
+                        <p class="text-gray-600 mb-4">{Enum.at(@news, index).content}</p>
+                        <a
+                          href={Enum.at(@news, index).url}
+                          target="_blank"
+                          phx-click="noop"
+                          class="inline-block text-orange-400 hover:text-orange-500 transition-colors uppercase tracking-wider text-sm font-medium"
+                          onclick="event.stopPropagation();"
+                        >
+                          Watch on YouTube →
+                        </a>
+                      <% else %>
+                        {Enum.at(@news, index).content}
+                        <a
+                          href={Enum.at(@news, index).url}
+                          target="_blank"
+                          phx-click="noop"
+                          class="inline-block mt-4 text-orange-400 hover:text-orange-500 transition-colors uppercase tracking-wider text-sm font-medium"
+                          onclick="event.stopPropagation();"
+                        >
+                          Read more →
+                        </a>
+                      <% end %>
                     </div>
                   </div>
                   <%!-- Hint text at the bottom --%>

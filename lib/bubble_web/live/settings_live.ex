@@ -3,7 +3,17 @@ defmodule BubbleWeb.SettingsLive do
 
   on_mount {BubbleWeb.UserAuth, :mount_current_user}
 
+  alias Bubble.News.FetchSingleSourceJob
   alias Bubble.NewsSources
+
+  @featured_sources [
+    %{
+      name: "NBA Game Recaps",
+      url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCWJ2lWNubArHWmf3FIHbfcQ",
+      description: "Official NBA YouTube channel — game recaps and last night's summaries.",
+      content_type: :video
+    }
+  ]
 
   def render(assigns) do
     ~H"""
@@ -22,6 +32,115 @@ defmodule BubbleWeb.SettingsLive do
       </div>
 
       <div class="max-w-4xl mx-auto px-8">
+        <!-- Featured Sources Section -->
+        <div class="mb-12">
+          <h2 class="text-3xl md:text-4xl text-orange-400 tracking-wide uppercase font-light text-center mb-2 mt-8">
+            Discover
+          </h2>
+          <p class="text-center text-xs text-gray-500 uppercase tracking-widest mb-8">
+            Curated sources — subscribe with one click
+          </p>
+          <div class="max-w-2xl mx-auto space-y-4">
+            <%= for source <- @featured_sources do %>
+              <% sub = Map.get(@featured_subscriptions, source.name) %>
+              <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                <div class="flex items-start justify-between gap-4">
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                      <h3 class="text-orange-400 uppercase tracking-wide">{source.name}</h3>
+                      <%= if source.content_type == :video do %>
+                        <span class="text-xs uppercase tracking-wider bg-orange-100 text-orange-500 px-2 py-0.5 rounded">
+                          Video
+                        </span>
+                      <% end %>
+                    </div>
+                    <p class="text-sm text-gray-600">{source.description}</p>
+                  </div>
+                  <%= if sub do %>
+                    <% {db_source, user_source} = sub %>
+                    <button
+                      phx-click="toggle_active"
+                      phx-value-id={db_source.id}
+                      class={
+                        "shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 #{if user_source.is_active, do: "bg-orange-400", else: "bg-gray-200"}"
+                      }
+                    >
+                      <span class={
+                        "inline-block h-4 w-4 transform rounded-full bg-white transition-transform #{if user_source.is_active, do: "translate-x-6", else: "translate-x-1"}"
+                      }>
+                      </span>
+                    </button>
+                  <% else %>
+                    <button
+                      phx-click="subscribe_featured"
+                      phx-value-url={source.url}
+                      class="shrink-0 border border-orange-400 text-orange-400 hover:bg-orange-400 hover:text-white uppercase tracking-wider px-4 py-2 rounded-md transition-all text-xs"
+                    >
+                      Subscribe
+                    </button>
+                  <% end %>
+                </div>
+                <%!-- Edit URL form --%>
+                <%= if sub && elem(sub, 0).id == @editing_featured_id do %>
+                  <% {db_source, db_user_source} = sub %>
+                  <form phx-submit="save_featured_url" phx-value-id={db_source.id} class="mt-4 flex gap-2">
+                    <input
+                      type="url"
+                      name="url"
+                      value={db_user_source.custom_url || db_source.url}
+                      placeholder="https://www.youtube.com/feeds/videos.xml?..."
+                      required
+                      class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none"
+                    />
+                    <button type="submit" class="px-3 py-2 bg-orange-400 hover:bg-orange-500 text-white rounded-md text-xs uppercase tracking-wider transition-colors">
+                      Save
+                    </button>
+                    <button type="button" phx-click="cancel_edit_featured" class="px-3 py-2 border border-gray-300 text-gray-600 rounded-md text-xs uppercase tracking-wider hover:bg-gray-50 transition-colors">
+                      Cancel
+                    </button>
+                  </form>
+                <% end %>
+                <%!-- Controls row (only when subscribed and not editing) --%>
+                <%= if sub && elem(sub, 0).id != @editing_featured_id do %>
+                  <% {db_source, _} = sub %>
+                  <div class="flex items-center justify-end gap-1 pt-3 mt-3 border-t border-gray-100">
+                    <button
+                      phx-click="edit_featured"
+                      phx-value-id={db_source.id}
+                      title="Edit feed URL"
+                      class="text-gray-500 hover:text-orange-400 transition-colors p-2 rounded-md hover:bg-gray-50"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" />
+                      </svg>
+                    </button>
+                    <button
+                      phx-click="fetch_source"
+                      phx-value-id={db_source.id}
+                      title="Fetch now"
+                      class="text-gray-500 hover:text-orange-400 transition-colors p-2 rounded-md hover:bg-gray-50"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" />
+                      </svg>
+                    </button>
+                    <button
+                      phx-click="delete_source"
+                      phx-value-id={db_source.id}
+                      data-confirm={"Unsubscribe from #{source.name}?"}
+                      title="Unsubscribe"
+                      class="text-gray-500 hover:text-red-500 transition-colors p-2 rounded-md hover:bg-gray-50"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                      </svg>
+                    </button>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
         <!-- RSS Sources Section -->
         <div>
           <!-- Section title -->
@@ -271,6 +390,26 @@ defmodule BubbleWeb.SettingsLive do
                       </p>
                       <div class="flex gap-2">
                         <button
+                          phx-click="fetch_source"
+                          phx-value-id={source.id}
+                          title="Fetch now"
+                          class="text-gray-600 hover:text-orange-400 transition-colors p-2 rounded-md hover:bg-gray-50"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-4 h-4"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                            <path d="M21 3v5h-5" />
+                          </svg>
+                        </button>
+                        <button
                           phx-click="edit_source"
                           phx-value-id={source.id}
                           class="text-gray-600 hover:text-orange-400 transition-colors p-2 rounded-md hover:bg-gray-50"
@@ -322,11 +461,12 @@ defmodule BubbleWeb.SettingsLive do
 
   def mount(_params, _session, socket) do
     user_id = socket.assigns.current_user.id
-    sources = NewsSources.list_user_sources(user_id)
 
     {:ok,
      socket
-     |> assign(:sources, sources)
+     |> assign_sources(user_id)
+     |> assign(:featured_sources, @featured_sources)
+     |> assign(:editing_featured_id, nil)
      |> assign(:modal_step, nil)
      |> assign(:editing_source_id, nil)
      |> assign(:url_input, "")
@@ -346,6 +486,56 @@ defmodule BubbleWeb.SettingsLive do
      |> assign(:url_input, "")
      |> assign(:found_source, nil)
      |> assign(:new_source, %{name: "", url: "", description: ""})}
+  end
+
+  def handle_event("subscribe_featured", %{"url" => url}, socket) do
+    user_id = socket.assigns.current_user.id
+    attrs = Enum.find(@featured_sources, &(&1.url == url))
+
+    result =
+      case NewsSources.get_featured_source_by_name(attrs.name) do
+        nil ->
+          NewsSources.create_and_add_user_source(user_id, Map.put(attrs, :is_featured, true))
+
+        existing ->
+          NewsSources.add_user_source(user_id, existing.id)
+      end
+
+    case result do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> assign_sources(user_id)
+         |> put_flash(:info, "Subscribed to #{attrs.name}.")}
+
+      {:error, _} ->
+        {:noreply, socket |> put_flash(:error, "Failed to subscribe.")}
+    end
+  end
+
+  def handle_event("edit_featured", %{"id" => id}, socket) do
+    {:noreply, assign(socket, :editing_featured_id, id)}
+  end
+
+  def handle_event("cancel_edit_featured", _params, socket) do
+    {:noreply, assign(socket, :editing_featured_id, nil)}
+  end
+
+  def handle_event("save_featured_url", %{"id" => id, "url" => url}, socket) do
+    user_id = socket.assigns.current_user.id
+    user_source = NewsSources.get_user_news_source(user_id, id)
+
+    case NewsSources.update_user_news_source(user_source, %{custom_url: url}) do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> assign_sources(user_id)
+         |> assign(:editing_featured_id, nil)
+         |> put_flash(:info, "Feed URL updated.")}
+
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Failed to update URL.")}
+    end
   end
 
   def handle_event("check_url", %{"url" => url}, socket) do
@@ -387,7 +577,7 @@ defmodule BubbleWeb.SettingsLive do
       {:ok, _} ->
         {:noreply,
          socket
-         |> assign(:sources, NewsSources.list_user_sources(user_id))
+         |> assign_sources(user_id)
          |> assign(:modal_step, nil)
          |> assign(:url_input, "")
          |> assign(:found_source, nil)
@@ -400,18 +590,23 @@ defmodule BubbleWeb.SettingsLive do
 
   def handle_event("add_new_source", params, socket) do
     user_id = socket.assigns.current_user.id
+    url = params["url"]
+
+    content_type =
+      if String.contains?(url, "youtube.com"), do: :video, else: :article
 
     attrs = %{
       name: params["name"],
-      url: params["url"],
-      description: params["description"] || ""
+      url: url,
+      description: params["description"] || "",
+      content_type: content_type
     }
 
     case NewsSources.create_and_add_user_source(user_id, attrs) do
       {:ok, _source} ->
         {:noreply,
          socket
-         |> assign(:sources, NewsSources.list_user_sources(user_id))
+         |> assign_sources(user_id)
          |> assign(:modal_step, nil)
          |> assign(:url_input, "")
          |> assign(:new_source, %{name: "", url: "", description: ""})
@@ -420,6 +615,16 @@ defmodule BubbleWeb.SettingsLive do
       {:error, _changeset} ->
         {:noreply, socket |> put_flash(:error, "Failed to add source.")}
     end
+  end
+
+  def handle_event("fetch_source", %{"id" => id}, socket) do
+    user_id = socket.assigns.current_user.id
+
+    %{news_source_id: id, user_id: user_id}
+    |> FetchSingleSourceJob.new()
+    |> Oban.insert()
+
+    {:noreply, put_flash(socket, :info, "Fetch queued.")}
   end
 
   def handle_event("edit_source", %{"id" => id}, socket) do
@@ -456,7 +661,7 @@ defmodule BubbleWeb.SettingsLive do
       {:ok, _source} ->
         {:noreply,
          socket
-         |> assign(:sources, NewsSources.list_user_sources(user_id))
+         |> assign_sources(user_id)
          |> assign(:editing_source_id, nil)
          |> assign(:edit_form, %{name: "", url: "", description: ""})
          |> put_flash(:info, "Source updated successfully.")}
@@ -475,7 +680,7 @@ defmodule BubbleWeb.SettingsLive do
            is_active: !user_feed_source.is_active
          }) do
       {:ok, _user_feed_source} ->
-        {:noreply, assign(socket, :sources, NewsSources.list_user_sources(user_id))}
+        {:noreply, assign_sources(socket, user_id)}
 
       {:error, _changeset} ->
         {:noreply, socket |> put_flash(:error, "Failed to toggle source status.")}
@@ -489,11 +694,32 @@ defmodule BubbleWeb.SettingsLive do
       {1, _} ->
         {:noreply,
          socket
-         |> assign(:sources, NewsSources.list_user_sources(user_id))
+         |> assign_sources(user_id)
          |> put_flash(:info, "Successfully unsubscribed from source.")}
 
       {0, _} ->
         {:noreply, socket |> put_flash(:error, "Failed to unsubscribe from source.")}
     end
+  end
+
+  defp assign_sources(socket, user_id) do
+    featured_names = MapSet.new(@featured_sources, & &1.name)
+    all_sources = NewsSources.list_user_sources(user_id)
+
+    is_featured_source? = fn {s, _} ->
+      s.is_featured or MapSet.member?(featured_names, s.name)
+    end
+
+    {featured_user_sources, regular_sources} = Enum.split_with(all_sources, is_featured_source?)
+
+    # name => {source, user_source} — used to render controls on Discover cards
+    featured_subscriptions =
+      featured_user_sources
+      |> Enum.map(fn {s, us} -> {s.name, {s, us}} end)
+      |> Map.new()
+
+    socket
+    |> assign(:sources, regular_sources)
+    |> assign(:featured_subscriptions, featured_subscriptions)
   end
 end

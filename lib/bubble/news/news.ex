@@ -11,6 +11,8 @@ defmodule Bubble.News.News do
     field :published_at, :utc_datetime
     field :content, :string
     field :description, :string
+    field :video_id, :string
+    field :thumbnail_url, :string
 
     belongs_to :news_source, NewsSource
 
@@ -19,7 +21,16 @@ defmodule Bubble.News.News do
 
   def changeset(news, attrs) do
     news
-    |> cast(attrs, [:title, :url, :published_at, :content, :description, :news_source_id])
+    |> cast(attrs, [
+      :title,
+      :url,
+      :published_at,
+      :content,
+      :description,
+      :news_source_id,
+      :video_id,
+      :thumbnail_url
+    ])
     |> validate_required([:title, :url, :published_at, :description])
     |> unique_constraint(:url)
   end

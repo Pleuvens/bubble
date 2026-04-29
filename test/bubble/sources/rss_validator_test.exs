@@ -92,6 +92,49 @@ defmodule Bubble.Sources.RSSValidatorTest do
       assert item.content == "\"Quoted\" & 'apostrophe'"
     end
 
+    test "parses YouTube Atom feed extracting video_id and thumbnail_url" do
+      xml = ~s"""
+      <?xml version="1.0" encoding="UTF-8"?>
+      <feed xmlns="http://www.w3.org/2005/Atom"
+            xmlns:yt="http://www.youtube.com/xml/schemas/2015"
+            xmlns:media="http://search.yahoo.com/mrss/">
+        <entry>
+          <title>Lakers vs Celtics | Game Recap</title>
+          <link href="https://www.youtube.com/watch?v=abc123" />
+          <published>2026-04-29T12:00:00+00:00</published>
+          <summary>Full game recap from last night.</summary>
+          <yt:videoId>abc123</yt:videoId>
+          <media:group>
+            <media:thumbnail url="https://i.ytimg.com/vi/abc123/maxresdefault.jpg" />
+          </media:group>
+        </entry>
+      </feed>
+      """
+
+      assert {:ok, [item]} = RSSValidator.parse_and_validate(xml)
+      assert item.title == "Lakers vs Celtics | Game Recap"
+      assert item.video_id == "abc123"
+      assert item.thumbnail_url == "https://i.ytimg.com/vi/abc123/maxresdefault.jpg"
+    end
+
+    test "returns empty video_id and thumbnail_url for non-video feeds" do
+      xml = ~s"""
+      <?xml version="1.0" encoding="UTF-8"?>
+      <feed xmlns="http://www.w3.org/2005/Atom">
+        <entry>
+          <title>Regular Article</title>
+          <link href="https://example.com/article" />
+          <published>2026-04-29T12:00:00+00:00</published>
+          <summary>An article without video fields.</summary>
+        </entry>
+      </feed>
+      """
+
+      assert {:ok, [item]} = RSSValidator.parse_and_validate(xml)
+      assert item.video_id == ""
+      assert item.thumbnail_url == ""
+    end
+
     test "filters out items without valid URLs" do
       xml = ~s"""
       <?xml version="1.0" encoding="UTF-8"?>

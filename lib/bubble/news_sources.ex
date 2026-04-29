@@ -43,6 +43,13 @@ defmodule Bubble.NewsSources do
   end
 
   @doc """
+  Gets a featured news source by name.
+  """
+  def get_featured_source_by_name(name) do
+    Repo.one(from ns in NewsSource, where: ns.name == ^name and ns.is_featured == true, limit: 1)
+  end
+
+  @doc """
   Creates a new news source.
   """
   def create_source(attrs) do

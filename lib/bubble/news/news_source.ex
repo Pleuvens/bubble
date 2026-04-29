@@ -12,6 +12,8 @@ defmodule Bubble.News.NewsSource do
     field :url, :string
     field :description, :string
     field :last_fetched_at, :utc_datetime_usec
+    field :content_type, Ecto.Enum, values: [:article, :video], default: :article
+    field :is_featured, :boolean, default: false
 
     has_many :news, News
     many_to_many :users, User, join_through: UserNewsSource
@@ -21,8 +23,8 @@ defmodule Bubble.News.NewsSource do
 
   def changeset(news_source, attrs) do
     news_source
-    |> cast(attrs, [:name, :url, :description, :last_fetched_at])
-    |> validate_required([:name, :url])
+    |> cast(attrs, [:name, :url, :description, :last_fetched_at, :content_type, :is_featured])
+    |> validate_required([:name, :url, :content_type])
     |> unique_constraint(:url)
   end
 end

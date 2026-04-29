@@ -16,8 +16,7 @@ defmodule Bubble.NewsFixtures do
       Enum.into(attrs, %{
         name: "Test Source #{System.unique_integer()}",
         url: "https://example#{System.unique_integer()}.com/rss",
-        description: "Test source description",
-        is_active: true
+        description: "Test source description"
       })
 
     {:ok, news_source} = NewsSources.create_source(attrs)

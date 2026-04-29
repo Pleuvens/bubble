@@ -99,18 +99,19 @@ defmodule Bubble.Sources.NewsProcessor do
     :ok
   end
 
-  # Hybrid approach: Try RSS data first, then MetaScraper
+  # For video items (YouTube etc.), use the RSS description directly — no scraping needed.
+  # For articles, try RSS content/description first, then fall back to MetaScraper.
   defp fetch_content_with_fallback(news) do
     cond do
-      # First: Use RSS content if available and substantial
+      news[:video_id] not in [nil, ""] ->
+        if has_substantial_content?(news[:description]), do: news[:description], else: ""
+
       has_substantial_content?(news.content) ->
         news.content
 
-      # Second: Use RSS description if available and substantial
       has_substantial_content?(news.description) ->
         news.description
 
-      # Third: Try free MetaScraper (OpenGraph/Twitter/HTML meta tags)
       true ->
         case MetaScraper.fetch_description(news.url) do
           {:ok, description} ->

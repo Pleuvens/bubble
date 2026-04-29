@@ -16,7 +16,9 @@ defmodule Bubble.Sources.RSSValidator do
           url: String.t(),
           description: String.t(),
           content: String.t(),
-          published_at: String.t()
+          published_at: String.t(),
+          video_id: String.t(),
+          thumbnail_url: String.t()
         }
 
   @type parse_result :: {:ok, [feed_item()]} | {:error, atom()}
@@ -81,7 +83,11 @@ defmodule Bubble.Sources.RSSValidator do
           content: ~x"./content/text()"s,
           # Extract each date source separately to avoid concatenation
           published: ~x"./published/text()"s,
-          pub_date: ~x"./pubDate/text()"s
+          pub_date: ~x"./pubDate/text()"s,
+          # YouTube (yt:videoId) and MRSS (media:thumbnail) — match by local name
+          # so we don't need namespace declarations. Empty on non-video feeds.
+          video_id: ~x"./*[local-name()='videoId']/text()"s,
+          thumbnail_url: ~x".//*[local-name()='thumbnail']/@url"s
         )
 
       {:ok, items}
@@ -141,7 +147,9 @@ defmodule Bubble.Sources.RSSValidator do
       url: url,
       description: description,
       content: clean_string(Map.get(item, :content, "")),
-      published_at: published_at
+      published_at: published_at,
+      video_id: clean_string(Map.get(item, :video_id, "")),
+      thumbnail_url: clean_string(Map.get(item, :thumbnail_url, ""))
     }
   end
 
