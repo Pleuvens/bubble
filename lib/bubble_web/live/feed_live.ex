@@ -8,210 +8,167 @@ defmodule BubbleWeb.FeedLive do
 
   def render(assigns) do
     ~H"""
-    <div id="feed" class="bg-gray-50 min-h-screen" data-active={@current_index} phx-hook="FeedNav">
-      <!-- Header -->
-      <div class="fixed top-0 left-0 right-0 z-10 bg-white/80 backdrop-blur-sm">
-        <div class="flex items-center justify-between px-6 py-4">
-          <h1 class="text-sm uppercase tracking-wider text-gray-600">Bubble</h1>
-          <div class="flex items-center gap-4">
-            <%= if @current_user do %>
-              <span class="text-xs text-gray-600">{@current_user.email}</span>
+    <div id="feed" class="min-h-screen bg-white" data-active={@current_index} phx-hook="FeedNav">
+      <header class="fixed top-0 left-0 right-0 z-10 bg-white/90 backdrop-blur-sm border-b border-gray-100">
+        <div class="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
+          <span class="text-sm font-semibold tracking-[0.18em] uppercase text-gray-900">Bubble</span>
+          <%= if @current_user do %>
+            <div class="flex items-center gap-4">
               <.link
-                href={~p"/users/settings"}
-                class="text-xs uppercase tracking-wider text-gray-600 hover:text-orange-400 transition-colors"
+                navigate={~p"/settings"}
+                class="text-xs text-gray-500 hover:text-orange-400 uppercase tracking-wider transition-colors"
               >
-                Account
+                Settings
               </.link>
               <.link
                 href={~p"/users/log_out"}
                 method="delete"
-                class="text-xs uppercase tracking-wider text-gray-600 hover:text-orange-400 transition-colors"
+                class="text-xs text-gray-400 hover:text-orange-400 uppercase tracking-wider transition-colors"
               >
                 Log out
               </.link>
-            <% else %>
+            </div>
+          <% else %>
+            <div class="flex items-center gap-4">
               <.link
                 navigate={~p"/users/log_in"}
-                class="text-xs uppercase tracking-wider text-gray-600 hover:text-orange-400 transition-colors"
+                class="text-xs text-gray-500 hover:text-orange-400 uppercase tracking-wider transition-colors"
               >
                 Log in
               </.link>
               <.link
                 navigate={~p"/users/register"}
-                class="text-xs uppercase tracking-wider text-gray-600 hover:text-orange-400 transition-colors"
+                class="text-xs px-4 py-1.5 bg-orange-400 text-white hover:bg-orange-500 uppercase tracking-wider transition-colors rounded"
               >
                 Register
               </.link>
-            <% end %>
-            <%= if @current_user do %>
-              <.link
-                navigate={~p"/settings"}
-                class="text-gray-600 hover:text-orange-400 transition-colors p-2 rounded-md hover:bg-gray-100"
-                aria-label="Settings"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="w-5 h-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
-              </.link>
-            <% end %>
-          </div>
-        </div>
-      </div>
-      <%!-- Current news --%>
-      <div class="pt-16">
-        <%= if length(@news) > 0 do %>
-          <%= for index <- 0..(length(@news) - 1) do %>
-            <div id={"news-item-#{index}"}>
-              <div
-                phx-click="toggle_expanded"
-                class={"min-h-screen flex flex-col p-8 cursor-pointer hover:bg-gray-50 #{if @expanded, do: "justify-start pt-16", else: "items-center justify-center"}"}
-              >
-                <div class="max-w-4xl mx-auto text-center w-full">
-                  <%!-- Title --%>
-                  <div class="relative mb-8">
-                    <h1
-                      class="text-4xl md:text-5xl lg:text-6xl text-orange-400 tracking-wide leading-tight uppercase font-light"
-                      style={"transform-origin: center; #{if @expanded, do: "transform: scale(0.5);", else: "transform: scale(1);"}"}
-                    >
-                      {Enum.at(@news, index).title}
-                    </h1>
-                  </div>
-                  <%!-- sorce and date --%>
-                  <div class={"text-xs text-gray-500 uppercase tracking-widest #{if @expanded, do: "mb-8", else: "mb-4"}"}>
-                    <%!-- {source} — {new Date(publishedAt).toLocaleDateString('en-US', {  --%>
-                    <%!--   month: 'short',  --%>
-                    <%!--   day: 'numeric', --%>
-                    <%!--   year: 'numeric' --%>
-                    <%!-- })} --%>
-                    {DateFormatter.format_news_date(Enum.at(@news, index).published_at)}
-                  </div>
-                  <%!-- Expanded content section --%>
-                  <div
-                    class="flex items-center justify-center overflow-hidden"
-                    style={"#{if @expanded, do: "max-height: 2000px; margin-top: 8rem;", else: "max-height: 0;"}"}
-                  >
-                    <div
-                      class="text-base md:text-lg text-gray-700 max-w-3xl mx-auto leading-relaxed text-left px-4 py-4"
-                      style={"#{if @expanded, do: "opacity: 1;", else: "opacity: 0;"}"}
-                    >
-                      <%= if Enum.at(@news, index).video_id not in [nil, ""] do %>
-                        <div class="w-full aspect-video mb-4" phx-click="noop" onclick="event.stopPropagation();">
-                          <iframe
-                            src={"https://www.youtube.com/embed/#{Enum.at(@news, index).video_id}"}
-                            class="w-full h-full rounded-md"
-                            frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowfullscreen
-                          >
-                          </iframe>
-                        </div>
-                        <p class="text-gray-600 mb-4">{Enum.at(@news, index).content}</p>
-                        <a
-                          href={Enum.at(@news, index).url}
-                          target="_blank"
-                          phx-click="noop"
-                          class="inline-block text-orange-400 hover:text-orange-500 transition-colors uppercase tracking-wider text-sm font-medium"
-                          onclick="event.stopPropagation();"
-                        >
-                          Watch on YouTube →
-                        </a>
-                      <% else %>
-                        {Enum.at(@news, index).content}
-                        <a
-                          href={Enum.at(@news, index).url}
-                          target="_blank"
-                          phx-click="noop"
-                          class="inline-block mt-4 text-orange-400 hover:text-orange-500 transition-colors uppercase tracking-wider text-sm font-medium"
-                          onclick="event.stopPropagation();"
-                        >
-                          Read more →
-                        </a>
-                      <% end %>
-                    </div>
-                  </div>
-                  <%!-- Hint text at the bottom --%>
-                  <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-gray-400 uppercase tracking-wider">
-                    <%= if @expanded do %>
-                      Click to collapse
-                    <% else %>
-                      Click to expand • Scroll to navigate
-                    <% end %>
-                  </div>
-                </div>
-              </div>
             </div>
           <% end %>
+        </div>
+      </header>
+
+      <main class="max-w-2xl mx-auto px-6 pt-20 pb-20">
+        <%= if length(@news) > 0 do %>
+          <div class="divide-y divide-gray-100">
+            <%= for {item, index} <- Enum.with_index(@news) do %>
+              <article
+                id={"news-item-#{index}"}
+                class={"py-7 transition-all duration-150 #{if index == @current_index, do: "bg-orange-50/60 -mx-4 px-4 rounded-xl", else: ""}"}
+              >
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="text-[11px] font-semibold text-orange-400 uppercase tracking-widest">
+                    {item.news_source.name}
+                  </span>
+                  <span class="text-gray-200 text-xs">·</span>
+                  <time class="text-[11px] text-gray-400">
+                    {DateFormatter.format_news_date(item.published_at)}
+                  </time>
+                </div>
+
+                <%= if item.video_id not in [nil, ""] do %>
+                  <div class="w-full aspect-video rounded-lg overflow-hidden bg-gray-100 mb-4">
+                    <iframe
+                      src={"https://www.youtube.com/embed/#{item.video_id}"}
+                      class="w-full h-full"
+                      frameborder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowfullscreen
+                    >
+                    </iframe>
+                  </div>
+                <% end %>
+
+                <h2 class="text-[17px] font-semibold text-gray-900 leading-snug mb-2">
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener"
+                    class="hover:text-orange-400 transition-colors duration-150"
+                  >
+                    {item.title}
+                  </a>
+                </h2>
+
+                <%= if item.description not in [nil, ""] do %>
+                  <p class="text-sm text-gray-500 leading-relaxed mb-3">
+                    {item.description |> HtmlSanitizeEx.strip_tags() |> String.trim() |> truncate(280) |> linkify()}
+                  </p>
+                <% end %>
+
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener"
+                  class="inline-flex items-center gap-1 text-[11px] font-semibold text-orange-400 hover:text-orange-500 uppercase tracking-widest transition-colors duration-150"
+                >
+                  {if item.video_id not in [nil, ""], do: "Watch", else: "Read"}
+                  <span>→</span>
+                </a>
+              </article>
+            <% end %>
+          </div>
         <% else %>
           <%= if @current_user do %>
-            <div class="min-h-screen flex items-center justify-center">
-              <div class="text-center">
-                <p class="text-gray-500 text-lg">No news available</p>
-                <p class="text-gray-400 text-sm mt-2">
-                  Add some news sources in
-                  <.link
-                    navigate={~p"/settings"}
-                    class="text-orange-400 hover:text-orange-500 underline"
-                  >
-                    settings
-                  </.link>
-                  to get started
-                </p>
-              </div>
+            <div class="flex flex-col items-center justify-center py-32 text-center">
+              <p class="text-gray-400 text-base mb-2">Nothing here yet</p>
+              <p class="text-gray-300 text-sm">
+                Add sources in
+                <.link navigate={~p"/settings"} class="text-orange-400 hover:text-orange-500 underline">
+                  settings
+                </.link>
+                to start reading
+              </p>
             </div>
           <% else %>
-            <%!-- Landing page for non-authenticated users --%>
-            <div class="min-h-screen flex items-center justify-center px-6">
-              <div class="max-w-3xl mx-auto text-center">
-                <h2 class="text-5xl md:text-6xl lg:text-7xl text-orange-400 tracking-wide leading-tight uppercase font-light mb-8">
-                  Welcome to Bubble
-                </h2>
-                <div class="space-y-6 text-gray-600 text-lg leading-relaxed">
-                  <p class="text-xl md:text-2xl font-light">
-                    Your personalized RSS news aggregator
-                  </p>
-                  <p>
-                    Bubble helps you stay informed by aggregating news from your favorite RSS feeds in one beautiful, distraction-free interface.
-                  </p>
-                  <p>
-                    Subscribe to multiple sources, manage your feeds, and read news in a clean, minimalist layout designed for focus.
-                  </p>
-                </div>
-                <div class="flex items-center justify-center gap-6 mt-12">
-                  <.link
-                    navigate={~p"/users/register"}
-                    class="px-8 py-4 bg-orange-400 text-white uppercase tracking-wider text-sm hover:bg-orange-500 transition-colors rounded-md"
-                  >
-                    Get Started
-                  </.link>
-                  <.link
-                    navigate={~p"/users/log_in"}
-                    class="px-8 py-4 border-2 border-gray-300 text-gray-600 uppercase tracking-wider text-sm hover:border-orange-400 hover:text-orange-400 transition-colors rounded-md"
-                  >
-                    Log In
-                  </.link>
-                </div>
+            <div class="flex flex-col items-center justify-center min-h-[80vh] text-center">
+              <h2 class="text-4xl font-semibold text-gray-900 tracking-tight mb-4">
+                Your feed, your way.
+              </h2>
+              <p class="text-gray-400 text-base max-w-sm leading-relaxed mb-10">
+                Bubble brings together all your RSS feeds in one clean, distraction-free reader.
+              </p>
+              <div class="flex items-center gap-3">
+                <.link
+                  navigate={~p"/users/register"}
+                  class="px-6 py-2.5 bg-orange-400 text-white text-sm uppercase tracking-wider hover:bg-orange-500 transition-colors rounded"
+                >
+                  Get Started
+                </.link>
+                <.link
+                  navigate={~p"/users/log_in"}
+                  class="px-6 py-2.5 border border-gray-200 text-gray-500 text-sm uppercase tracking-wider hover:border-orange-400 hover:text-orange-400 transition-colors rounded"
+                >
+                  Log In
+                </.link>
               </div>
             </div>
           <% end %>
         <% end %>
-      </div>
+      </main>
+
       <%= if @current_user && length(@news) > 0 do %>
-        <div class="fixed bottom-4 left-4 text-xs text-gray-400 bg-white/80 backdrop-blur-sm px-3 py-2 rounded-lg">
-          <div>↑↓ Navigate • Enter/Space Expand • Scroll to browse</div>
+        <div class="fixed bottom-5 right-5 text-[10px] text-gray-300 bg-white border border-gray-100 px-3 py-1.5 rounded-full shadow-sm">
+          ↑↓ navigate &nbsp;·&nbsp; enter open
         </div>
       <% end %>
     </div>
     """
+  end
+
+  defp truncate(text, max) when byte_size(text) <= max, do: text
+  defp truncate(text, max), do: String.slice(text, 0, max) <> "…"
+
+  @url_regex ~r/(https?:\/\/[^\s]+)/
+
+  defp linkify(text) do
+    escaped = Phoenix.HTML.html_escape(text) |> Phoenix.HTML.safe_to_string()
+
+    result =
+      Regex.replace(@url_regex, escaped, fn url ->
+        ~s(<a href="#{url}" target="_blank" rel="noopener" class="text-orange-400 hover:text-orange-500 underline underline-offset-2 break-all">#{url}</a>)
+      end)
+
+    Phoenix.HTML.raw(result)
   end
 
   def mount(_params, _session, socket) do
@@ -224,15 +181,12 @@ defmodule BubbleWeb.FeedLive do
     {:ok,
      socket
      |> assign(:news, news)
-     |> assign(:current_index, 0)
-     |> assign(:expanded, false)}
-  end
-
-  def handle_event("toggle_expanded", _params, socket) do
-    {:noreply, assign(socket, :expanded, !socket.assigns.expanded)}
+     |> assign(:current_index, 0)}
   end
 
   def handle_event("set_index", %{"index" => idx}, socket) do
-    {:noreply, assign(socket, :current_index, idx)}
+    count = length(socket.assigns.news)
+    clamped = idx |> max(0) |> min(count - 1)
+    {:noreply, assign(socket, :current_index, clamped)}
   end
 end

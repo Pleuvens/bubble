@@ -390,6 +390,25 @@ defmodule BubbleWeb.SettingsLive do
                       </p>
                       <div class="flex gap-2">
                         <button
+                          phx-click="edit_source"
+                          phx-value-id={source.id}
+                          title="Edit source"
+                          class="text-gray-600 hover:text-orange-400 transition-colors p-2 rounded-md hover:bg-gray-50"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-4 h-4"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" />
+                          </svg>
+                        </button>
+                        <button
                           phx-click="fetch_source"
                           phx-value-id={source.id}
                           title="Fetch now"
@@ -410,27 +429,10 @@ defmodule BubbleWeb.SettingsLive do
                           </svg>
                         </button>
                         <button
-                          phx-click="edit_source"
-                          phx-value-id={source.id}
-                          class="text-gray-600 hover:text-orange-400 transition-colors p-2 rounded-md hover:bg-gray-50"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="w-4 h-4"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" />
-                          </svg>
-                        </button>
-                        <button
                           phx-click="delete_source"
                           phx-value-id={source.id}
                           data-confirm="Are you sure you want to unsubscribe from this RSS source?"
+                          title="Unsubscribe"
                           class="text-gray-600 hover:text-red-500 transition-colors p-2 rounded-md hover:bg-gray-50"
                         >
                           <svg

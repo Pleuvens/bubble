@@ -27,6 +27,6 @@ defmodule BubbleWeb.PageControllerTest do
     conn = build_conn()
 
     {:ok, _view, html} = live(conn, ~p"/")
-    assert html =~ "Welcome to Bubble"
+    assert html =~ "Your feed, your way."
   end
 end

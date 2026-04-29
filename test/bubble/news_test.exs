@@ -164,17 +164,13 @@ defmodule Bubble.NewsTest do
       assert Enum.at(news, 2).id == old_feed.id
     end
 
-    test "limits results to 10 items", %{user: user} do
-      # Create feed source
+    test "limits results to 50 items", %{user: user} do
       source = feed_source_fixture()
-
-      # Subscribe user
       {:ok, _} = NewsSources.add_user_source(user.id, source.id)
 
       now = DateTime.utc_now() |> DateTime.truncate(:second)
 
-      # Create 15 feeds
-      for i <- 1..15 do
+      for i <- 1..60 do
         feed_fixture(
           title: "News #{i}",
           news_source_id: source.id,
@@ -182,11 +178,9 @@ defmodule Bubble.NewsTest do
         )
       end
 
-      # Get user news
       news = News.list_user_news(user.id)
 
-      # Should be limited to 10
-      assert length(news) == 10
+      assert length(news) == 50
     end
 
     test "returns empty list when user has no subscriptions", %{user: user} do
