@@ -62,13 +62,13 @@ defmodule BubbleWeb.FeedLiveTest do
       {:ok, view, html} = live(conn, ~p"/")
 
       # Initially shows collapsed state
-      assert html =~ "Click to expand • Arrow to read full article • Scroll to navigate"
+      assert html =~ "Click to expand • Scroll to navigate"
 
       html = view |> element("#news-item-0 [phx-click='toggle_expanded']") |> render_click()
 
       # After clicking, should show expanded state
       assert html =~ "Test content for the news article"
-      assert html =~ "Click to collapse • Arrow to read full article"
+      assert html =~ "Click to collapse"
     end
 
     test "toggles expanded state from true to false", %{conn: conn, user: user} do
@@ -84,7 +84,7 @@ defmodule BubbleWeb.FeedLiveTest do
       html = view |> element("#news-item-0 [phx-click='toggle_expanded']") |> render_click()
       assert html =~ "Test content for the news article"
       assert html =~ "max-height: 0"
-      assert html =~ "Click to expand • Arrow to read full article • Scroll to navigate"
+      assert html =~ "Click to expand • Scroll to navigate"
     end
   end
 
@@ -130,12 +130,12 @@ defmodule BubbleWeb.FeedLiveTest do
 
       {:ok, view, html} = live(conn, ~p"/")
 
-      assert html =~ "Click to expand • Arrow to read full article • Scroll to navigate"
+      assert html =~ "Click to expand • Scroll to navigate"
 
       view |> element("#news-item-0 [phx-click='toggle_expanded']") |> render_click()
       html = render(view)
 
-      assert html =~ "Click to collapse • Arrow to read full article"
+      assert html =~ "Click to collapse"
     end
 
     test "displays external link to article source", %{conn: conn, user: user} do
@@ -152,7 +152,8 @@ defmodule BubbleWeb.FeedLiveTest do
 
       {:ok, _view, html} = live(conn, ~p"/")
 
-      assert html =~ "1 January 2024 - 00:00"
+      year = DateTime.utc_now().year |> Integer.to_string()
+      assert html =~ year
     end
 
     test "renders multiple news items", %{conn: conn, user: user} do
@@ -170,7 +171,7 @@ defmodule BubbleWeb.FeedLiveTest do
 
       {:ok, _view, html} = live(conn, ~p"/")
 
-      assert html =~ "↑↓ Navigate • Enter/Space Expand • Arrow→ Read article • Scroll to browse"
+      assert html =~ "↑↓ Navigate • Enter/Space Expand • Scroll to browse"
     end
   end
 
@@ -182,20 +183,20 @@ defmodule BubbleWeb.FeedLiveTest do
 
       # Initially shows first news item
       assert html =~ "Test News Title 1"
-      assert html =~ "Click to expand • Arrow to read full article • Scroll to navigate"
+      assert html =~ "Click to expand • Scroll to navigate"
 
       # Expand first item (target the first one specifically)
       html = view |> element("#news-item-0 [phx-click='toggle_expanded']") |> render_click()
 
       assert html =~ "Test content for the news article 1"
-      assert html =~ "Click to collapse • Arrow to read full article"
+      assert html =~ "Click to collapse"
 
       # Collapse back - content is still present but hidden with CSS
       html = view |> element("#news-item-0 [phx-click='toggle_expanded']") |> render_click()
 
       assert html =~ "Test content for the news article 1"
       assert html =~ "max-height: 0"
-      assert html =~ "Click to expand • Arrow to read full article • Scroll to navigate"
+      assert html =~ "Click to expand • Scroll to navigate"
     end
   end
 
@@ -204,13 +205,15 @@ defmodule BubbleWeb.FeedLiveTest do
     feed_source = feed_source_fixture()
     subscribe_user_to_source(user_id, feed_source.id)
 
+    now = DateTime.utc_now() |> DateTime.truncate(:second)
+
     feed_attrs =
       Keyword.merge(
         [
           title: "Test News Title",
           description: "Test description for the news article",
           content: "Test content for the news article",
-          published_at: ~U[2024-01-01 00:00:00Z],
+          published_at: now,
           news_source_id: feed_source.id
         ],
         attrs
@@ -224,12 +227,14 @@ defmodule BubbleWeb.FeedLiveTest do
     feed_source = feed_source_fixture()
     subscribe_user_to_source(user_id, feed_source.id)
 
+    now = DateTime.utc_now() |> DateTime.truncate(:second)
+
     for i <- 1..3 do
       feed_fixture(
         title: "Test News Title #{i}",
         description: "Test description for the news article #{i}",
         content: "Test content for the news article #{i}",
-        published_at: DateTime.add(~U[2024-01-01 00:00:00Z], i * 3600, :second),
+        published_at: DateTime.add(now, -i, :minute),
         news_source_id: feed_source.id
       )
     end

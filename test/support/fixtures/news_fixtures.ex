@@ -33,7 +33,7 @@ defmodule Bubble.NewsFixtures do
         description: "Test description for the news article",
         content: "Test content for the news article",
         url: "https://example.com/test#{System.unique_integer()}",
-        published_at: ~U[2024-01-01 00:00:00Z]
+        published_at: DateTime.utc_now() |> DateTime.truncate(:second)
       })
 
     %News{}

@@ -35,7 +35,8 @@ defmodule Bubble.News do
         on: uns.news_source_id == n.news_source_id,
         where: uns.user_id == ^user_id and uns.is_active == true,
         where: n.published_at >= ^yesterday_start,
-        order_by: [desc: n.published_at]
+        order_by: [desc: n.published_at],
+        limit: 10
       )
     )
   end

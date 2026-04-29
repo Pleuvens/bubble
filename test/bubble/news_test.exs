@@ -22,19 +22,21 @@ defmodule Bubble.NewsTest do
       {:ok, _} = NewsSources.add_user_source(user.id, active_source.id)
       {:ok, _} = NewsSources.add_user_source(user.id, inactive_source.id)
 
+      now = DateTime.utc_now() |> DateTime.truncate(:second)
+
       # Create feeds for both sources
       active_feed =
         feed_fixture(
           title: "News from Active Source",
           news_source_id: active_source.id,
-          published_at: ~U[2024-01-02 00:00:00Z]
+          published_at: DateTime.add(now, -1, :hour)
         )
 
       inactive_feed =
         feed_fixture(
           title: "News from Inactive Source",
           news_source_id: inactive_source.id,
-          published_at: ~U[2024-01-01 00:00:00Z]
+          published_at: DateTime.add(now, -2, :hour)
         )
 
       # Deactivate the second source
@@ -82,26 +84,28 @@ defmodule Bubble.NewsTest do
       {:ok, _} = NewsSources.add_user_source(user.id, source2.id)
       {:ok, _} = NewsSources.add_user_source(user.id, source3.id)
 
+      now = DateTime.utc_now() |> DateTime.truncate(:second)
+
       # Create feeds for all sources
       feed1 =
         feed_fixture(
           title: "News 1",
           news_source_id: source1.id,
-          published_at: ~U[2024-01-03 00:00:00Z]
+          published_at: DateTime.add(now, -1, :hour)
         )
 
       feed2 =
         feed_fixture(
           title: "News 2",
           news_source_id: source2.id,
-          published_at: ~U[2024-01-02 00:00:00Z]
+          published_at: DateTime.add(now, -2, :hour)
         )
 
       feed3 =
         feed_fixture(
           title: "News 3",
           news_source_id: source3.id,
-          published_at: ~U[2024-01-01 00:00:00Z]
+          published_at: DateTime.add(now, -3, :hour)
         )
 
       # Deactivate source2
@@ -126,26 +130,28 @@ defmodule Bubble.NewsTest do
       # Subscribe user
       {:ok, _} = NewsSources.add_user_source(user.id, source.id)
 
+      now = DateTime.utc_now() |> DateTime.truncate(:second)
+
       # Create feeds with different publish dates
       old_feed =
         feed_fixture(
           title: "Old News",
           news_source_id: source.id,
-          published_at: ~U[2024-01-01 00:00:00Z]
+          published_at: DateTime.add(now, -3, :hour)
         )
 
       recent_feed =
         feed_fixture(
           title: "Recent News",
           news_source_id: source.id,
-          published_at: ~U[2024-01-03 00:00:00Z]
+          published_at: DateTime.add(now, -1, :hour)
         )
 
       middle_feed =
         feed_fixture(
           title: "Middle News",
           news_source_id: source.id,
-          published_at: ~U[2024-01-02 00:00:00Z]
+          published_at: DateTime.add(now, -2, :hour)
         )
 
       # Get user news
@@ -165,14 +171,14 @@ defmodule Bubble.NewsTest do
       # Subscribe user
       {:ok, _} = NewsSources.add_user_source(user.id, source.id)
 
-      # Create 15 feeds
-      base_time = ~U[2024-01-01 00:00:00Z]
+      now = DateTime.utc_now() |> DateTime.truncate(:second)
 
+      # Create 15 feeds
       for i <- 1..15 do
         feed_fixture(
           title: "News #{i}",
           news_source_id: source.id,
-          published_at: DateTime.add(base_time, i, :hour)
+          published_at: DateTime.add(now, -i, :minute)
         )
       end
 
