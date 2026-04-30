@@ -45,3 +45,7 @@ liveSocket.connect()
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
 
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js")
+}
+
