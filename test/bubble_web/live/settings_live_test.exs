@@ -55,12 +55,13 @@ defmodule BubbleWeb.SettingsLiveTest do
       conn: conn,
       user: user
     } do
-      existing = news_source_fixture(%{
-        name: "NBA Game Recaps",
-        url: "https://www.youtube.com/feeds/videos.xml?playlist_id=XYZ",
-        content_type: :video,
-        is_featured: true
-      })
+      existing =
+        news_source_fixture(%{
+          name: "NBA Game Recaps",
+          url: "https://www.youtube.com/feeds/videos.xml?playlist_id=XYZ",
+          content_type: :video,
+          is_featured: true
+        })
 
       {:ok, view, _html} = live(conn, ~p"/settings")
       view |> element("button[phx-click='subscribe_featured']") |> render_click()
@@ -78,12 +79,13 @@ defmodule BubbleWeb.SettingsLiveTest do
 
   describe "Discover section - subscribed state controls" do
     setup %{user: user} do
-      source = news_source_fixture(%{
-        name: "NBA Game Recaps",
-        url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCWJ2lWNubArHWmf3FIHbfcQ",
-        content_type: :video,
-        is_featured: true
-      })
+      source =
+        news_source_fixture(%{
+          name: "NBA Game Recaps",
+          url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCWJ2lWNubArHWmf3FIHbfcQ",
+          content_type: :video,
+          is_featured: true
+        })
 
       {:ok, _} = NewsSources.add_user_source(user.id, source.id)
       {:ok, source: source}
@@ -129,12 +131,16 @@ defmodule BubbleWeb.SettingsLiveTest do
       |> form("form[phx-submit='save_featured_url']", %{url: new_url})
       |> render_submit()
 
-      user_source = Repo.get_by(Bubble.News.UserNewsSource, user_id: user.id, news_source_id: source.id)
+      user_source =
+        Repo.get_by(Bubble.News.UserNewsSource, user_id: user.id, news_source_id: source.id)
+
       assert user_source.custom_url == new_url
 
       # Shared source URL must remain unchanged
       shared = Repo.get(Bubble.News.NewsSource, source.id)
-      assert shared.url == "https://www.youtube.com/feeds/videos.xml?channel_id=UCWJ2lWNubArHWmf3FIHbfcQ"
+
+      assert shared.url ==
+               "https://www.youtube.com/feeds/videos.xml?channel_id=UCWJ2lWNubArHWmf3FIHbfcQ"
     end
 
     test "cancel_edit_featured hides the URL form", %{conn: conn} do
@@ -167,7 +173,9 @@ defmodule BubbleWeb.SettingsLiveTest do
       assert html =~ "Hacker News"
       # NBA appears only in the Discover section — exactly one toggle_active for NBA
       # (in Discover card), not a second one in the RSS Sources list
-      toggle_count = html |> String.split("phx-click=\"toggle_active\"") |> length() |> Kernel.-(1)
+      toggle_count =
+        html |> String.split("phx-click=\"toggle_active\"") |> length() |> Kernel.-(1)
+
       assert toggle_count == 2
     end
 

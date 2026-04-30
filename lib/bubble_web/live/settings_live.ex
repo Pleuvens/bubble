@@ -83,7 +83,11 @@ defmodule BubbleWeb.SettingsLive do
                 <%!-- Edit URL form --%>
                 <%= if sub && elem(sub, 0).id == @editing_featured_id do %>
                   <% {db_source, db_user_source} = sub %>
-                  <form phx-submit="save_featured_url" phx-value-id={db_source.id} class="mt-4 flex gap-2">
+                  <form
+                    phx-submit="save_featured_url"
+                    phx-value-id={db_source.id}
+                    class="mt-4 flex gap-2"
+                  >
                     <input
                       type="url"
                       name="url"
@@ -92,10 +96,17 @@ defmodule BubbleWeb.SettingsLive do
                       required
                       class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none"
                     />
-                    <button type="submit" class="px-3 py-2 bg-orange-400 hover:bg-orange-500 text-white rounded-md text-xs uppercase tracking-wider transition-colors">
+                    <button
+                      type="submit"
+                      class="px-3 py-2 bg-orange-400 hover:bg-orange-500 text-white rounded-md text-xs uppercase tracking-wider transition-colors"
+                    >
                       Save
                     </button>
-                    <button type="button" phx-click="cancel_edit_featured" class="px-3 py-2 border border-gray-300 text-gray-600 rounded-md text-xs uppercase tracking-wider hover:bg-gray-50 transition-colors">
+                    <button
+                      type="button"
+                      phx-click="cancel_edit_featured"
+                      class="px-3 py-2 border border-gray-300 text-gray-600 rounded-md text-xs uppercase tracking-wider hover:bg-gray-50 transition-colors"
+                    >
                       Cancel
                     </button>
                   </form>
@@ -110,7 +121,16 @@ defmodule BubbleWeb.SettingsLive do
                       title="Edit feed URL"
                       class="text-gray-500 hover:text-orange-400 transition-colors p-2 rounded-md hover:bg-gray-50"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
                         <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" />
                       </svg>
                     </button>
@@ -120,7 +140,16 @@ defmodule BubbleWeb.SettingsLive do
                       title="Fetch now"
                       class="text-gray-500 hover:text-orange-400 transition-colors p-2 rounded-md hover:bg-gray-50"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
                         <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" />
                       </svg>
                     </button>
@@ -131,7 +160,16 @@ defmodule BubbleWeb.SettingsLive do
                       title="Unsubscribe"
                       class="text-gray-500 hover:text-red-500 transition-colors p-2 rounded-md hover:bg-gray-50"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
                         <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
                       </svg>
                     </button>

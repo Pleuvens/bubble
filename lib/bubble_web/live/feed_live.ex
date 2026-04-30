@@ -91,7 +91,11 @@ defmodule BubbleWeb.FeedLive do
 
                 <%= if item.description not in [nil, ""] do %>
                   <p class="text-sm text-gray-500 leading-relaxed mb-3">
-                    {item.description |> HtmlSanitizeEx.strip_tags() |> String.trim() |> truncate(280) |> linkify()}
+                    {item.description
+                    |> HtmlSanitizeEx.strip_tags()
+                    |> String.trim()
+                    |> truncate(280)
+                    |> linkify()}
                   </p>
                 <% end %>
 
@@ -113,7 +117,10 @@ defmodule BubbleWeb.FeedLive do
               <p class="text-gray-400 text-base mb-2">Nothing here yet</p>
               <p class="text-gray-300 text-sm">
                 Add sources in
-                <.link navigate={~p"/settings"} class="text-orange-400 hover:text-orange-500 underline">
+                <.link
+                  navigate={~p"/settings"}
+                  class="text-orange-400 hover:text-orange-500 underline"
+                >
                   settings
                 </.link>
                 to start reading

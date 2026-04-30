@@ -7,7 +7,8 @@ defmodule Bubble.Repo.Migrations.AddVideoFields do
     end
 
     create constraint(:news_sources, :content_type_must_be_valid,
-             check: "content_type IN ('article', 'video')")
+             check: "content_type IN ('article', 'video')"
+           )
 
     alter table(:news) do
       add :video_id, :text

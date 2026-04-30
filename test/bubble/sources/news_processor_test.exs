@@ -97,7 +97,9 @@ defmodule Bubble.Sources.NewsProcessorTest do
       ]
 
       assert :ok = NewsProcessor.process_and_save_news(items, source)
-      assert Repo.one(News).content == "This is the full article content with enough length to qualify."
+
+      assert Repo.one(News).content ==
+               "This is the full article content with enough length to qualify."
     end
   end
 end
