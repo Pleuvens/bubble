@@ -25,9 +25,9 @@ defmodule Bubble.Sources.NewsProcessor do
         content = fetch_content_with_fallback(news)
 
         published_at =
-          case DateTime.from_iso8601(news.published_at) |> elem(1) do
-            :invalid_format -> DateTime.utc_now() |> DateTime.truncate(:second)
-            dt -> dt
+          case DateTime.from_iso8601(news.published_at) do
+            {:ok, dt, _offset} -> dt
+            {:error, _} -> DateTime.utc_now() |> DateTime.truncate(:second)
           end
 
         news
@@ -69,9 +69,9 @@ defmodule Bubble.Sources.NewsProcessor do
           content = fetch_content_with_fallback(news)
 
           published_at =
-            case DateTime.from_iso8601(news.published_at) |> elem(1) do
-              :invalid_format -> DateTime.utc_now() |> DateTime.truncate(:second)
-              dt -> dt
+            case DateTime.from_iso8601(news.published_at) do
+              {:ok, dt, _offset} -> dt
+              {:error, _} -> DateTime.utc_now() |> DateTime.truncate(:second)
             end
 
           news
