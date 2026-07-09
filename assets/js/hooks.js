@@ -45,4 +45,13 @@ Hooks.FeedNav = {
   }
 };
 
+Hooks.DarkModeToggle = {
+  mounted() {
+    this.el.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('darkMode', String(isDark));
+    });
+  }
+};
+
 export default Hooks;

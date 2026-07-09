@@ -17,64 +17,126 @@ defmodule BubbleWeb.SettingsLive do
 
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gray-50 py-16">
-      <!-- Header -->
-      <div class="fixed top-0 left-0 right-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-        <div class="flex items-center justify-between px-6 py-4">
-          <h1 class="text-sm uppercase tracking-wider text-gray-600">Settings</h1>
-          <.link
-            navigate={~p"/"}
-            class="text-xs uppercase tracking-wider text-gray-600 hover:text-orange-400 transition-colors px-4 py-2 rounded-md hover:bg-gray-100"
-          >
-            <span class="inline-block mr-2">✕</span> Close
-          </.link>
+    <div class="min-h-screen bg-white dark:bg-[#0a0a0c]">
+      <header class="fixed top-0 left-0 right-0 z-10 bg-white/90 dark:bg-[#0a0a0c]/90 backdrop-blur-sm border-b border-gray-200 dark:border-[#26262a]">
+        <div class="max-w-[480px] mx-auto px-4 py-3 flex items-center justify-between">
+          <div class="flex items-center gap-7">
+            <span class="text-[13px] font-bold tracking-[0.14em] uppercase text-gray-900 dark:text-white">
+              Bubble
+            </span>
+            <nav class="flex items-center gap-1">
+              <.link
+                navigate={~p"/"}
+                class="px-3 py-2.5 text-[13px] font-semibold rounded-lg text-gray-500 dark:text-[#71717a] hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                Feed
+              </.link>
+              <.link
+                navigate={~p"/settings"}
+                class="px-3 py-2.5 text-[13px] font-semibold rounded-lg bg-orange-50 dark:bg-orange-400/10 text-gray-900 dark:text-white"
+              >
+                Settings
+              </.link>
+            </nav>
+          </div>
+          <div class="flex items-center gap-2.5">
+            <button
+              id="dark-mode-toggle"
+              phx-hook="DarkModeToggle"
+              title="Toggle dark mode"
+              class="w-[38px] h-[38px] flex items-center justify-center rounded-full border border-gray-200 dark:border-[#26262a] text-gray-500 dark:text-[#a1a1aa] hover:text-gray-900 dark:hover:text-white transition-colors"
+            >
+              <svg
+                class="dark:hidden w-[15px] h-[15px]"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+              </svg>
+              <svg
+                class="hidden dark:block w-[15px] h-[15px]"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+            </button>
+            <.link
+              href={~p"/users/log_out"}
+              method="delete"
+              class="text-[13px] text-gray-500 dark:text-[#a1a1aa] hover:text-gray-900 dark:hover:text-white transition-colors"
+            >
+              Log out
+            </.link>
+          </div>
         </div>
-      </div>
+      </header>
 
-      <div class="max-w-4xl mx-auto px-8">
-        <!-- Featured Sources Section -->
-        <div class="mb-12">
-          <h2 class="text-3xl md:text-4xl text-orange-400 tracking-wide uppercase font-light text-center mb-2 mt-8">
-            Discover
-          </h2>
-          <p class="text-center text-xs text-gray-500 uppercase tracking-widest mb-8">
-            Curated sources — subscribe with one click
-          </p>
-          <div class="max-w-2xl mx-auto space-y-4">
+      <div class="max-w-[480px] mx-auto px-4 pt-[72px] pb-20">
+        <!-- Discover section -->
+        <section class="mb-10">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]">
+              Discover
+            </span>
+            <span class="text-[12px] text-gray-400 dark:text-[#52525b]">
+              Curated sources, one click to subscribe
+            </span>
+          </div>
+
+          <div class="flex flex-col gap-3.5">
             <%= for source <- @featured_sources do %>
               <% sub = Map.get(@featured_subscriptions, source.name) %>
-              <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+              <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
                 <div class="flex items-start justify-between gap-4">
                   <div class="flex-1">
                     <div class="flex items-center gap-2 mb-1">
-                      <h3 class="text-orange-400 uppercase tracking-wide">{source.name}</h3>
+                      <span class="text-[14.5px] font-semibold text-gray-900 dark:text-white">
+                        {source.name}
+                      </span>
                       <%= if source.content_type == :video do %>
-                        <span class="text-xs uppercase tracking-wider bg-orange-100 text-orange-500 px-2 py-0.5 rounded">
+                        <span class="text-[11px] font-semibold uppercase tracking-wide bg-orange-50 dark:bg-orange-400/[0.14] text-orange-500 dark:text-orange-300 px-1.5 py-0.5 rounded-full">
                           Video
                         </span>
                       <% end %>
                     </div>
-                    <p class="text-sm text-gray-600">{source.description}</p>
+                    <p class="text-[13.5px] text-gray-500 dark:text-[#a1a1aa] leading-relaxed">
+                      {source.description}
+                    </p>
                   </div>
                   <%= if sub do %>
                     <% {db_source, user_source} = sub %>
                     <button
                       phx-click="toggle_active"
                       phx-value-id={db_source.id}
-                      class={
-                        "shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 #{if user_source.is_active, do: "bg-orange-400", else: "bg-gray-200"}"
-                      }
+                      class={[
+                        "shrink-0 relative inline-flex items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2",
+                        "w-[46px] h-[27px]",
+                        if(user_source.is_active,
+                          do: "bg-orange-400",
+                          else: "bg-gray-200 dark:bg-[#3f3f46]"
+                        )
+                      ]}
                     >
-                      <span class={
-                        "inline-block h-4 w-4 transform rounded-full bg-white transition-transform #{if user_source.is_active, do: "translate-x-6", else: "translate-x-1"}"
-                      }>
+                      <span class={[
+                        "inline-block w-[21px] h-[21px] transform rounded-full bg-white transition-transform",
+                        if(user_source.is_active, do: "translate-x-[22px]", else: "translate-x-[3px]")
+                      ]}>
                       </span>
                     </button>
                   <% else %>
                     <button
                       phx-click="subscribe_featured"
                       phx-value-url={source.url}
-                      class="shrink-0 border border-orange-400 text-orange-400 hover:bg-orange-400 hover:text-white uppercase tracking-wider px-4 py-2 rounded-md transition-all text-xs"
+                      class="shrink-0 border border-orange-400 text-orange-400 hover:bg-orange-400 hover:text-white uppercase tracking-wider px-3 py-1.5 rounded-lg transition-all text-[12px] font-semibold"
                     >
                       Subscribe
                     </button>
@@ -94,18 +156,18 @@ defmodule BubbleWeb.SettingsLive do
                       value={db_user_source.custom_url || db_source.url}
                       placeholder="https://www.youtube.com/feeds/videos.xml?..."
                       required
-                      class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none"
+                      class="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white"
                     />
                     <button
                       type="submit"
-                      class="px-3 py-2 bg-orange-400 hover:bg-orange-500 text-white rounded-md text-xs uppercase tracking-wider transition-colors"
+                      class="px-3 py-2 bg-orange-400 hover:bg-orange-500 text-white rounded-lg text-xs uppercase tracking-wider transition-colors"
                     >
                       Save
                     </button>
                     <button
                       type="button"
                       phx-click="cancel_edit_featured"
-                      class="px-3 py-2 border border-gray-300 text-gray-600 rounded-md text-xs uppercase tracking-wider hover:bg-gray-50 transition-colors"
+                      class="px-3 py-2 border border-gray-200 dark:border-[#26262a] text-gray-600 dark:text-[#a1a1aa] rounded-lg text-xs uppercase tracking-wider hover:bg-gray-50 dark:hover:bg-[#1f1f22] transition-colors"
                     >
                       Cancel
                     </button>
@@ -114,12 +176,12 @@ defmodule BubbleWeb.SettingsLive do
                 <%!-- Controls row (only when subscribed and not editing) --%>
                 <%= if sub && elem(sub, 0).id != @editing_featured_id do %>
                   <% {db_source, _} = sub %>
-                  <div class="flex items-center justify-end gap-1 pt-3 mt-3 border-t border-gray-100">
+                  <div class="flex items-center justify-end gap-1 pt-3 mt-3 border-t border-gray-100 dark:border-[#1f1f22]">
                     <button
                       phx-click="edit_featured"
                       phx-value-id={db_source.id}
                       title="Edit feed URL"
-                      class="text-gray-500 hover:text-orange-400 transition-colors p-2 rounded-md hover:bg-gray-50"
+                      class="w-11 h-11 flex items-center justify-center text-gray-500 dark:text-[#71717a] hover:text-orange-400 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-[#1f1f22]"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -138,7 +200,7 @@ defmodule BubbleWeb.SettingsLive do
                       phx-click="fetch_source"
                       phx-value-id={db_source.id}
                       title="Fetch now"
-                      class="text-gray-500 hover:text-orange-400 transition-colors p-2 rounded-md hover:bg-gray-50"
+                      class="w-11 h-11 flex items-center justify-center text-gray-500 dark:text-[#71717a] hover:text-orange-400 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-[#1f1f22]"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -158,7 +220,7 @@ defmodule BubbleWeb.SettingsLive do
                       phx-value-id={db_source.id}
                       data-confirm={"Unsubscribe from #{source.name}?"}
                       title="Unsubscribe"
-                      class="text-gray-500 hover:text-red-500 transition-colors p-2 rounded-md hover:bg-gray-50"
+                      class="w-11 h-11 flex items-center justify-center text-gray-500 dark:text-[#71717a] hover:text-red-500 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-[#1f1f22]"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -178,168 +240,31 @@ defmodule BubbleWeb.SettingsLive do
               </div>
             <% end %>
           </div>
-        </div>
-        <!-- RSS Sources Section -->
-        <div>
-          <!-- Section title -->
-          <h2 class="text-3xl md:text-4xl text-orange-400 tracking-wide uppercase font-light text-center mb-8 mt-8">
-            RSS Sources
-          </h2>
-          <!-- Add new source button -->
-          <div class="text-center mb-8">
+        </section>
+
+        <!-- RSS Sources section -->
+        <section>
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]">
+              Your Sources
+            </span>
             <button
               phx-click="show_add_form"
-              class="border border-orange-400 text-orange-400 hover:bg-orange-400 hover:text-white uppercase tracking-wider px-4 py-2 rounded-md transition-all"
+              class="text-[12px] font-semibold text-orange-400 hover:text-orange-500 transition-colors"
             >
-              <span class="inline-block mr-2">+</span> Add RSS Source
+              + Add source
             </button>
           </div>
-          <!-- Step 1: URL Input -->
-          <%= if @modal_step == :url_input do %>
-            <div class="max-w-md mx-auto mb-8 p-6 bg-white rounded-lg border border-gray-200 shadow-sm">
-              <h3 class="text-sm uppercase tracking-wider text-gray-600 mb-4 text-center">
-                Enter RSS URL
-              </h3>
-              <form phx-submit="check_url" class="space-y-4">
-                <div class="space-y-2">
-                  <label for="url" class="text-xs uppercase tracking-wider text-gray-600">
-                    RSS URL
-                  </label>
-                  <input
-                    type="url"
-                    id="url"
-                    name="url"
-                    value={@url_input}
-                    placeholder="https://example.com/rss"
-                    required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
-                  />
-                </div>
-                <div class="flex gap-2">
-                  <button
-                    type="submit"
-                    class="flex-1 bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
-                  >
-                    Next
-                  </button>
-                  <button
-                    type="button"
-                    phx-click="cancel_add"
-                    class="flex-1 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          <% end %>
-          <!-- Step 2a: Confirm Existing Source -->
-          <%= if @modal_step == :confirm_existing do %>
-            <div class="max-w-md mx-auto mb-8 p-6 bg-white rounded-lg border border-gray-200 shadow-sm">
-              <h3 class="text-sm uppercase tracking-wider text-gray-600 mb-4 text-center">
-                Subscribe to Existing Source
-              </h3>
-              <div class="space-y-4">
-                <div class="bg-gray-50 p-4 rounded-md">
-                  <h4 class="text-orange-400 uppercase tracking-wide mb-2">
-                    {@found_source.name}
-                  </h4>
-                  <p class="text-xs text-gray-600 mb-2 break-all">{@found_source.url}</p>
-                  <p class="text-sm text-gray-700">
-                    {@found_source.description || "No description"}
-                  </p>
-                </div>
-                <p class="text-xs text-gray-600 text-center">
-                  This RSS source already exists. Would you like to subscribe to it?
-                </p>
-                <div class="flex gap-2">
-                  <button
-                    type="button"
-                    phx-click="confirm_existing_source"
-                    class="flex-1 bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
-                  >
-                    Subscribe
-                  </button>
-                  <button
-                    type="button"
-                    phx-click="cancel_add"
-                    class="flex-1 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          <% end %>
-          <!-- Step 2b: New Source Form -->
-          <%= if @modal_step == :new_source_form do %>
-            <div class="max-w-md mx-auto mb-8 p-6 bg-white rounded-lg border border-gray-200 shadow-sm">
-              <h3 class="text-sm uppercase tracking-wider text-gray-600 mb-4 text-center">
-                Add New Source
-              </h3>
-              <form phx-submit="add_new_source" class="space-y-4">
-                <div class="space-y-2">
-                  <label class="text-xs uppercase tracking-wider text-gray-600">RSS URL</label>
-                  <input type="hidden" name="url" value={@new_source.url} />
-                  <p class="text-sm text-gray-700 bg-gray-50 px-3 py-2 rounded-md break-all">
-                    {@new_source.url}
-                  </p>
-                </div>
-                <div class="space-y-2">
-                  <label for="name" class="text-xs uppercase tracking-wider text-gray-600">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={@new_source.name}
-                    placeholder="e.g. Tech News"
-                    required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label for="description" class="text-xs uppercase tracking-wider text-gray-600">
-                    Description
-                  </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    placeholder="Brief description of this source"
-                    rows="2"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none resize-none transition"
-                  ><%= @new_source.description %></textarea>
-                </div>
-                <div class="flex gap-2">
-                  <button
-                    type="submit"
-                    class="flex-1 bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
-                  >
-                    Add Source
-                  </button>
-                  <button
-                    type="button"
-                    phx-click="cancel_add"
-                    class="flex-1 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          <% end %>
-          <!-- RSS sources list -->
-          <div class="max-w-2xl mx-auto space-y-4">
+
+          <div class="flex flex-col gap-3.5">
             <%= for {source, user_source} <- @sources do %>
-              <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
                 <%= if @editing_source_id == source.id do %>
-                  <!-- Edit mode -->
-                  <form phx-submit="save_source" phx-value-id={source.id} class="space-y-4">
-                    <div class="space-y-2">
+                  <form phx-submit="save_source" phx-value-id={source.id} class="space-y-3">
+                    <div class="space-y-1.5">
                       <label
                         for={"edit_name_#{source.id}"}
-                        class="text-xs uppercase tracking-wider text-gray-600"
+                        class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
                       >
                         Name
                       </label>
@@ -349,13 +274,13 @@ defmodule BubbleWeb.SettingsLive do
                         name="name"
                         value={@edit_form.name}
                         required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
+                        class="w-full px-3 py-2 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white text-sm transition"
                       />
                     </div>
-                    <div class="space-y-2">
+                    <div class="space-y-1.5">
                       <label
                         for={"edit_url_#{source.id}"}
-                        class="text-xs uppercase tracking-wider text-gray-600"
+                        class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
                       >
                         RSS URL
                       </label>
@@ -365,13 +290,13 @@ defmodule BubbleWeb.SettingsLive do
                         name="url"
                         value={@edit_form.url}
                         required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
+                        class="w-full px-3 py-2 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white text-sm transition"
                       />
                     </div>
-                    <div class="space-y-2">
+                    <div class="space-y-1.5">
                       <label
                         for={"edit_description_#{source.id}"}
-                        class="text-xs uppercase tracking-wider text-gray-600"
+                        class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
                       >
                         Description
                       </label>
@@ -379,59 +304,68 @@ defmodule BubbleWeb.SettingsLive do
                         id={"edit_description_#{source.id}"}
                         name="description"
                         rows="2"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none resize-none transition"
+                        class="w-full px-3 py-2 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none resize-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white text-sm transition"
                       ><%= @edit_form.description %></textarea>
                     </div>
                     <div class="flex gap-2">
                       <button
                         type="submit"
-                        class="flex-1 bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
+                        class="flex-1 bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-lg text-[13px] font-semibold uppercase tracking-wide transition-colors"
                       >
                         Save
                       </button>
                       <button
                         type="button"
                         phx-click="cancel_edit"
-                        class="flex-1 border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
+                        class="flex-1 border border-gray-200 dark:border-[#26262a] text-gray-700 dark:text-[#a1a1aa] hover:bg-gray-50 dark:hover:bg-[#1f1f22] px-4 py-2 rounded-lg text-[13px] font-semibold uppercase tracking-wide transition-colors"
                       >
                         Cancel
                       </button>
                     </div>
                   </form>
                 <% else %>
-                  <!-- Display mode -->
                   <div>
-                    <div class="flex items-start justify-between mb-2">
-                      <div class="flex-1">
-                        <h3 class="text-orange-400 uppercase tracking-wide mb-1">{source.name}</h3>
-                        <p class="text-xs text-gray-600 mb-2 break-all">{source.url}</p>
-                        <p class="text-sm text-gray-700">{source.description || "No description"}</p>
+                    <div class="flex items-start justify-between gap-4 mb-3">
+                      <div class="flex-1 min-w-0">
+                        <span class="text-[14.5px] font-semibold text-gray-900 dark:text-white">
+                          {source.name}
+                        </span>
+                        <p class="text-[12px] text-gray-400 dark:text-[#52525b] mt-0.5 break-all">
+                          {source.url}
+                        </p>
+                        <p class="text-[13.5px] text-gray-500 dark:text-[#a1a1aa] leading-relaxed mt-1">
+                          {source.description || "No description"}
+                        </p>
                       </div>
-                      <div class="flex items-center gap-2 ml-4">
-                        <button
-                          phx-click="toggle_active"
-                          phx-value-id={source.id}
-                          class={
-                            "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 #{if user_source.is_active, do: "bg-orange-400", else: "bg-gray-200"}"
-                          }
-                        >
-                          <span class={
-                            "inline-block h-4 w-4 transform rounded-full bg-white transition-transform #{if user_source.is_active, do: "translate-x-6", else: "translate-x-1"}"
-                          }>
-                          </span>
-                        </button>
-                      </div>
+                      <button
+                        phx-click="toggle_active"
+                        phx-value-id={source.id}
+                        class={[
+                          "shrink-0 relative inline-flex items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2",
+                          "w-[46px] h-[27px]",
+                          if(user_source.is_active,
+                            do: "bg-orange-400",
+                            else: "bg-gray-200 dark:bg-[#3f3f46]"
+                          )
+                        ]}
+                      >
+                        <span class={[
+                          "inline-block w-[21px] h-[21px] transform rounded-full bg-white transition-transform",
+                          if(user_source.is_active, do: "translate-x-[22px]", else: "translate-x-[3px]")
+                        ]}>
+                        </span>
+                      </button>
                     </div>
-                    <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                      <p class="text-xs text-gray-500 uppercase tracking-wider">
+                    <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-[#1f1f22]">
+                      <p class="text-[12px] text-gray-400 dark:text-[#52525b]">
                         Subscribed {Calendar.strftime(user_source.inserted_at, "%b %d, %Y")}
                       </p>
-                      <div class="flex gap-2">
+                      <div class="flex gap-1">
                         <button
                           phx-click="edit_source"
                           phx-value-id={source.id}
                           title="Edit source"
-                          class="text-gray-600 hover:text-orange-400 transition-colors p-2 rounded-md hover:bg-gray-50"
+                          class="w-11 h-11 flex items-center justify-center text-gray-500 dark:text-[#71717a] hover:text-orange-400 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-[#1f1f22]"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -450,7 +384,7 @@ defmodule BubbleWeb.SettingsLive do
                           phx-click="fetch_source"
                           phx-value-id={source.id}
                           title="Fetch now"
-                          class="text-gray-600 hover:text-orange-400 transition-colors p-2 rounded-md hover:bg-gray-50"
+                          class="w-11 h-11 flex items-center justify-center text-gray-500 dark:text-[#71717a] hover:text-orange-400 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-[#1f1f22]"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -471,7 +405,7 @@ defmodule BubbleWeb.SettingsLive do
                           phx-value-id={source.id}
                           data-confirm="Are you sure you want to unsubscribe from this RSS source?"
                           title="Unsubscribe"
-                          class="text-gray-600 hover:text-red-500 transition-colors p-2 rounded-md hover:bg-gray-50"
+                          class="w-11 h-11 flex items-center justify-center text-gray-500 dark:text-[#71717a] hover:text-red-500 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-[#1f1f22]"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -493,8 +427,160 @@ defmodule BubbleWeb.SettingsLive do
               </div>
             <% end %>
           </div>
-        </div>
+        </section>
       </div>
+
+      <!-- Add Source Modal -->
+      <%= if @modal_step != nil do %>
+        <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div
+            class="absolute inset-0 bg-black/40"
+            phx-click="cancel_add"
+          />
+          <div class="relative w-full max-w-[380px] bg-white dark:bg-[#141416] rounded-2xl p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-5">
+              <span class="text-[14.5px] font-semibold text-gray-900 dark:text-white">
+                <%= case @modal_step do %>
+                  <% :url_input -> %>
+                    Add RSS source
+                  <% :confirm_existing -> %>
+                    Subscribe to source
+                  <% :new_source_form -> %>
+                    Add new source
+                <% end %>
+              </span>
+              <button
+                phx-click="cancel_add"
+                class="w-11 h-11 flex items-center justify-center text-gray-400 dark:text-[#71717a] hover:text-gray-900 dark:hover:text-white transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-[#1f1f22]"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <%= if @modal_step == :url_input do %>
+              <form phx-submit="check_url" class="space-y-4">
+                <div class="space-y-1.5">
+                  <label for="modal_url" class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]">
+                    RSS URL
+                  </label>
+                  <input
+                    type="url"
+                    id="modal_url"
+                    name="url"
+                    value={@url_input}
+                    placeholder="https://example.com/rss"
+                    required
+                    class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white text-sm transition"
+                  />
+                </div>
+                <div class="flex gap-2 mt-2">
+                  <button
+                    type="submit"
+                    class="flex-1 bg-orange-400 hover:bg-orange-500 text-white px-4 py-2.5 rounded-lg text-[13px] font-bold uppercase tracking-wide transition-colors"
+                  >
+                    Next
+                  </button>
+                  <button
+                    type="button"
+                    phx-click="cancel_add"
+                    class="flex-1 border border-gray-200 dark:border-[#26262a] text-gray-700 dark:text-[#a1a1aa] hover:bg-gray-50 dark:hover:bg-[#1f1f22] px-4 py-2.5 rounded-lg text-[13px] font-bold uppercase tracking-wide transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            <% end %>
+
+            <%= if @modal_step == :confirm_existing do %>
+              <div class="space-y-4">
+                <div class="bg-gray-50 dark:bg-[#1f1f22] p-4 rounded-lg">
+                  <h4 class="text-[14.5px] font-semibold text-gray-900 dark:text-white mb-1">
+                    {@found_source.name}
+                  </h4>
+                  <p class="text-[12px] text-gray-400 dark:text-[#52525b] mb-1 break-all">
+                    {@found_source.url}
+                  </p>
+                  <p class="text-[13.5px] text-gray-500 dark:text-[#a1a1aa]">
+                    {@found_source.description || "No description"}
+                  </p>
+                </div>
+                <p class="text-[13px] text-gray-500 dark:text-[#a1a1aa] text-center">
+                  This source already exists. Subscribe to it?
+                </p>
+                <div class="flex gap-2">
+                  <button
+                    type="button"
+                    phx-click="confirm_existing_source"
+                    class="flex-1 bg-orange-400 hover:bg-orange-500 text-white px-4 py-2.5 rounded-lg text-[13px] font-bold uppercase tracking-wide transition-colors"
+                  >
+                    Subscribe
+                  </button>
+                  <button
+                    type="button"
+                    phx-click="cancel_add"
+                    class="flex-1 border border-gray-200 dark:border-[#26262a] text-gray-700 dark:text-[#a1a1aa] hover:bg-gray-50 dark:hover:bg-[#1f1f22] px-4 py-2.5 rounded-lg text-[13px] font-bold uppercase tracking-wide transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            <% end %>
+
+            <%= if @modal_step == :new_source_form do %>
+              <form phx-submit="add_new_source" class="space-y-4">
+                <div class="space-y-1.5">
+                  <label class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]">
+                    RSS URL
+                  </label>
+                  <input type="hidden" name="url" value={@new_source.url} />
+                  <p class="text-[13px] text-gray-500 dark:text-[#a1a1aa] bg-gray-50 dark:bg-[#1f1f22] px-3 py-2 rounded-lg break-all">
+                    {@new_source.url}
+                  </p>
+                </div>
+                <div class="space-y-1.5">
+                  <label for="modal_name" class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    id="modal_name"
+                    name="name"
+                    value={@new_source.name}
+                    placeholder="e.g. Tech News"
+                    required
+                    class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white text-sm transition"
+                  />
+                </div>
+                <div class="flex gap-2 mt-2">
+                  <button
+                    type="submit"
+                    class="flex-1 bg-orange-400 hover:bg-orange-500 text-white px-4 py-2.5 rounded-lg text-[13px] font-bold uppercase tracking-wide transition-colors"
+                  >
+                    Add source
+                  </button>
+                  <button
+                    type="button"
+                    phx-click="cancel_add"
+                    class="flex-1 border border-gray-200 dark:border-[#26262a] text-gray-700 dark:text-[#a1a1aa] hover:bg-gray-50 dark:hover:bg-[#1f1f22] px-4 py-2.5 rounded-lg text-[13px] font-bold uppercase tracking-wide transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
     </div>
     """
   end
@@ -581,7 +667,6 @@ defmodule BubbleWeb.SettingsLive do
   def handle_event("check_url", %{"url" => url}, socket) do
     case NewsSources.get_source_by_url(url) do
       nil ->
-        # URL doesn't exist, show new source form
         {:noreply,
          socket
          |> assign(:modal_step, :new_source_form)
@@ -590,7 +675,6 @@ defmodule BubbleWeb.SettingsLive do
          |> assign(:new_source, %{name: "", url: url, description: ""})}
 
       source ->
-        # URL exists, show confirmation
         user_id = socket.assigns.current_user.id
 
         if NewsSources.user_subscribed?(user_id, source.id) do
@@ -752,7 +836,6 @@ defmodule BubbleWeb.SettingsLive do
 
     {featured_user_sources, regular_sources} = Enum.split_with(all_sources, is_featured_source?)
 
-    # name => {source, user_source} — used to render controls on Discover cards
     featured_subscriptions =
       featured_user_sources
       |> Enum.map(fn {s, us} -> {s.name, {s, us}} end)
