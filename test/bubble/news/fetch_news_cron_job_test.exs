@@ -255,6 +255,42 @@ defmodule Bubble.News.FetchNewsCronJobTest do
     end
   end
 
+    test "one failing source does not block other sources from being processed" do
+      Enum.map(1..3, fn i ->
+        insert_news_source(%{
+          name: "Source #{i}",
+          url: "https://multi#{i}.example.com/rss",
+          last_fetched_at: nil
+        })
+      end)
+
+      Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
+        case conn.host do
+          "multi1.example.com" ->
+            Req.Test.text(conn, mock_rss_feed("https://example.com/news/multi1"))
+
+          "multi2.example.com" ->
+            Plug.Conn.send_resp(conn, 500, "Server Error")
+
+          "multi3.example.com" ->
+            Req.Test.text(conn, mock_rss_feed("https://example.com/news/multi3"))
+        end
+      end)
+
+      Req.Test.stub(Bubble.Sources.HttpClient, fn conn ->
+        Req.Test.html(
+          conn,
+          "<html><head><meta name=\"description\" content=\"Test description\"></head></html>"
+        )
+      end)
+
+      job = %Oban.Job{args: %{}}
+      assert :ok = FetchNewsCronJob.perform(job)
+
+      # Two sources succeeded, one failed — we should have 2 news items, not 0
+      assert Repo.aggregate(News, :count) == 2
+    end
+
   defp insert_news_source(attrs) do
     %NewsSource{}
     |> NewsSource.changeset(attrs)

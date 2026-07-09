@@ -53,7 +53,18 @@ defmodule Bubble.News.FetchNewsCronJob do
     |> Enum.each(fn
       {url, {:ok, news_items}} ->
         source = Map.get(url_to_source, url)
-        if source, do: NewsProcessor.process_and_save_news(news_items, source)
+
+        if source do
+          try do
+            NewsProcessor.process_and_save_news(news_items, source)
+          rescue
+            e ->
+              Logger.error("Failed to process news for #{url}: #{Exception.message(e)}")
+          catch
+            :exit, reason ->
+              Logger.error("Unexpected exit processing news for #{url}: #{inspect(reason)}")
+          end
+        end
 
       {url, {:error, reason}} ->
         Logger.error("Failed to fetch RSS feed for #{url}: #{inspect(reason)}")

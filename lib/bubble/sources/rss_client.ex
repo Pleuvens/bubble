@@ -39,7 +39,11 @@ defmodule Bubble.Sources.RSSClient do
   """
   def fetch_feeds(urls) when is_list(urls) do
     urls
-    |> Task.async_stream(&{&1, fetch_feed(&1)}, timeout: 10_000, max_concurrency: 5)
+    |> Task.async_stream(&{&1, fetch_feed(&1)},
+      timeout: 10_000,
+      max_concurrency: 5,
+      on_timeout: :kill_task
+    )
     |> Enum.map(fn
       {:ok, result} ->
         result
