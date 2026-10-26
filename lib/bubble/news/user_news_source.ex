@@ -5,6 +5,7 @@ defmodule Bubble.News.UserNewsSource do
 
   alias Bubble.Accounts.User
   alias Bubble.News.NewsSource
+  alias Utils.FeedUrl
 
   schema "users_news_sources" do
     belongs_to :user, User, type: :binary_id
@@ -19,6 +20,14 @@ defmodule Bubble.News.UserNewsSource do
     user_news_source
     |> cast(attrs, [:user_id, :news_source_id, :is_active, :custom_url])
     |> validate_required([:user_id, :news_source_id])
+    |> validate_custom_url()
     |> unique_constraint([:user_id, :news_source_id])
+  end
+
+  defp validate_custom_url(changeset) do
+    case get_field(changeset, :custom_url) do
+      blank when blank in [nil, ""] -> changeset
+      _url -> FeedUrl.validate_fetchable(changeset, :custom_url)
+    end
   end
 end
