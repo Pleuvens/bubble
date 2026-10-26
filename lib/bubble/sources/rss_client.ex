@@ -6,10 +6,9 @@ defmodule Bubble.Sources.RSSClient do
   """
 
   alias Bubble.Sources.RSSValidator
+  alias Utils.FeedUrl
 
   require Logger
-
-  @fetchable_schemes ["http", "https"]
 
   @doc """
   Fetches and parses an RSS feed from the given URL.
@@ -62,16 +61,7 @@ defmodule Bubble.Sources.RSSClient do
     Keyword.merge([url: url], Application.get_env(:bubble, :rss_client_req_options, []))
   end
 
-  defp ensure_fetchable_url(url) when is_binary(url) do
-    case URI.parse(url) do
-      %URI{scheme: scheme, host: host}
-      when scheme in @fetchable_schemes and is_binary(host) and host != "" ->
-        :ok
-
-      _ ->
-        {:error, :malformed_url}
-    end
+  defp ensure_fetchable_url(url) do
+    if FeedUrl.fetchable?(url), do: :ok, else: {:error, :malformed_url}
   end
-
-  defp ensure_fetchable_url(_url), do: {:error, :malformed_url}
 end
