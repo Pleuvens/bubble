@@ -9,17 +9,21 @@ defmodule Bubble.Sources.RSSClient do
 
   require Logger
 
+  @fetchable_schemes ["http", "https"]
+
   @doc """
   Fetches and parses an RSS feed from the given URL.
   """
   def fetch_feed(url) do
-    get_params =
-      Keyword.merge([url: url], Application.get_env(:bubble, :rss_client_req_options, []))
-
-    with {:ok, %{status: 200, body: body}} <- Req.get(get_params),
+    with :ok <- ensure_fetchable_url(url),
+         {:ok, %{status: 200, body: body}} <- Req.get(request_options(url)),
          {:ok, parsed_feed} <- RSSValidator.parse_and_validate(body) do
       {:ok, parsed_feed}
     else
+      {:error, :malformed_url} ->
+        Logger.warning("Skipping RSS feed with malformed URL: #{inspect(url)}")
+        {:error, :malformed_url}
+
       {:ok, %{status: status}} ->
         Logger.warning("Failed to fetch RSS feed: HTTP status #{status} for URL #{url}")
         {:error, :invalid_http_request}
@@ -53,4 +57,21 @@ defmodule Bubble.Sources.RSSClient do
         {nil, {:error, :task_timeout}}
     end)
   end
+
+  defp request_options(url) do
+    Keyword.merge([url: url], Application.get_env(:bubble, :rss_client_req_options, []))
+  end
+
+  defp ensure_fetchable_url(url) when is_binary(url) do
+    case URI.parse(url) do
+      %URI{scheme: scheme, host: host}
+      when scheme in @fetchable_schemes and is_binary(host) and host != "" ->
+        :ok
+
+      _ ->
+        {:error, :malformed_url}
+    end
+  end
+
+  defp ensure_fetchable_url(_url), do: {:error, :malformed_url}
 end
