@@ -7,12 +7,12 @@
 # This file is based on these images:
 #
 #   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
-#   - https://hub.docker.com/_/debian?tab=tags&page=1&name=bullseye-20231009-slim - for the release image
+#   - https://hub.docker.com/_/debian?tab=tags&page=1&name=trixie-slim - for the release image
 #   - https://pkgs.org/ - resource for finding needed packages
-#   - Ex: hexpm/elixir:1.18.0-erlang-27.2-debian-bullseye-20250106-slim
+#   - Ex: hexpm/elixir:1.18-erlang-27.3.4.5-debian-trixie-20260610-slim
 #
-ARG BUILDER_IMAGE="hexpm/elixir:1.18-erlang-27.3.4.5-debian-bullseye-20251103-slim"
-ARG RUNNER_IMAGE="debian:bullseye-slim"
+ARG BUILDER_IMAGE="hexpm/elixir:1.18-erlang-27.3.4.5-debian-trixie-20260610-slim"
+ARG RUNNER_IMAGE="debian:trixie-slim"
 
 FROM ${BUILDER_IMAGE} as builder
 
@@ -72,7 +72,7 @@ RUN mix release
 FROM ${RUNNER_IMAGE}
 
 RUN apt-get update -y && \
-  apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates \
+  apt-get install -y libstdc++6 openssl libncurses6 locales ca-certificates \
   && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # Set the locale
