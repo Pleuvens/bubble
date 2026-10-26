@@ -40,3 +40,5 @@ npm-debug.log
 
 # Ignore environment files.
 dev.local.secrets.exs
+
+redesign_handoff.zip

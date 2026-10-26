@@ -6,6 +6,7 @@ defmodule Bubble.Sources.RSSClient do
   """
 
   alias Bubble.Sources.RSSValidator
+  alias Utils.FeedUrl
 
   require Logger
 
@@ -13,13 +14,15 @@ defmodule Bubble.Sources.RSSClient do
   Fetches and parses an RSS feed from the given URL.
   """
   def fetch_feed(url) do
-    get_params =
-      Keyword.merge([url: url], Application.get_env(:bubble, :rss_client_req_options, []))
-
-    with {:ok, %{status: 200, body: body}} <- Req.get(get_params),
+    with :ok <- ensure_fetchable_url(url),
+         {:ok, %{status: 200, body: body}} <- Req.get(request_options(url)),
          {:ok, parsed_feed} <- RSSValidator.parse_and_validate(body) do
       {:ok, parsed_feed}
     else
+      {:error, :malformed_url} ->
+        Logger.warning("Skipping RSS feed with malformed URL: #{inspect(url)}")
+        {:error, :malformed_url}
+
       {:ok, %{status: status}} ->
         Logger.warning("Failed to fetch RSS feed: HTTP status #{status} for URL #{url}")
         {:error, :invalid_http_request}
@@ -52,5 +55,13 @@ defmodule Bubble.Sources.RSSClient do
         Logger.warning("RSS feed fetch task exited: #{inspect(reason)}")
         {nil, {:error, :task_timeout}}
     end)
+  end
+
+  defp request_options(url) do
+    Keyword.merge([url: url], Application.get_env(:bubble, :rss_client_req_options, []))
+  end
+
+  defp ensure_fetchable_url(url) do
+    if FeedUrl.fetchable?(url), do: :ok, else: {:error, :malformed_url}
   end
 end

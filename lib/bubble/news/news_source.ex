@@ -6,6 +6,7 @@ defmodule Bubble.News.NewsSource do
   alias Bubble.Accounts.User
   alias Bubble.News.News
   alias Bubble.News.UserNewsSource
+  alias Utils.FeedUrl
 
   schema "news_sources" do
     field :name, :string
@@ -25,6 +26,7 @@ defmodule Bubble.News.NewsSource do
     news_source
     |> cast(attrs, [:name, :url, :description, :last_fetched_at, :content_type, :is_featured])
     |> validate_required([:name, :url, :content_type])
+    |> FeedUrl.validate_fetchable(:url)
     |> unique_constraint(:url)
   end
 end

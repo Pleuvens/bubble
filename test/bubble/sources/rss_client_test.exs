@@ -24,6 +24,12 @@ defmodule Bubble.Sources.RSSClientTest do
                Bubble.Sources.RSSClient.fetch_feed(url)
     end
 
+    test "returns error for a URL with no host" do
+      assert {:error, :malformed_url} = Bubble.Sources.RSSClient.fetch_feed("https:\\\\bsky.app")
+      assert {:error, :malformed_url} = Bubble.Sources.RSSClient.fetch_feed("bsky.app")
+      assert {:error, :malformed_url} = Bubble.Sources.RSSClient.fetch_feed(nil)
+    end
+
     test "returns error when call fails" do
       url = "https://www.reddit.com/r/elixir/.rss"
 
