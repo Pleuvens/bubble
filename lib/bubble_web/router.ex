@@ -21,7 +21,6 @@ defmodule BubbleWeb.Router do
     pipe_through :browser
 
     live "/", FeedLive, :index
-    live "/settings", SettingsLive, :index
   end
 
   # Other scopes may use custom stacks.
@@ -67,6 +66,7 @@ defmodule BubbleWeb.Router do
 
     live_session :require_authenticated_user,
       on_mount: [{BubbleWeb.UserAuth, :ensure_authenticated}] do
+      live "/settings", SettingsLive, :index
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
     end

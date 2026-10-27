@@ -1,8 +1,6 @@
 defmodule BubbleWeb.SettingsLive do
   use BubbleWeb, :live_view
 
-  on_mount {BubbleWeb.UserAuth, :mount_current_user}
-
   alias Bubble.News.FetchSingleSourceJob
   alias Bubble.NewsSources
 
