@@ -325,13 +325,13 @@ defmodule BubbleWeb.SettingsLive do
                     <div class="flex items-start justify-between gap-4 mb-3">
                       <div class="flex-1 min-w-0">
                         <span class="text-[14.5px] font-semibold text-gray-900 dark:text-white">
-                          {source.name}
+                          {SourceOverride.name(source, user_source)}
                         </span>
                         <p class="text-[12px] text-gray-400 dark:text-[#52525b] mt-0.5 break-all">
-                          {source.url}
+                          {SourceOverride.url(source, user_source)}
                         </p>
                         <p class="text-[13.5px] text-gray-500 dark:text-[#a1a1aa] leading-relaxed mt-1">
-                          {source.description || "No description"}
+                          {SourceOverride.description(source, user_source) || "No description"}
                         </p>
                       </div>
                       <button

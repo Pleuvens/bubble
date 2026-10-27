@@ -227,4 +227,58 @@ defmodule Bubble.NewsTest do
       assert hd(news).id == feed.id
     end
   end
+
+  describe "list_user_news/1 source overrides" do
+    setup do
+      user = user_fixture()
+      other_user = user_fixture()
+      source = feed_source_fixture(name: "Shared Name", description: "Shared description")
+
+      {:ok, _} = NewsSources.add_user_source(user.id, source.id)
+      {:ok, _} = NewsSources.add_user_source(other_user.id, source.id)
+
+      feed_fixture(
+        title: "An article",
+        news_source_id: source.id,
+        published_at: DateTime.utc_now() |> DateTime.truncate(:second)
+      )
+
+      {:ok, user: user, other_user: other_user, source: source}
+    end
+
+    test "shows the subscriber's own name and description", %{user: user, source: source} do
+      user_source = NewsSources.get_user_news_source(user.id, source.id)
+
+      {:ok, _} =
+        NewsSources.update_user_news_source(user_source, %{
+          custom_name: "My Name",
+          custom_description: "My description"
+        })
+
+      news = News.list_user_news(user.id)
+
+      assert hd(news).news_source.name == "My Name"
+      assert hd(news).news_source.description == "My description"
+    end
+
+    test "leaves another subscriber on the shared name", %{
+      user: user,
+      other_user: other_user,
+      source: source
+    } do
+      user_source = NewsSources.get_user_news_source(user.id, source.id)
+      {:ok, _} = NewsSources.update_user_news_source(user_source, %{custom_name: "My Name"})
+
+      news = News.list_user_news(other_user.id)
+
+      assert hd(news).news_source.name == "Shared Name"
+      assert hd(news).news_source.description == "Shared description"
+    end
+
+    test "uses the shared name when nothing is overridden", %{user: user} do
+      news = News.list_user_news(user.id)
+
+      assert hd(news).news_source.name == "Shared Name"
+    end
+  end
 end
