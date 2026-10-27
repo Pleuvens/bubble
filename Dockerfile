@@ -9,9 +9,9 @@
 #   - https://hub.docker.com/r/hexpm/elixir/tags - for the build image
 #   - https://hub.docker.com/_/debian?tab=tags&page=1&name=trixie-slim - for the release image
 #   - https://pkgs.org/ - resource for finding needed packages
-#   - Ex: hexpm/elixir:1.18-erlang-27.3.4.5-debian-trixie-20260610-slim
+#   - Ex: hexpm/elixir:1.20.4-erlang-29.1.2-debian-trixie-20261020-slim
 #
-ARG BUILDER_IMAGE="hexpm/elixir:1.18-erlang-27.3.4.5-debian-trixie-20260610-slim"
+ARG BUILDER_IMAGE="hexpm/elixir:1.20.4-erlang-29.1.2-debian-trixie-20261020-slim"
 ARG RUNNER_IMAGE="debian:trixie-slim"
 
 FROM ${BUILDER_IMAGE} as builder

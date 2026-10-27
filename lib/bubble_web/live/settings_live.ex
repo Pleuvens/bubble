@@ -81,7 +81,6 @@ defmodule BubbleWeb.SettingsLive do
       </header>
 
       <div class="max-w-[480px] mx-auto px-4 pt-[72px] pb-20">
-        <!-- Discover section -->
         <section class="mb-10">
           <div class="flex items-center justify-between mb-4">
             <span class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]">
@@ -242,7 +241,6 @@ defmodule BubbleWeb.SettingsLive do
           </div>
         </section>
 
-        <!-- RSS Sources section -->
         <section>
           <div class="flex items-center justify-between mb-4">
             <span class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]">
@@ -351,7 +349,10 @@ defmodule BubbleWeb.SettingsLive do
                       >
                         <span class={[
                           "inline-block w-[21px] h-[21px] transform rounded-full bg-white transition-transform",
-                          if(user_source.is_active, do: "translate-x-[22px]", else: "translate-x-[3px]")
+                          if(user_source.is_active,
+                            do: "translate-x-[22px]",
+                            else: "translate-x-[3px]"
+                          )
                         ]}>
                         </span>
                       </button>
@@ -430,13 +431,9 @@ defmodule BubbleWeb.SettingsLive do
         </section>
       </div>
 
-      <!-- Add Source Modal -->
       <%= if @modal_step != nil do %>
         <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <div
-            class="absolute inset-0 bg-black/40"
-            phx-click="cancel_add"
-          />
+          <div class="absolute inset-0 bg-black/40" phx-click="cancel_add" />
           <div class="relative w-full max-w-[380px] bg-white dark:bg-[#141416] rounded-2xl p-6 shadow-2xl">
             <div class="flex items-center justify-between mb-5">
               <span class="text-[14.5px] font-semibold text-gray-900 dark:text-white">
@@ -470,7 +467,10 @@ defmodule BubbleWeb.SettingsLive do
             <%= if @modal_step == :url_input do %>
               <form phx-submit="check_url" class="space-y-4">
                 <div class="space-y-1.5">
-                  <label for="modal_url" class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]">
+                  <label
+                    for="modal_url"
+                    class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
+                  >
                     RSS URL
                   </label>
                   <input
@@ -548,7 +548,10 @@ defmodule BubbleWeb.SettingsLive do
                   </p>
                 </div>
                 <div class="space-y-1.5">
-                  <label for="modal_name" class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]">
+                  <label
+                    for="modal_name"
+                    class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
+                  >
                     Name
                   </label>
                   <input
