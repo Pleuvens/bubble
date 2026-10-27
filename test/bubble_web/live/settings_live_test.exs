@@ -10,6 +10,16 @@ defmodule BubbleWeb.SettingsLiveTest do
 
   setup :register_and_log_in_user
 
+  describe "authentication" do
+    test "redirects to the log in page when the user is not logged in" do
+      assert {:error, {:redirect, %{to: path, flash: flash}}} =
+               live(build_conn(), ~p"/settings")
+
+      assert path == ~p"/users/log_in"
+      assert %{"error" => "You must log in to access this page."} = flash
+    end
+  end
+
   describe "Discover section - unsubscribed state" do
     test "shows Subscribe button for each featured source", %{conn: conn} do
       {:ok, view, html} = live(conn, ~p"/settings")
