@@ -650,19 +650,15 @@ defmodule BubbleWeb.SettingsLive do
   end
 
   def handle_event("save_featured_url", %{"id" => id, "url" => url}, socket) do
-    user_id = socket.assigns.current_user.id
-    user_source = NewsSources.get_user_news_source(user_id, id)
-
-    case NewsSources.update_user_news_source(user_source, %{custom_url: url}) do
-      {:ok, _} ->
+    case NewsSources.get_user_news_source(socket.assigns.current_user.id, id) do
+      nil ->
         {:noreply,
          socket
-         |> assign_sources(user_id)
          |> assign(:editing_featured_id, nil)
-         |> put_flash(:info, "Feed URL updated.")}
+         |> refresh_with_error("You are not subscribed to that source.")}
 
-      {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Failed to update URL.")}
+      user_source ->
+        save_user_source_url(socket, user_source, url)
     end
   end
 
@@ -815,6 +811,20 @@ defmodule BubbleWeb.SettingsLive do
 
       {0, _} ->
         {:noreply, socket |> put_flash(:error, "Failed to unsubscribe from source.")}
+    end
+  end
+
+  defp save_user_source_url(socket, user_source, url) do
+    case NewsSources.update_user_news_source(user_source, %{custom_url: url}) do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> assign_sources(socket.assigns.current_user.id)
+         |> assign(:editing_featured_id, nil)
+         |> put_flash(:info, "Feed URL updated.")}
+
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Failed to update URL.")}
     end
   end
 

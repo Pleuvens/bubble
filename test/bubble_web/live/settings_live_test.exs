@@ -297,6 +297,20 @@ defmodule BubbleWeb.SettingsLiveTest do
       assert shared.name == "Not Mine"
     end
 
+    test "save_featured_url survives a subscription that is gone", %{conn: conn, user: user} do
+      stranger_source = news_source_fixture(%{name: "Not Mine"})
+
+      {:ok, view, _html} = live(conn, ~p"/settings")
+
+      render_click(view, "save_featured_url", %{
+        "id" => stranger_source.id,
+        "url" => "https://hijacked.example.com/rss"
+      })
+
+      assert render(view) =~ "Your Sources"
+      assert is_nil(NewsSources.get_user_news_source(user.id, stranger_source.id))
+    end
+
     test "toggle_active survives a subscription that is gone", %{conn: conn, user: user} do
       stranger_source = news_source_fixture(%{name: "Not Mine"})
 
