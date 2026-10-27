@@ -81,7 +81,6 @@ defmodule BubbleWeb.SettingsLive do
       </header>
 
       <div class="max-w-[480px] mx-auto px-4 pt-[72px] pb-20">
-        <!-- Discover section -->
         <section class="mb-10">
           <div class="flex items-center justify-between mb-4">
             <span class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]">
@@ -242,7 +241,6 @@ defmodule BubbleWeb.SettingsLive do
           </div>
         </section>
 
-        <!-- RSS Sources section -->
         <section>
           <div class="flex items-center justify-between mb-4">
             <span class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]">
@@ -430,7 +428,6 @@ defmodule BubbleWeb.SettingsLive do
         </section>
       </div>
 
-      <!-- Add Source Modal -->
       <%= if @modal_step != nil do %>
         <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
           <div
