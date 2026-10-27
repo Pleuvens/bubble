@@ -10,7 +10,12 @@ defmodule BubbleWeb.FeedLive do
 
   def render(assigns) do
     ~H"""
-    <div id="feed" class="min-h-screen bg-white dark:bg-[#0a0a0c]" data-active={@current_index} phx-hook="FeedNav">
+    <div
+      id="feed"
+      class="min-h-screen bg-white dark:bg-[#0a0a0c]"
+      data-active={@current_index}
+      phx-hook="FeedNav"
+    >
       <header class="fixed top-0 left-0 right-0 z-10 bg-white/90 dark:bg-[#0a0a0c]/90 backdrop-blur-sm border-b border-gray-200 dark:border-[#26262a]">
         <div class="max-w-[480px] mx-auto px-4 py-3 flex items-center justify-between">
           <div class="flex items-center gap-7">
@@ -106,7 +111,8 @@ defmodule BubbleWeb.FeedLive do
                   <div class={[
                     "w-10 h-10 rounded-[9px] flex-shrink-0 flex items-center justify-center font-mono text-[11.5px] font-bold tracking-[0.02em]",
                     if(item.news_source.content_type == :video,
-                      do: "bg-orange-50 dark:bg-orange-400/[0.14] text-orange-600 dark:text-orange-300",
+                      do:
+                        "bg-orange-50 dark:bg-orange-400/[0.14] text-orange-600 dark:text-orange-300",
                       else: "bg-gray-100 dark:bg-[#1f1f22] text-gray-500 dark:text-[#71717a]"
                     )
                   ]}>
