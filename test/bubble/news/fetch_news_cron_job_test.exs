@@ -253,7 +253,6 @@ defmodule Bubble.News.FetchNewsCronJobTest do
       updated_source = Repo.get(NewsSource, source1.id)
       assert DateTime.diff(updated_source.last_fetched_at, source1.last_fetched_at) > 0
     end
-  end
 
     test "one failing source does not block other sources from being processed" do
       Enum.map(1..3, fn i ->
@@ -290,6 +289,7 @@ defmodule Bubble.News.FetchNewsCronJobTest do
       # Two sources succeeded, one failed — we should have 2 news items, not 0
       assert Repo.aggregate(News, :count) == 2
     end
+  end
 
   defp insert_news_source(attrs) do
     %NewsSource{}
