@@ -41,6 +41,30 @@ defmodule Bubble.News.NewsSourceTest do
       assert %{custom_url: ["must start with http:// or https:// and include a domain"]} =
                errors_on(changeset)
     end
+
+    test "accepts a custom_name and custom_description" do
+      changeset =
+        UserNewsSource.changeset(%UserNewsSource{}, %{
+          valid_link_attrs()
+          | custom_name: "My Bluesky",
+            custom_description: "Only the posts I care about"
+        })
+
+      assert changeset.valid?
+      assert changeset.changes.custom_name == "My Bluesky"
+      assert changeset.changes.custom_description == "Only the posts I care about"
+    end
+
+    test "rejects a custom_name longer than 255 characters" do
+      changeset =
+        UserNewsSource.changeset(%UserNewsSource{}, %{
+          valid_link_attrs()
+          | custom_name: String.duplicate("a", 256)
+        })
+
+      refute changeset.valid?
+      assert %{custom_name: ["should be at most 255 character(s)"]} = errors_on(changeset)
+    end
   end
 
   defp valid_source_attrs do
@@ -48,6 +72,12 @@ defmodule Bubble.News.NewsSourceTest do
   end
 
   defp valid_link_attrs do
-    %{user_id: Ecto.UUID.generate(), news_source_id: Ecto.UUID.generate(), custom_url: nil}
+    %{
+      user_id: Ecto.UUID.generate(),
+      news_source_id: Ecto.UUID.generate(),
+      custom_url: nil,
+      custom_name: nil,
+      custom_description: nil
+    }
   end
 end

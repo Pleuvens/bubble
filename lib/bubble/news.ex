@@ -2,6 +2,7 @@ defmodule Bubble.News do
   import Ecto.Query
 
   alias Bubble.News.News
+  alias Bubble.News.SourceOverride
   alias Bubble.News.UserNewsSource
   alias Bubble.Repo
 
@@ -36,8 +37,22 @@ defmodule Bubble.News do
         where: n.published_at >= ^yesterday_start,
         order_by: [desc: n.published_at],
         limit: 50,
-        preload: [:news_source]
+        preload: [:news_source],
+        select: {n, uns}
       )
     )
+    |> Enum.map(&apply_source_override/1)
+  end
+
+  defp apply_source_override({news, user_source}) do
+    source = news.news_source
+
+    overridden = %{
+      source
+      | name: SourceOverride.name(source, user_source),
+        description: SourceOverride.description(source, user_source)
+    }
+
+    %{news | news_source: overridden}
   end
 end

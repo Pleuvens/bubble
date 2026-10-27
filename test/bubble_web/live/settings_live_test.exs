@@ -198,4 +198,126 @@ defmodule BubbleWeb.SettingsLiveTest do
       assert html =~ "My Blog"
     end
   end
+
+  describe "RSS Sources list - editing a source" do
+    setup %{user: user} do
+      source = news_source_fixture(%{name: "Shared Name", url: "https://shared.example.com/rss"})
+      subscribe_user_to_source(user.id, source.id)
+      {:ok, source: source}
+    end
+
+    test "save_source stores the edits on the user's subscription", %{
+      conn: conn,
+      user: user,
+      source: source
+    } do
+      {:ok, view, _html} = live(conn, ~p"/settings")
+
+      view |> element("button[phx-click='edit_source']") |> render_click()
+
+      view
+      |> form("form[phx-submit='save_source']", %{
+        name: "My Name",
+        url: "https://mine.example.com/rss",
+        description: "My description"
+      })
+      |> render_submit()
+
+      user_source = NewsSources.get_user_news_source(user.id, source.id)
+
+      assert user_source.custom_name == "My Name"
+      assert user_source.custom_url == "https://mine.example.com/rss"
+      assert user_source.custom_description == "My description"
+    end
+
+    test "save_source leaves the shared source untouched", %{conn: conn, source: source} do
+      {:ok, view, _html} = live(conn, ~p"/settings")
+
+      view |> element("button[phx-click='edit_source']") |> render_click()
+
+      view
+      |> form("form[phx-submit='save_source']", %{
+        name: "My Name",
+        url: "https://mine.example.com/rss",
+        description: "My description"
+      })
+      |> render_submit()
+
+      shared = Repo.get(Bubble.News.NewsSource, source.id)
+
+      assert shared.name == "Shared Name"
+      assert shared.url == "https://shared.example.com/rss"
+      assert shared.description == "Test source description"
+    end
+
+    test "another subscriber keeps seeing the shared name", %{
+      conn: conn,
+      source: source
+    } do
+      other_user = Bubble.AccountsFixtures.user_fixture()
+      subscribe_user_to_source(other_user.id, source.id)
+
+      {:ok, view, _html} = live(conn, ~p"/settings")
+      view |> element("button[phx-click='edit_source']") |> render_click()
+
+      view
+      |> form("form[phx-submit='save_source']", %{
+        name: "My Name",
+        url: "https://mine.example.com/rss",
+        description: "My description"
+      })
+      |> render_submit()
+
+      other_source = NewsSources.get_user_news_source(other_user.id, source.id)
+
+      assert is_nil(other_source.custom_name)
+
+      {:ok, _other_view, other_html} =
+        other_user
+        |> then(&(Phoenix.ConnTest.build_conn() |> log_in_user(&1)))
+        |> live(~p"/settings")
+
+      assert other_html =~ "Shared Name"
+      refute other_html =~ "My Name"
+    end
+
+    test "save_source refuses a source the user is not subscribed to", %{conn: conn} do
+      stranger_source = news_source_fixture(%{name: "Not Mine"})
+
+      {:ok, view, _html} = live(conn, ~p"/settings")
+
+      render_click(view, "save_source", %{
+        "id" => stranger_source.id,
+        "name" => "Hijacked",
+        "url" => "https://hijacked.example.com/rss",
+        "description" => "Hijacked"
+      })
+
+      shared = Repo.get(Bubble.News.NewsSource, stranger_source.id)
+      assert shared.name == "Not Mine"
+    end
+
+    test "the edit form opens with the user's own values", %{
+      conn: conn,
+      user: user,
+      source: source
+    } do
+      user_source = NewsSources.get_user_news_source(user.id, source.id)
+
+      {:ok, _} =
+        NewsSources.update_user_news_source(user_source, %{
+          custom_name: "My Name",
+          custom_url: "https://mine.example.com/rss",
+          custom_description: "My description"
+        })
+
+      {:ok, view, _html} = live(conn, ~p"/settings")
+
+      html = view |> element("button[phx-click='edit_source']") |> render_click()
+
+      assert html =~ "My Name"
+      assert html =~ "https://mine.example.com/rss"
+      assert html =~ "My description"
+    end
+  end
 end

@@ -2,6 +2,7 @@ defmodule BubbleWeb.SettingsLive do
   use BubbleWeb, :live_view
 
   alias Bubble.News.FetchSingleSourceJob
+  alias Bubble.News.SourceOverride
   alias Bubble.NewsSources
 
   @featured_sources [
@@ -324,13 +325,13 @@ defmodule BubbleWeb.SettingsLive do
                     <div class="flex items-start justify-between gap-4 mb-3">
                       <div class="flex-1 min-w-0">
                         <span class="text-[14.5px] font-semibold text-gray-900 dark:text-white">
-                          {source.name}
+                          {SourceOverride.name(source, user_source)}
                         </span>
                         <p class="text-[12px] text-gray-400 dark:text-[#52525b] mt-0.5 break-all">
-                          {source.url}
+                          {SourceOverride.url(source, user_source)}
                         </p>
                         <p class="text-[13.5px] text-gray-500 dark:text-[#a1a1aa] leading-relaxed mt-1">
-                          {source.description || "No description"}
+                          {SourceOverride.description(source, user_source) || "No description"}
                         </p>
                       </div>
                       <button
@@ -753,16 +754,22 @@ defmodule BubbleWeb.SettingsLive do
   end
 
   def handle_event("edit_source", %{"id" => id}, socket) do
-    source = NewsSources.get_source(id)
+    user_id = socket.assigns.current_user.id
 
-    {:noreply,
-     socket
-     |> assign(:editing_source_id, id)
-     |> assign(:edit_form, %{
-       name: source.name,
-       url: source.url,
-       description: source.description || ""
-     })}
+    case NewsSources.get_subscribed_source(user_id, id) do
+      nil ->
+        {:noreply, put_flash(socket, :error, "You are not subscribed to that source.")}
+
+      {source, user_source} ->
+        {:noreply,
+         socket
+         |> assign(:editing_source_id, id)
+         |> assign(:edit_form, %{
+           name: SourceOverride.name(source, user_source),
+           url: SourceOverride.url(source, user_source),
+           description: SourceOverride.description(source, user_source) || ""
+         })}
+    end
   end
 
   def handle_event("cancel_edit", _params, socket) do
@@ -774,25 +781,13 @@ defmodule BubbleWeb.SettingsLive do
 
   def handle_event("save_source", %{"id" => id} = params, socket) do
     user_id = socket.assigns.current_user.id
-    source = NewsSources.get_source(id)
 
-    attrs = %{
-      name: params["name"],
-      url: params["url"],
-      description: params["description"] || ""
-    }
+    case NewsSources.get_subscribed_source(user_id, id) do
+      nil ->
+        {:noreply, put_flash(socket, :error, "You are not subscribed to that source.")}
 
-    case NewsSources.update_source(source, attrs) do
-      {:ok, _source} ->
-        {:noreply,
-         socket
-         |> assign_sources(user_id)
-         |> assign(:editing_source_id, nil)
-         |> assign(:edit_form, %{name: "", url: "", description: ""})
-         |> put_flash(:info, "Source updated successfully.")}
-
-      {:error, _changeset} ->
-        {:noreply, socket |> put_flash(:error, "Failed to update source.")}
+      {source, user_source} ->
+        save_source_overrides(socket, source, user_source, params)
     end
   end
 
@@ -826,6 +821,33 @@ defmodule BubbleWeb.SettingsLive do
         {:noreply, socket |> put_flash(:error, "Failed to unsubscribe from source.")}
     end
   end
+
+  defp save_source_overrides(socket, source, user_source, params) do
+    user_id = socket.assigns.current_user.id
+
+    attrs = %{
+      custom_name: override_or_nil(params["name"], source.name),
+      custom_url: override_or_nil(params["url"], source.url),
+      custom_description: override_or_nil(params["description"], source.description)
+    }
+
+    case NewsSources.update_user_news_source(user_source, attrs) do
+      {:ok, _user_source} ->
+        {:noreply,
+         socket
+         |> assign_sources(user_id)
+         |> assign(:editing_source_id, nil)
+         |> assign(:edit_form, %{name: "", url: "", description: ""})
+         |> put_flash(:info, "Source updated successfully.")}
+
+      {:error, _changeset} ->
+        {:noreply, socket |> put_flash(:error, "Failed to update source.")}
+    end
+  end
+
+  defp override_or_nil(submitted, _shared) when submitted in [nil, ""], do: nil
+  defp override_or_nil(submitted, shared) when submitted == shared, do: nil
+  defp override_or_nil(submitted, _shared), do: submitted
 
   defp assign_sources(socket, user_id) do
     featured_names = MapSet.new(@featured_sources, & &1.name)

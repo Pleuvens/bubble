@@ -9,6 +9,7 @@ defmodule Bubble.News.FetchSingleSourceJob do
   use Oban.Worker
 
   alias Bubble.News.NewsSource
+  alias Bubble.News.SourceOverride
   alias Bubble.News.UserNewsSource
   alias Bubble.Repo
   alias Bubble.Sources.NewsProcessor
@@ -32,13 +33,8 @@ defmodule Bubble.News.FetchSingleSourceJob do
   defp effective_url(source, nil), do: source.url
 
   defp effective_url(source, user_id) do
-    case Repo.get_by(UserNewsSource, user_id: user_id, news_source_id: source.id) do
-      %UserNewsSource{custom_url: custom_url} when is_binary(custom_url) and custom_url != "" ->
-        custom_url
-
-      _ ->
-        source.url
-    end
+    user_source = Repo.get_by(UserNewsSource, user_id: user_id, news_source_id: source.id)
+    SourceOverride.url(source, user_source)
   end
 
   defp fetch_source(source, url) do
