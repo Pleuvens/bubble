@@ -1,4 +1,6 @@
 defmodule Bubble.News.SourceOverride do
+  import Ecto.Query
+
   alias Bubble.News.NewsSource
   alias Bubble.News.UserNewsSource
 
@@ -12,6 +14,13 @@ defmodule Bubble.News.SourceOverride do
 
   def url(%NewsSource{} = source, user_source) do
     custom(user_source, :custom_url) || source.url
+  end
+
+  def custom_urls_by_source_id do
+    from uns in UserNewsSource,
+      where: not is_nil(uns.custom_url) and uns.custom_url != "",
+      select: {uns.news_source_id, uns.custom_url},
+      distinct: true
   end
 
   defp custom(%UserNewsSource{} = user_source, field) do

@@ -4,7 +4,7 @@ defmodule Bubble.News.FetchNewsCronJob do
   import Ecto.Query
 
   alias Bubble.News.NewsSource
-  alias Bubble.News.UserNewsSource
+  alias Bubble.News.SourceOverride
   alias Bubble.Repo
   alias Bubble.Sources.NewsProcessor
   alias Bubble.Sources.RSSClient
@@ -21,18 +21,11 @@ defmodule Bubble.News.FetchNewsCronJob do
         )
       )
 
-    # Collect all distinct custom_urls set by users, grouped by source id
     custom_url_map =
-      Repo.all(
-        from(uns in UserNewsSource,
-          where: not is_nil(uns.custom_url) and uns.custom_url != "",
-          select: {uns.news_source_id, uns.custom_url},
-          distinct: true
-        )
-      )
+      SourceOverride.custom_urls_by_source_id()
+      |> Repo.all()
       |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
 
-    # Build url -> source map (deduplicated), including the shared url and all custom_urls
     url_to_source =
       sources
       |> Enum.flat_map(fn source ->
