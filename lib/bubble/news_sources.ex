@@ -131,6 +131,20 @@ defmodule Bubble.NewsSources do
   end
 
   @doc """
+  Gets a source the user is subscribed to, with their subscription.
+  Returns `{news_source, user_news_source}`, or `nil` when they are not subscribed.
+  """
+  def get_subscribed_source(user_id, news_source_id) do
+    Repo.one(
+      from ns in NewsSource,
+        join: uns in UserNewsSource,
+        on: uns.news_source_id == ns.id,
+        where: uns.user_id == ^user_id and ns.id == ^news_source_id,
+        select: {ns, uns}
+    )
+  end
+
+  @doc """
   Updates a user's subscription to a news source (e.g., toggling is_active).
   """
   def update_user_news_source(user_news_source, attrs) do
