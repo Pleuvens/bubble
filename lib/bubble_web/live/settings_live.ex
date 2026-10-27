@@ -794,16 +794,12 @@ defmodule BubbleWeb.SettingsLive do
   def handle_event("toggle_active", %{"id" => source_id}, socket) do
     user_id = socket.assigns.current_user.id
 
-    user_feed_source = NewsSources.get_user_news_source(user_id, source_id)
+    case NewsSources.get_user_news_source(user_id, source_id) do
+      nil ->
+        {:noreply, refresh_with_error(socket, "You are not subscribed to that source.")}
 
-    case NewsSources.update_user_news_source(user_feed_source, %{
-           is_active: !user_feed_source.is_active
-         }) do
-      {:ok, _user_feed_source} ->
-        {:noreply, assign_sources(socket, user_id)}
-
-      {:error, _changeset} ->
-        {:noreply, socket |> put_flash(:error, "Failed to toggle source status.")}
+      user_feed_source ->
+        toggle_user_source_active(socket, user_feed_source)
     end
   end
 
@@ -820,6 +816,24 @@ defmodule BubbleWeb.SettingsLive do
       {0, _} ->
         {:noreply, socket |> put_flash(:error, "Failed to unsubscribe from source.")}
     end
+  end
+
+  defp toggle_user_source_active(socket, user_feed_source) do
+    case NewsSources.update_user_news_source(user_feed_source, %{
+           is_active: !user_feed_source.is_active
+         }) do
+      {:ok, _user_feed_source} ->
+        {:noreply, assign_sources(socket, socket.assigns.current_user.id)}
+
+      {:error, _changeset} ->
+        {:noreply, put_flash(socket, :error, "Failed to toggle source status.")}
+    end
+  end
+
+  defp refresh_with_error(socket, message) do
+    socket
+    |> assign_sources(socket.assigns.current_user.id)
+    |> put_flash(:error, message)
   end
 
   defp save_source_overrides(socket, source, user_source, params) do

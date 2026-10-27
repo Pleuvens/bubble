@@ -297,6 +297,17 @@ defmodule BubbleWeb.SettingsLiveTest do
       assert shared.name == "Not Mine"
     end
 
+    test "toggle_active survives a subscription that is gone", %{conn: conn, user: user} do
+      stranger_source = news_source_fixture(%{name: "Not Mine"})
+
+      {:ok, view, _html} = live(conn, ~p"/settings")
+
+      render_click(view, "toggle_active", %{"id" => stranger_source.id})
+
+      assert render(view) =~ "Your Sources"
+      assert is_nil(NewsSources.get_user_news_source(user.id, stranger_source.id))
+    end
+
     test "the edit form opens with the user's own values", %{
       conn: conn,
       user: user,
