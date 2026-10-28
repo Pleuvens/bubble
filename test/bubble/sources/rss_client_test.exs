@@ -30,6 +30,46 @@ defmodule Bubble.Sources.RSSClientTest do
       assert {:error, :malformed_url} = Bubble.Sources.RSSClient.fetch_feed(nil)
     end
 
+    test "refuses a URL that resolves to an internal address" do
+      Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
+        Req.Test.text(conn, mock_rss_feed())
+      end)
+
+      assert {:error, :blocked_url} =
+               Bubble.Sources.RSSClient.fetch_feed("https://loopback.test/rss")
+
+      assert {:error, :blocked_url} =
+               Bubble.Sources.RSSClient.fetch_feed("https://metadata.test/rss")
+
+      assert {:error, :blocked_url} =
+               Bubble.Sources.RSSClient.fetch_feed("https://private.test/rss")
+    end
+
+    test "refuses an internal address written as an IP literal" do
+      assert {:error, :blocked_url} =
+               Bubble.Sources.RSSClient.fetch_feed("http://169.254.169.254/latest/meta-data/")
+
+      assert {:error, :blocked_url} =
+               Bubble.Sources.RSSClient.fetch_feed("http://127.0.0.1:4000/")
+    end
+
+    test "refuses a public URL that redirects to an internal address" do
+      Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
+        case conn.request_path do
+          "/rss" ->
+            conn
+            |> Plug.Conn.put_resp_header("location", "http://169.254.169.254/latest/meta-data/")
+            |> Plug.Conn.send_resp(302, "")
+
+          _ ->
+            Req.Test.text(conn, "secret")
+        end
+      end)
+
+      assert {:error, :blocked_url} =
+               Bubble.Sources.RSSClient.fetch_feed("https://public.test/rss")
+    end
+
     test "returns error when call fails" do
       url = "https://www.reddit.com/r/elixir/.rss"
 

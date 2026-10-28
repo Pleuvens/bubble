@@ -7,6 +7,7 @@ defmodule Bubble.Sources.RSSClient do
 
   alias Bubble.Sources.RSSValidator
   alias Utils.FeedUrl
+  alias Utils.FetchGuard
 
   require Logger
 
@@ -15,13 +16,20 @@ defmodule Bubble.Sources.RSSClient do
   """
   def fetch_feed(url) do
     with :ok <- ensure_fetchable_url(url),
-         {:ok, %{status: 200, body: body}} <- Req.get(request_options(url)),
+         {:ok, %{status: 200, body: body}} <- url |> build_request() |> Req.request(),
          {:ok, parsed_feed} <- RSSValidator.parse_and_validate(body) do
       {:ok, parsed_feed}
     else
       {:error, :malformed_url} ->
         Logger.warning("Skipping RSS feed with malformed URL: #{inspect(url)}")
         {:error, :malformed_url}
+
+      {:error, %ReqSSRF.BlockedError{} = error} ->
+        Logger.warning(
+          "Blocked RSS feed fetch to an internal address: #{URI.to_string(error.url)}"
+        )
+
+        {:error, :blocked_url}
 
       {:ok, %{status: status}} ->
         Logger.warning("Failed to fetch RSS feed: HTTP status #{status} for URL #{url}")
@@ -55,6 +63,13 @@ defmodule Bubble.Sources.RSSClient do
         Logger.warning("RSS feed fetch task exited: #{inspect(reason)}")
         {nil, {:error, :task_timeout}}
     end)
+  end
+
+  defp build_request(url) do
+    url
+    |> request_options()
+    |> Req.new()
+    |> FetchGuard.attach()
   end
 
   defp request_options(url) do
