@@ -9,6 +9,8 @@ defmodule Bubble.Sources.HttpClient do
   - Response size limiting to avoid downloading large files
   """
 
+  alias Utils.FetchGuard
+
   require Logger
 
   @doc """
@@ -31,23 +33,28 @@ defmodule Bubble.Sources.HttpClient do
       {:error, :request_failed}
   """
   def fetch_html(url, opts \\ []) do
-    max_redirects = Keyword.get(opts, :max_redirects, 3)
-    timeout = Keyword.get(opts, :timeout, 10_000)
     max_size = Keyword.get(opts, :max_size, 51_200)
 
-    request_opts =
-      Keyword.merge(
-        [
-          url: url,
-          max_redirects: max_redirects,
-          receive_timeout: timeout
-        ],
-        Application.get_env(:bubble, :http_client_req_options, [])
-      )
-
     url
-    |> Req.get(request_opts)
+    |> build_request(opts)
+    |> Req.request()
     |> handle_response(url, max_size)
+  end
+
+  defp build_request(url, opts) do
+    [
+      url: url,
+      max_redirects: Keyword.get(opts, :max_redirects, 3),
+      receive_timeout: Keyword.get(opts, :timeout, 10_000)
+    ]
+    |> Keyword.merge(Application.get_env(:bubble, :http_client_req_options, []))
+    |> Req.new()
+    |> FetchGuard.attach()
+  end
+
+  defp handle_response({:error, %ReqSSRF.BlockedError{} = error}, _url, _max_size) do
+    Logger.warning("Blocked fetch to an internal address: #{URI.to_string(error.url)}")
+    {:error, :blocked_url}
   end
 
   # Success: 200 OK with binary body
