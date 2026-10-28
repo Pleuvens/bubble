@@ -1,53 +1,22 @@
 defmodule Bubble.Sources.RSSClient do
-  @moduledoc """
-  A simple module to fetch RSS feeds using Req.
-
-  Parsing and validation is delegated to `Bubble.Sources.RSSValidator`.
-  """
-
   alias Bubble.Sources.RSSValidator
   alias Utils.FeedUrl
   alias Utils.FetchGuard
 
   require Logger
 
-  @doc """
-  Fetches and parses an RSS feed from the given URL.
-  """
+  @parsing_failures [:invalid_xml, :item_extraction_failed, :no_valid_items]
+
   def fetch_feed(url) do
     with :ok <- ensure_fetchable_url(url),
          {:ok, %{status: 200, body: body}} <- url |> build_request() |> Req.request(),
          {:ok, parsed_feed} <- RSSValidator.parse_and_validate(body) do
       {:ok, parsed_feed}
     else
-      {:error, :malformed_url} ->
-        Logger.warning("Skipping RSS feed with malformed URL: #{inspect(url)}")
-        {:error, :malformed_url}
-
-      {:error, %ReqSSRF.BlockedError{} = error} ->
-        Logger.warning(
-          "Blocked RSS feed fetch to an internal address: #{URI.to_string(error.url)}"
-        )
-
-        {:error, :blocked_url}
-
-      {:ok, %{status: status}} ->
-        Logger.warning("Failed to fetch RSS feed: HTTP status #{status} for URL #{url}")
-        {:error, :invalid_http_request}
-
-      {:error, reason} when reason in [:invalid_xml, :item_extraction_failed, :no_valid_items] ->
-        Logger.warning("Failed to parse RSS feed: #{reason} for URL #{url}")
-        {:error, :rss_parsing_failed}
-
-      {:error, reason} ->
-        Logger.warning("Failed to fetch RSS feed: #{inspect(reason)} for URL #{url}")
-        {:error, :http_request_failed}
+      failure -> handle_failure(failure, url)
     end
   end
 
-  @doc """
-  Fetches and parses multiple RSS feeds concurrently.
-  """
   def fetch_feeds(urls) when is_list(urls) do
     urls
     |> Task.async_stream(&{&1, fetch_feed(&1)},
@@ -63,6 +32,31 @@ defmodule Bubble.Sources.RSSClient do
         Logger.warning("RSS feed fetch task exited: #{inspect(reason)}")
         {nil, {:error, :task_timeout}}
     end)
+  end
+
+  defp handle_failure({:error, :malformed_url}, url) do
+    Logger.warning("Skipping RSS feed with malformed URL: #{inspect(url)}")
+    {:error, :malformed_url}
+  end
+
+  defp handle_failure({:error, %ReqSSRF.BlockedError{} = error}, _url) do
+    Logger.warning("Blocked RSS feed fetch to an internal address: #{URI.to_string(error.url)}")
+    {:error, :blocked_url}
+  end
+
+  defp handle_failure({:ok, %{status: status}}, url) do
+    Logger.warning("Failed to fetch RSS feed: HTTP status #{status} for URL #{url}")
+    {:error, :invalid_http_request}
+  end
+
+  defp handle_failure({:error, reason}, url) when reason in @parsing_failures do
+    Logger.warning("Failed to parse RSS feed: #{reason} for URL #{url}")
+    {:error, :rss_parsing_failed}
+  end
+
+  defp handle_failure({:error, reason}, url) do
+    Logger.warning("Failed to fetch RSS feed: #{inspect(reason)} for URL #{url}")
+    {:error, :http_request_failed}
   end
 
   defp build_request(url) do
