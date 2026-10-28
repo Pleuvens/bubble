@@ -61,6 +61,7 @@ defmodule Bubble.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:req, "~> 0.7"},
+      {:req_ssrf, "~> 0.2"},
       {:sweet_xml, "~> 0.7.5"},
       {:oban, "~> 2.19"},
       {:igniter, "~> 0.5"},
