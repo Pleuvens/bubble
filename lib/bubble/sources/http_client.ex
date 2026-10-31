@@ -3,6 +3,8 @@ defmodule Bubble.Sources.HttpClient do
 
   require Logger
 
+  @max_utf8_character_bytes 4
+
   def fetch_html(url, opts \\ []) do
     max_size = Keyword.get(opts, :max_size, 51_200)
 
@@ -59,7 +61,20 @@ defmodule Bubble.Sources.HttpClient do
     {:error, :request_failed}
   end
 
+  defp truncate_to(body, max_size) when byte_size(body) <= max_size, do: body
+
   defp truncate_to(body, max_size) do
-    binary_part(body, 0, min(byte_size(body), max_size))
+    hard_cut = binary_part(body, 0, max_size)
+
+    case Enum.find(prefixes_at_possible_boundaries(hard_cut), &String.valid?/1) do
+      nil -> hard_cut
+      on_boundary -> on_boundary
+    end
+  end
+
+  defp prefixes_at_possible_boundaries(binary) do
+    shortest = max(byte_size(binary) - @max_utf8_character_bytes + 1, 0)
+
+    for size <- byte_size(binary)..shortest//-1, do: binary_part(binary, 0, size)
   end
 end
