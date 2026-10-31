@@ -52,7 +52,7 @@ defmodule Bubble.NewsSources do
     end
   end
 
-  def create_and_add_user_source(user_id, attrs) do
+  def create_source_and_subscribe(user_id, attrs) do
     Repo.transact(fn ->
       with {:ok, source} <- create_source(attrs),
            {:ok, _user_news_source} <- subscribe_user_and_fetch(user_id, source.id) do
