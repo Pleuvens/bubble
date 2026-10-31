@@ -195,26 +195,4 @@ defmodule Bubble.Sources.RSSValidator do
     |> String.replace("&#32;", " ")
     |> String.replace("&apos;", "'")
   end
-
-  @doc """
-  Checks if the given XML string appears to be a valid RSS or Atom feed.
-
-  Returns `true` if the XML contains RSS or Atom feed markers, `false` otherwise.
-
-  ## Examples
-
-      iex> Bubble.Sources.RSSValidator.valid_feed_format?("<rss version=\\"2.0\\"></rss>")
-      true
-
-      iex> Bubble.Sources.RSSValidator.valid_feed_format?("<html></html>")
-      false
-
-  """
-  @spec valid_feed_format?(String.t()) :: boolean()
-  def valid_feed_format?(xml) when is_binary(xml) do
-    String.contains?(xml, ["<rss", "<feed", "<atom", "<channel"]) and
-      String.contains?(xml, ["</rss>", "</feed>", "</atom>", "</channel>"])
-  end
-
-  def valid_feed_format?(_), do: false
 end
