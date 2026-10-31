@@ -5,29 +5,28 @@ defmodule BubbleWeb.UserResetPasswordLive do
 
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gray-50 flex items-center justify-center py-16 px-4">
-      <div class="w-full max-w-md">
-        <!-- Header -->
-        <div class="text-center mb-8">
-          <h1 class="text-3xl md:text-4xl text-orange-400 tracking-wide uppercase font-light mb-4">
-            Reset Password
-          </h1>
+    <div class="min-h-screen bg-white dark:bg-[#0a0a0c]">
+      <.auth_header />
+
+      <main class="max-w-[480px] mx-auto px-4 pt-[72px] pb-20">
+        <div class="text-center mb-6">
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Reset password</h1>
         </div>
 
-        <!-- Form Card -->
-        <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+        <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
           <form id="reset_password_form" phx-submit="reset_password" phx-change="validate">
             <div class="space-y-4">
-              <!-- Error Message -->
               <%= if @form.errors && @form.errors != [] do %>
-                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-[13.5px]">
                   Oops, something went wrong! Please check the errors below.
                 </div>
               <% end %>
 
-              <!-- New Password Input -->
-              <div class="space-y-2">
-                <label for="user_password" class="text-xs uppercase tracking-wider text-gray-600">
+              <div class="space-y-1.5">
+                <label
+                  for="user_password"
+                  class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
+                >
                   New Password
                 </label>
                 <input
@@ -37,16 +36,15 @@ defmodule BubbleWeb.UserResetPasswordLive do
                   value={@form[:password].value}
                   required
                   phx-debounce="blur"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
+                  class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                 />
                 <.field_errors field={@form[:password]} />
               </div>
 
-              <!-- Confirm Password Input -->
-              <div class="space-y-2">
+              <div class="space-y-1.5">
                 <label
                   for="user_password_confirmation"
-                  class="text-xs uppercase tracking-wider text-gray-600"
+                  class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
                 >
                   Confirm New Password
                 </label>
@@ -57,15 +55,14 @@ defmodule BubbleWeb.UserResetPasswordLive do
                   value={@form[:password_confirmation].value}
                   required
                   phx-debounce="blur"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
+                  class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                 />
                 <.field_errors field={@form[:password_confirmation]} />
               </div>
 
-              <!-- Submit Button -->
               <button
                 type="submit"
-                class="w-full bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
+                class="w-full py-3.5 rounded-lg bg-orange-400 hover:bg-orange-500 text-white uppercase text-[13px] font-bold tracking-wide transition-colors"
               >
                 Reset Password
               </button>
@@ -73,23 +70,8 @@ defmodule BubbleWeb.UserResetPasswordLive do
           </form>
         </div>
 
-        <!-- Links -->
-        <div class="text-center mt-6 space-x-2 text-sm text-gray-600">
-          <.link
-            href={~p"/users/register"}
-            class="text-orange-400 hover:text-orange-500 transition-colors"
-          >
-            Register
-          </.link>
-          <span>|</span>
-          <.link
-            href={~p"/users/log_in"}
-            class="text-orange-400 hover:text-orange-500 transition-colors"
-          >
-            Log in
-          </.link>
-        </div>
-      </div>
+        <.auth_footer_links />
+      </main>
     </div>
     """
   end

@@ -90,6 +90,8 @@ defmodule BubbleWeb do
       # Core UI components
       import BubbleWeb.CoreComponents
       import BubbleWeb.Components.AppHeader
+      import BubbleWeb.Components.AuthFooterLinks
+      import BubbleWeb.Components.AuthHeader
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

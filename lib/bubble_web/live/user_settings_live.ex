@@ -5,22 +5,23 @@ defmodule BubbleWeb.UserSettingsLive do
 
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gray-50 py-16">
+    <div class="min-h-screen bg-white dark:bg-[#0a0a0c]">
       <.app_header current_user={@current_user} />
 
-      <div class="max-w-2xl mx-auto px-8 mt-8">
-        <!-- Change Email Section -->
-        <div class="mb-12">
-          <h2 class="text-3xl md:text-4xl text-orange-400 tracking-wide uppercase font-light text-center mb-8">
-            Change Email
+      <div class="max-w-[480px] mx-auto px-4 pt-[72px] pb-20">
+        <section class="mb-10">
+          <h2 class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a] mb-4">
+            Change email
           </h2>
 
-          <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+          <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
             <form id="email_form" phx-submit="update_email" phx-change="validate_email">
               <div class="space-y-4">
-                <!-- Email Input -->
-                <div class="space-y-2">
-                  <label for="user_email" class="text-xs uppercase tracking-wider text-gray-600">
+                <div class="space-y-1.5">
+                  <label
+                    for="user_email"
+                    class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
+                  >
                     New Email
                   </label>
                   <input
@@ -30,16 +31,15 @@ defmodule BubbleWeb.UserSettingsLive do
                     value={@email_form[:email].value}
                     required
                     phx-debounce="blur"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
+                    class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                   />
                   <.field_errors field={@email_form[:email]} />
                 </div>
 
-                <!-- Current Password Input -->
-                <div class="space-y-2">
+                <div class="space-y-1.5">
                   <label
                     for="current_password_for_email"
-                    class="text-xs uppercase tracking-wider text-gray-600"
+                    class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
                   >
                     Current Password
                   </label>
@@ -49,30 +49,28 @@ defmodule BubbleWeb.UserSettingsLive do
                     name="current_password"
                     value={@email_form_current_password}
                     required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
+                    class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                   />
                   <.form_error error={@email_form.errors[:current_password]} />
                 </div>
 
-                <!-- Submit Button -->
                 <button
                   type="submit"
-                  class="w-full bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
+                  class="w-full py-3.5 rounded-lg bg-orange-400 hover:bg-orange-500 text-white uppercase text-[13px] font-bold tracking-wide transition-colors"
                 >
                   Change Email
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </section>
 
-        <!-- Change Password Section -->
-        <div>
-          <h2 class="text-3xl md:text-4xl text-orange-400 tracking-wide uppercase font-light text-center mb-8">
-            Change Password
+        <section>
+          <h2 class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a] mb-4">
+            Change password
           </h2>
 
-          <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+          <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
             <form
               id="password_form"
               action={~p"/users/log_in?_action=password_updated"}
@@ -89,9 +87,11 @@ defmodule BubbleWeb.UserSettingsLive do
               />
 
               <div class="space-y-4">
-                <!-- New Password Input -->
-                <div class="space-y-2">
-                  <label for="user_password" class="text-xs uppercase tracking-wider text-gray-600">
+                <div class="space-y-1.5">
+                  <label
+                    for="user_password"
+                    class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
+                  >
                     New Password
                   </label>
                   <input
@@ -101,16 +101,15 @@ defmodule BubbleWeb.UserSettingsLive do
                     value={@password_form[:password].value}
                     required
                     phx-debounce="blur"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
+                    class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                   />
                   <.field_errors field={@password_form[:password]} />
                 </div>
 
-                <!-- Confirm Password Input -->
-                <div class="space-y-2">
+                <div class="space-y-1.5">
                   <label
                     for="user_password_confirmation"
-                    class="text-xs uppercase tracking-wider text-gray-600"
+                    class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
                   >
                     Confirm New Password
                   </label>
@@ -120,16 +119,15 @@ defmodule BubbleWeb.UserSettingsLive do
                     name="user[password_confirmation]"
                     value={@password_form[:password_confirmation].value}
                     phx-debounce="blur"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
+                    class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                   />
                   <.field_errors field={@password_form[:password_confirmation]} />
                 </div>
 
-                <!-- Current Password Input -->
-                <div class="space-y-2">
+                <div class="space-y-1.5">
                   <label
                     for="current_password_for_password"
-                    class="text-xs uppercase tracking-wider text-gray-600"
+                    class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
                   >
                     Current Password
                   </label>
@@ -139,22 +137,21 @@ defmodule BubbleWeb.UserSettingsLive do
                     name="current_password"
                     value={@current_password}
                     required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
+                    class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                   />
                   <.form_error error={@password_form.errors[:current_password]} />
                 </div>
 
-                <!-- Submit Button -->
                 <button
                   type="submit"
-                  class="w-full bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
+                  class="w-full py-3.5 rounded-lg bg-orange-400 hover:bg-orange-500 text-white uppercase text-[13px] font-bold tracking-wide transition-colors"
                 >
                   Change Password
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </section>
       </div>
     </div>
     """

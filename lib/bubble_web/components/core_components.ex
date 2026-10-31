@@ -109,7 +109,7 @@ defmodule BubbleWeb.CoreComponents do
   end
 
   attr :field, Phoenix.HTML.FormField, required: true
-  attr :class, :string, default: "text-red-600 text-xs mt-1"
+  attr :class, :string, default: "text-red-600 dark:text-red-400 text-xs mt-1"
 
   def field_errors(assigns) do
     ~H"""
@@ -118,7 +118,7 @@ defmodule BubbleWeb.CoreComponents do
   end
 
   attr :error, :any, required: true
-  attr :class, :string, default: "text-red-600 text-xs mt-1"
+  attr :class, :string, default: "text-red-600 dark:text-red-400 text-xs mt-1"
 
   def form_error(assigns) do
     ~H"""

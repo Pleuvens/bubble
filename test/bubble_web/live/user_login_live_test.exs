@@ -81,7 +81,7 @@ defmodule BubbleWeb.UserLoginLiveTest do
         |> render_click()
         |> follow_redirect(conn, ~p"/users/reset_password")
 
-      assert conn.resp_body =~ "Forgot Password?"
+      assert conn.resp_body =~ "Forgot password?"
     end
   end
 end
