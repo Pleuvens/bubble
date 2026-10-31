@@ -17,67 +17,7 @@ defmodule BubbleWeb.SettingsLive do
   def render(assigns) do
     ~H"""
     <div class="min-h-screen bg-white dark:bg-[#0a0a0c]">
-      <header class="fixed top-0 left-0 right-0 z-10 bg-white/90 dark:bg-[#0a0a0c]/90 backdrop-blur-sm border-b border-gray-200 dark:border-[#26262a]">
-        <div class="max-w-[480px] mx-auto px-4 py-3 flex items-center justify-between">
-          <div class="flex items-center gap-7">
-            <span class="text-[13px] font-bold tracking-[0.14em] uppercase text-gray-900 dark:text-white">
-              Bubble
-            </span>
-            <nav class="flex items-center gap-1">
-              <.link
-                navigate={~p"/"}
-                class="px-3 py-2.5 text-[13px] font-semibold rounded-lg text-gray-500 dark:text-[#71717a] hover:text-gray-900 dark:hover:text-white transition-colors"
-              >
-                Feed
-              </.link>
-              <.link
-                navigate={~p"/settings"}
-                class="px-3 py-2.5 text-[13px] font-semibold rounded-lg bg-orange-50 dark:bg-orange-400/10 text-gray-900 dark:text-white"
-              >
-                Settings
-              </.link>
-            </nav>
-          </div>
-          <div class="flex items-center gap-2.5">
-            <button
-              id="dark-mode-toggle"
-              phx-hook="DarkModeToggle"
-              title="Toggle dark mode"
-              class="w-[38px] h-[38px] flex items-center justify-center rounded-full border border-gray-200 dark:border-[#26262a] text-gray-500 dark:text-[#a1a1aa] hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              <svg
-                class="dark:hidden w-[15px] h-[15px]"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-              </svg>
-              <svg
-                class="hidden dark:block w-[15px] h-[15px]"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-              </svg>
-            </button>
-            <.link
-              href={~p"/users/log_out"}
-              method="delete"
-              class="text-[13px] text-gray-500 dark:text-[#a1a1aa] hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              Log out
-            </.link>
-          </div>
-        </div>
-      </header>
+      <.app_header current_page="settings" current_user={@current_user} />
 
       <div class="max-w-[480px] mx-auto px-4 pt-[72px] pb-20">
         <section class="mb-10">
