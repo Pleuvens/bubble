@@ -40,8 +40,8 @@ defmodule Bubble.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 1.0.0"},
-      {:floki, ">= 0.30.0", only: :test},
+      {:phoenix_live_view, "~> 1.2"},
+      {:lazy_html, ">= 0.1.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:esbuild, "~> 0.8", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
@@ -66,7 +66,8 @@ defmodule Bubble.MixProject do
       {:oban, "~> 2.19"},
       {:igniter, "~> 0.5"},
       {:html_sanitize_ex, "~> 1.4"},
-      {:lucide_live_view, "~> 0.1.0"}
+      {:lucide_live_view, "~> 0.1.0"},
+      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false}
     ]
   end
 

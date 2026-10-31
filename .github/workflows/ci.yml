@@ -159,8 +159,7 @@ jobs:
         run: mix deps.get
 
       - name: Check for security vulnerabilities
-        run: mix deps.audit || true
-        continue-on-error: true
+        run: mix deps.audit
 
   assets:
     name: Build Assets

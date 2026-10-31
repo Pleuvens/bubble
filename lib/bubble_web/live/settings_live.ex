@@ -127,8 +127,7 @@ defmodule BubbleWeb.SettingsLive do
                       <span class={[
                         "inline-block w-[21px] h-[21px] transform rounded-full bg-white transition-transform",
                         if(user_source.is_active, do: "translate-x-[22px]", else: "translate-x-[3px]")
-                      ]}>
-                      </span>
+                      ]}></span>
                     </button>
                   <% else %>
                     <button
@@ -352,8 +351,7 @@ defmodule BubbleWeb.SettingsLive do
                             do: "translate-x-[22px]",
                             else: "translate-x-[3px]"
                           )
-                        ]}>
-                        </span>
+                        ]}></span>
                       </button>
                     </div>
                     <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-[#1f1f22]">

@@ -13,8 +13,8 @@ defmodule BubbleWeb.UserResetPasswordLive do
             Reset Password
           </h1>
         </div>
-        
-    <!-- Form Card -->
+
+        <!-- Form Card -->
         <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
           <form id="reset_password_form" phx-submit="reset_password" phx-change="validate">
             <div class="space-y-4">
@@ -24,8 +24,8 @@ defmodule BubbleWeb.UserResetPasswordLive do
                   Oops, something went wrong! Please check the errors below.
                 </div>
               <% end %>
-              
-    <!-- New Password Input -->
+
+              <!-- New Password Input -->
               <div class="space-y-2">
                 <label for="user_password" class="text-xs uppercase tracking-wider text-gray-600">
                   New Password
@@ -47,8 +47,8 @@ defmodule BubbleWeb.UserResetPasswordLive do
                   <% end %>
                 <% end %>
               </div>
-              
-    <!-- Confirm Password Input -->
+
+              <!-- Confirm Password Input -->
               <div class="space-y-2">
                 <label
                   for="user_password_confirmation"
@@ -73,8 +73,8 @@ defmodule BubbleWeb.UserResetPasswordLive do
                   <% end %>
                 <% end %>
               </div>
-              
-    <!-- Submit Button -->
+
+              <!-- Submit Button -->
               <button
                 type="submit"
                 class="w-full bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
@@ -84,8 +84,8 @@ defmodule BubbleWeb.UserResetPasswordLive do
             </div>
           </form>
         </div>
-        
-    <!-- Links -->
+
+        <!-- Links -->
         <div class="text-center mt-6 space-x-2 text-sm text-gray-600">
           <.link
             href={~p"/users/register"}

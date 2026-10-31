@@ -51,8 +51,8 @@ defmodule BubbleWeb.UserSettingsLive do
                     <% end %>
                   <% end %>
                 </div>
-                
-    <!-- Current Password Input -->
+
+                <!-- Current Password Input -->
                 <div class="space-y-2">
                   <label
                     for="current_password_for_email"
@@ -74,8 +74,8 @@ defmodule BubbleWeb.UserSettingsLive do
                     </p>
                   <% end %>
                 </div>
-                
-    <!-- Submit Button -->
+
+                <!-- Submit Button -->
                 <button
                   type="submit"
                   class="w-full bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
@@ -86,8 +86,8 @@ defmodule BubbleWeb.UserSettingsLive do
             </form>
           </div>
         </div>
-        
-    <!-- Change Password Section -->
+
+        <!-- Change Password Section -->
         <div>
           <h2 class="text-3xl md:text-4xl text-orange-400 tracking-wide uppercase font-light text-center mb-8">
             Change Password
@@ -132,8 +132,8 @@ defmodule BubbleWeb.UserSettingsLive do
                     <% end %>
                   <% end %>
                 </div>
-                
-    <!-- Confirm Password Input -->
+
+                <!-- Confirm Password Input -->
                 <div class="space-y-2">
                   <label
                     for="user_password_confirmation"
@@ -158,8 +158,8 @@ defmodule BubbleWeb.UserSettingsLive do
                     <% end %>
                   <% end %>
                 </div>
-                
-    <!-- Current Password Input -->
+
+                <!-- Current Password Input -->
                 <div class="space-y-2">
                   <label
                     for="current_password_for_password"
@@ -183,8 +183,8 @@ defmodule BubbleWeb.UserSettingsLive do
                     </p>
                   <% end %>
                 </div>
-                
-    <!-- Submit Button -->
+
+                <!-- Submit Button -->
                 <button
                   type="submit"
                   class="w-full bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
