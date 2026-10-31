@@ -5,6 +5,7 @@ defmodule BubbleWeb.FeedLive do
 
   alias Bubble.News
   alias Utils.DateFormatter
+  alias Utils.HtmlEntities
 
   @per_page 20
 
@@ -85,6 +86,7 @@ defmodule BubbleWeb.FeedLive do
                         <.text_with_links text={
                           item.description
                           |> HtmlSanitizeEx.strip_tags()
+                          |> HtmlEntities.decode()
                           |> String.trim()
                           |> truncate(280)
                         } />
