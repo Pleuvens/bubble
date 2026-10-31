@@ -9,6 +9,8 @@ defmodule Bubble.Sources.RSSValidator do
 
   import SweetXml
 
+  alias Utils.HtmlEntities
+
   require Logger
 
   @type feed_item :: %{
@@ -180,19 +182,8 @@ defmodule Bubble.Sources.RSSValidator do
   defp clean_string(str) when is_binary(str) do
     str
     |> String.trim()
-    |> decode_html_entities()
+    |> HtmlEntities.decode()
   end
 
   defp clean_string(_), do: ""
-
-  # Basic HTML entity decoding for common entities
-  defp decode_html_entities(str) do
-    str
-    |> String.replace("&amp;", "&")
-    |> String.replace("&lt;", "<")
-    |> String.replace("&gt;", ">")
-    |> String.replace("&quot;", "\"")
-    |> String.replace("&#32;", " ")
-    |> String.replace("&apos;", "'")
-  end
 end

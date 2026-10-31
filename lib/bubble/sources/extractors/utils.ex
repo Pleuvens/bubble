@@ -4,9 +4,10 @@ defmodule Bubble.Sources.Extractors.Utils do
 
   Provides common functionality for:
   - Text cleaning and normalization
-  - HTML entity decoding
   - Meta tag and element selection with Floki
   """
+
+  alias Utils.HtmlEntities
 
   @type locator :: {:meta_content, String.t()} | {:element_text, String.t()}
 
@@ -57,7 +58,7 @@ defmodule Bubble.Sources.Extractors.Utils do
     cleaned =
       text
       |> String.trim()
-      |> decode_html_entities()
+      |> HtmlEntities.decode()
 
     if cleaned != "" and String.length(cleaned) > 10 do
       cleaned
@@ -67,32 +68,4 @@ defmodule Bubble.Sources.Extractors.Utils do
   end
 
   def clean_text(_), do: nil
-
-  @doc """
-  Decodes common HTML entities to their character equivalents.
-
-  ## Examples
-
-      iex> Utils.decode_html_entities("Hello &amp; goodbye")
-      "Hello & goodbye"
-
-      iex> Utils.decode_html_entities("It&#39;s working")
-      "It's working"
-  """
-  @spec decode_html_entities(String.t()) :: String.t()
-  def decode_html_entities(str) when is_binary(str) do
-    str
-    |> String.replace("&amp;", "&")
-    |> String.replace("&lt;", "<")
-    |> String.replace("&gt;", ">")
-    |> String.replace("&quot;", "\"")
-    |> String.replace("&#32;", " ")
-    |> String.replace("&#39;", "'")
-    |> String.replace("&apos;", "'")
-    |> String.replace("&nbsp;", " ")
-    |> String.replace("&#8217;", "'")
-    |> String.replace("&#8216;", "'")
-    |> String.replace("&#8220;", ~s("))
-    |> String.replace("&#8221;", ~s("))
-  end
 end

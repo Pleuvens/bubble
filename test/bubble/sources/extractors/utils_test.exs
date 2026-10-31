@@ -29,21 +29,6 @@ defmodule Bubble.Sources.Extractors.UtilsTest do
     end
   end
 
-  describe "decode_html_entities/1" do
-    test "decodes common HTML entities" do
-      assert "Hello & World" = Utils.decode_html_entities("Hello &amp; World")
-      assert "<div>" = Utils.decode_html_entities("&lt;div&gt;")
-      assert ~s("quoted") = Utils.decode_html_entities("&quot;quoted&quot;")
-      assert "It's great" = Utils.decode_html_entities("It&#39;s great")
-    end
-
-    test "handles multiple entities in one string" do
-      input = "Hello &amp; goodbye &lt;world&gt;"
-      expected = "Hello & goodbye <world>"
-      assert expected == Utils.decode_html_entities(input)
-    end
-  end
-
   describe "extract_content/2" do
     test "reads the content attribute of a matching meta tag" do
       html = ~s(<meta name="description" content="Test Description">)
