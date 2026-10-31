@@ -33,12 +33,12 @@ defmodule Bubble.NewsSourcesTest do
     end
   end
 
-  describe "add_user_source/2" do
+  describe "subscribe_user_and_fetch/2" do
     test "enqueues a fetch when the source has gone stale" do
       user = user_fixture()
       source = news_source_fixture()
 
-      assert {:ok, _} = NewsSources.add_user_source(user.id, source.id)
+      assert {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
 
       assert_enqueued worker: FetchSingleSourceJob, args: %{news_source_id: source.id}
     end
@@ -47,7 +47,7 @@ defmodule Bubble.NewsSourcesTest do
       user = user_fixture()
       source = news_source_fixture(%{last_fetched_at: DateTime.utc_now()})
 
-      assert {:ok, _} = NewsSources.add_user_source(user.id, source.id)
+      assert {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
 
       refute_enqueued worker: FetchSingleSourceJob
     end

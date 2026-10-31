@@ -118,7 +118,7 @@ defmodule BubbleWeb.SettingsLive do
           NewsSources.create_and_add_user_source(user_id, Map.put(attrs, :is_featured, true))
 
         existing ->
-          NewsSources.add_user_source(user_id, existing.id)
+          NewsSources.subscribe_user_and_fetch(user_id, existing.id)
       end
 
     case result do
@@ -187,7 +187,7 @@ defmodule BubbleWeb.SettingsLive do
     user_id = socket.assigns.current_user.id
     source = socket.assigns.found_source
 
-    case NewsSources.add_user_source(user_id, source.id) do
+    case NewsSources.subscribe_user_and_fetch(user_id, source.id) do
       {:ok, _} ->
         {:noreply,
          socket
