@@ -5,25 +5,25 @@ defmodule BubbleWeb.UserForgotPasswordLive do
 
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-gray-50 flex items-center justify-center py-16 px-4">
-      <div class="w-full max-w-md">
-        <!-- Header -->
-        <div class="text-center mb-8">
-          <h1 class="text-3xl md:text-4xl text-orange-400 tracking-wide uppercase font-light mb-4">
-            Forgot Password?
-          </h1>
-          <p class="text-sm text-gray-600">
+    <div class="min-h-screen bg-white dark:bg-[#0a0a0c]">
+      <.auth_header />
+
+      <main class="max-w-[480px] mx-auto px-4 pt-[72px] pb-20">
+        <div class="text-center mb-6">
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Forgot password?</h1>
+          <p class="text-[13.5px] text-gray-500 dark:text-[#a1a1aa]">
             We'll send a password reset link to your inbox
           </p>
         </div>
 
-        <!-- Form Card -->
-        <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+        <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
           <form id="reset_password_form" phx-submit="send_email">
             <div class="space-y-4">
-              <!-- Email Input -->
-              <div class="space-y-2">
-                <label for="user_email" class="text-xs uppercase tracking-wider text-gray-600">
+              <div class="space-y-1.5">
+                <label
+                  for="user_email"
+                  class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
+                >
                   Email
                 </label>
                 <input
@@ -32,14 +32,13 @@ defmodule BubbleWeb.UserForgotPasswordLive do
                   name="user[email]"
                   placeholder="your@email.com"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
+                  class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                 />
               </div>
 
-              <!-- Submit Button -->
               <button
                 type="submit"
-                class="w-full bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
+                class="w-full py-3.5 rounded-lg bg-orange-400 hover:bg-orange-500 text-white uppercase text-[13px] font-bold tracking-wide transition-colors"
               >
                 Send Reset Instructions
               </button>
@@ -47,23 +46,8 @@ defmodule BubbleWeb.UserForgotPasswordLive do
           </form>
         </div>
 
-        <!-- Links -->
-        <div class="text-center mt-6 space-x-2 text-sm text-gray-600">
-          <.link
-            href={~p"/users/register"}
-            class="text-orange-400 hover:text-orange-500 transition-colors"
-          >
-            Register
-          </.link>
-          <span>|</span>
-          <.link
-            href={~p"/users/log_in"}
-            class="text-orange-400 hover:text-orange-500 transition-colors"
-          >
-            Log in
-          </.link>
-        </div>
-      </div>
+        <.auth_footer_links />
+      </main>
     </div>
     """
   end
