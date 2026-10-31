@@ -73,7 +73,7 @@ defmodule Bubble.NewsSourcesTest do
 
     test "keeps the first stamp when the source is still orphaned" do
       first_stamp = DateTime.add(DateTime.utc_now(), -10, :day)
-      orphan = news_source_fixture(%{orphaned_at: first_stamp})
+      orphan = orphaned_news_source_fixture(first_stamp)
 
       assert 0 == NewsSources.stamp_newly_orphaned_sources(DateTime.utc_now())
       assert NewsSources.get_source(orphan.id).orphaned_at == first_stamp
@@ -83,7 +83,7 @@ defmodule Bubble.NewsSourcesTest do
   describe "clear_orphan_mark_on_subscribed_sources/0" do
     test "clears the stamp when a subscriber came back" do
       user = user_fixture()
-      source = news_source_fixture(%{orphaned_at: DateTime.utc_now()})
+      source = orphaned_news_source_fixture(DateTime.utc_now())
       {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
 
       assert 1 == NewsSources.clear_orphan_mark_on_subscribed_sources()
@@ -92,7 +92,7 @@ defmodule Bubble.NewsSourcesTest do
 
     test "leaves orphaned sources stamped" do
       stamp = DateTime.utc_now()
-      orphan = news_source_fixture(%{orphaned_at: stamp})
+      orphan = orphaned_news_source_fixture(stamp)
 
       assert 0 == NewsSources.clear_orphan_mark_on_subscribed_sources()
       assert NewsSources.get_source(orphan.id).orphaned_at == stamp
@@ -102,8 +102,8 @@ defmodule Bubble.NewsSourcesTest do
   describe "list_source_ids_orphaned_before/1" do
     test "returns only sources stamped before the cutoff" do
       cutoff = DateTime.add(DateTime.utc_now(), -30, :day)
-      long_orphaned = news_source_fixture(%{orphaned_at: DateTime.add(cutoff, -1, :day)})
-      news_source_fixture(%{orphaned_at: DateTime.add(cutoff, 1, :day)})
+      long_orphaned = orphaned_news_source_fixture(DateTime.add(cutoff, -1, :day))
+      orphaned_news_source_fixture(DateTime.add(cutoff, 1, :day))
       news_source_fixture()
 
       assert [long_orphaned.id] == NewsSources.list_source_ids_orphaned_before(cutoff)

@@ -26,15 +26,7 @@ defmodule Bubble.News.NewsSource do
 
   def changeset(news_source, attrs) do
     news_source
-    |> cast(attrs, [
-      :name,
-      :url,
-      :description,
-      :last_fetched_at,
-      :content_type,
-      :is_featured,
-      :orphaned_at
-    ])
+    |> cast(attrs, [:name, :url, :description, :last_fetched_at, :content_type, :is_featured])
     |> validate_required([:name, :url, :content_type])
     |> FeedUrl.validate_fetchable(:url)
     |> unique_constraint(:url)
