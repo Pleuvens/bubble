@@ -92,8 +92,4 @@ defmodule Bubble.NewsFixtures do
       )
     end
   end
-
-  # Backward compatibility aliases
-  def feed_source_fixture(attrs \\ %{}), do: news_source_fixture(attrs)
-  def feed_fixture(attrs \\ %{}), do: news_fixture(attrs)
 end
