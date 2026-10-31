@@ -1,7 +1,10 @@
 defmodule Bubble.News.FetchNewsCronJobTest do
   use Bubble.DataCase, async: false
 
+  import Bubble.AccountsFixtures
+
   alias Bubble.News.{News, NewsSource, FetchNewsCronJob}
+  alias Bubble.NewsSources
   alias Bubble.Repo
 
   setup do
@@ -13,21 +16,21 @@ defmodule Bubble.News.FetchNewsCronJobTest do
   describe "perform/1" do
     test "fetches feeds from sources that haven't been fetched recently" do
       old_source =
-        insert_news_source(%{
+        insert_subscribed_news_source(%{
           name: "Old Source",
           url: "https://old.example.com/rss",
           last_fetched_at: DateTime.add(DateTime.utc_now(), -2, :day)
         })
 
       recent_source =
-        insert_news_source(%{
+        insert_subscribed_news_source(%{
           name: "Recent Source",
           url: "https://recent.example.com/rss",
           last_fetched_at: DateTime.add(DateTime.utc_now(), -12, :hour)
         })
 
       never_fetched_source =
-        insert_news_source(%{
+        insert_subscribed_news_source(%{
           name: "Never Fetched",
           url: "https://never.example.com/rss",
           last_fetched_at: nil
@@ -70,7 +73,7 @@ defmodule Bubble.News.FetchNewsCronJobTest do
     end
 
     test "handles MetaScraper errors gracefully" do
-      insert_news_source(%{
+      insert_subscribed_news_source(%{
         name: "Test Source",
         url: "https://test2.example.com/rss",
         last_fetched_at: nil
@@ -94,7 +97,7 @@ defmodule Bubble.News.FetchNewsCronJobTest do
     end
 
     test "parses valid published_at dates" do
-      insert_news_source(%{
+      insert_subscribed_news_source(%{
         name: "Test Source",
         url: "https://test3.example.com/rss",
         last_fetched_at: nil
@@ -119,7 +122,7 @@ defmodule Bubble.News.FetchNewsCronJobTest do
     end
 
     test "handles invalid published_at dates by using current time" do
-      insert_news_source(%{
+      insert_subscribed_news_source(%{
         name: "Test Source",
         url: "https://test4.example.com/rss",
         last_fetched_at: nil
@@ -145,7 +148,7 @@ defmodule Bubble.News.FetchNewsCronJobTest do
 
     test "updates last_fetched_at for processed sources" do
       source =
-        insert_news_source(%{
+        insert_subscribed_news_source(%{
           name: "Test Source",
           url: "https://test5.example.com/rss",
           last_fetched_at: nil
@@ -172,7 +175,7 @@ defmodule Bubble.News.FetchNewsCronJobTest do
 
     test "processes multiple feed sources concurrently" do
       Enum.map(1..3, fn i ->
-        insert_news_source(%{
+        insert_subscribed_news_source(%{
           name: "Source #{i}",
           url: "https://source#{i}.example.com/rss",
           last_fetched_at: nil
@@ -211,7 +214,7 @@ defmodule Bubble.News.FetchNewsCronJobTest do
     test "handles duplicate URLs gracefully without crashing" do
       # First, create an existing news item
       source1 =
-        insert_news_source(%{
+        insert_subscribed_news_source(%{
           name: "Source 1",
           url: "https://duplicate.example.com/rss",
           last_fetched_at: DateTime.add(DateTime.utc_now(), -2, :day)
@@ -256,7 +259,7 @@ defmodule Bubble.News.FetchNewsCronJobTest do
 
     test "one failing source does not block other sources from being processed" do
       Enum.map(1..3, fn i ->
-        insert_news_source(%{
+        insert_subscribed_news_source(%{
           name: "Source #{i}",
           url: "https://multi#{i}.example.com/rss",
           last_fetched_at: nil
@@ -289,6 +292,99 @@ defmodule Bubble.News.FetchNewsCronJobTest do
       # Two sources succeeded, one failed — we should have 2 news items, not 0
       assert Repo.aggregate(News, :count) == 2
     end
+
+    test "skips sources nobody subscribes to" do
+      insert_news_source(%{
+        name: "Orphan Source",
+        url: "https://orphan.example.com/rss",
+        last_fetched_at: nil
+      })
+
+      subscribed =
+        insert_subscribed_news_source(%{
+          name: "Subscribed Source",
+          url: "https://subscribed.example.com/rss",
+          last_fetched_at: nil
+        })
+
+      Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
+        case conn.host do
+          "subscribed.example.com" ->
+            Req.Test.text(conn, mock_rss_feed("https://example.com/news/subscribed"))
+        end
+      end)
+
+      Req.Test.stub(Bubble.Sources.HttpClient, fn conn ->
+        Req.Test.html(
+          conn,
+          "<html><head><meta name=\"description\" content=\"Test description\"></head></html>"
+        )
+      end)
+
+      assert :ok = FetchNewsCronJob.perform(%Oban.Job{args: %{}})
+
+      assert [news] = Repo.all(News)
+      assert news.news_source_id == subscribed.id
+    end
+
+    test "fetches a source whose only subscription is paused" do
+      source =
+        insert_news_source(%{
+          name: "Paused Source",
+          url: "https://paused.example.com/rss",
+          last_fetched_at: nil
+        })
+
+      {:ok, user_source} = NewsSources.add_user_source(user_fixture().id, source.id)
+      {:ok, _} = NewsSources.update_user_news_source(user_source, %{is_active: false})
+
+      Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
+        Req.Test.text(conn, mock_rss_feed("https://example.com/news/paused"))
+      end)
+
+      Req.Test.stub(Bubble.Sources.HttpClient, fn conn ->
+        Req.Test.html(
+          conn,
+          "<html><head><meta name=\"description\" content=\"Test description\"></head></html>"
+        )
+      end)
+
+      assert :ok = FetchNewsCronJob.perform(%Oban.Job{args: %{}})
+
+      assert Repo.aggregate(News, :count) == 1
+    end
+
+    test "fetches a source only once when several users subscribe to it" do
+      insert_subscribed_news_source(%{
+        name: "Shared Source",
+        url: "https://shared.example.com/rss",
+        last_fetched_at: nil
+      })
+
+      source = Repo.one!(NewsSource)
+      {:ok, _} = NewsSources.add_user_source(user_fixture().id, source.id)
+
+      Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
+        Req.Test.text(conn, mock_rss_feed("https://example.com/news/shared"))
+      end)
+
+      Req.Test.stub(Bubble.Sources.HttpClient, fn conn ->
+        Req.Test.html(
+          conn,
+          "<html><head><meta name=\"description\" content=\"Test description\"></head></html>"
+        )
+      end)
+
+      assert :ok = FetchNewsCronJob.perform(%Oban.Job{args: %{}})
+
+      assert Repo.aggregate(News, :count) == 1
+    end
+  end
+
+  defp insert_subscribed_news_source(attrs) do
+    source = insert_news_source(attrs)
+    {:ok, _} = NewsSources.add_user_source(user_fixture().id, source.id)
+    source
   end
 
   defp insert_news_source(attrs) do

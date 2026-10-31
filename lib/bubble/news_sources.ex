@@ -50,6 +50,22 @@ defmodule Bubble.NewsSources do
   end
 
   def add_user_source(user_id, news_source_id) do
+    with {:ok, user_news_source} <- insert_user_source(user_id, news_source_id) do
+      enqueue_fetch_when_stale(news_source_id)
+      {:ok, user_news_source}
+    end
+  end
+
+  def create_and_add_user_source(user_id, attrs) do
+    Repo.transact(fn ->
+      with {:ok, source} <- create_source(attrs),
+           {:ok, _user_news_source} <- add_user_source(user_id, source.id) do
+        {:ok, source}
+      end
+    end)
+  end
+
+  defp insert_user_source(user_id, news_source_id) do
     %UserNewsSource{}
     |> UserNewsSource.changeset(%{
       user_id: user_id,
@@ -58,17 +74,18 @@ defmodule Bubble.NewsSources do
     |> Repo.insert()
   end
 
-  def create_and_add_user_source(user_id, attrs) do
-    Repo.transact(fn ->
-      with {:ok, source} <- create_source(attrs),
-           {:ok, _user_news_source} <- add_user_source(user_id, source.id) do
-        %{news_source_id: source.id}
-        |> FetchSingleSourceJob.new()
-        |> Oban.insert()
+  defp enqueue_fetch_when_stale(news_source_id) do
+    if stale?(news_source_id) do
+      %{news_source_id: news_source_id}
+      |> FetchSingleSourceJob.new()
+      |> Oban.insert()
+    end
+  end
 
-        {:ok, source}
-      end
-    end)
+  defp stale?(news_source_id) do
+    NewsSource.due_for_fetch()
+    |> where([ns], ns.id == ^news_source_id)
+    |> Repo.exists?()
   end
 
   def remove_user_source(user_id, news_source_id) do
