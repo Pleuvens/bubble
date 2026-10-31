@@ -5,7 +5,6 @@ defmodule BubbleWeb.UserSettingsLive do
 
   def render(assigns) do
     ~H"""
-    <.flash_group flash={@flash} />
     <div class="min-h-screen bg-gray-50 py-16">
       <!-- Header -->
       <div class="fixed top-0 left-0 right-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200">
