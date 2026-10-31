@@ -5,6 +5,7 @@ defmodule Bubble.News.FetchNewsCronJob do
 
   alias Bubble.News.NewsSource
   alias Bubble.News.SourceOverride
+  alias Bubble.News.UserNewsSource
   alias Bubble.Repo
   alias Bubble.Sources.NewsProcessor
   alias Bubble.Sources.RSSClient
@@ -13,13 +14,7 @@ defmodule Bubble.News.FetchNewsCronJob do
 
   @impl true
   def perform(%Oban.Job{}) do
-    sources =
-      Repo.all(
-        from(ns in NewsSource,
-          where:
-            is_nil(ns.last_fetched_at) or fragment("now() - ? > '23 hours'", ns.last_fetched_at)
-        )
-      )
+    sources = Repo.all(subscribed_sources_due_for_fetch())
 
     custom_url_map =
       SourceOverride.custom_urls_by_source_id()
@@ -64,5 +59,14 @@ defmodule Bubble.News.FetchNewsCronJob do
     end)
 
     :ok
+  end
+
+  defp subscribed_sources_due_for_fetch do
+    from(ns in NewsSource,
+      join: uns in UserNewsSource,
+      on: uns.news_source_id == ns.id,
+      where: is_nil(ns.last_fetched_at) or fragment("now() - ? > '23 hours'", ns.last_fetched_at),
+      distinct: true
+    )
   end
 end
