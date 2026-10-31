@@ -8,7 +8,7 @@ defmodule BubbleWeb.FeedLiveTest do
 
   describe "mount/3" do
     test "mounts successfully with news data", %{conn: conn, user: user} do
-      {_feed_source, _feed} = insert_test_feed_with_subscription(user.id)
+      {_news_source, _news} = subscribed_news_fixture(user.id)
 
       {:ok, _view, html} = live(conn, ~p"/")
 
@@ -23,11 +23,10 @@ defmodule BubbleWeb.FeedLiveTest do
     end
 
     test "only shows feeds from subscribed sources", %{conn: conn, user: user} do
-      {_feed_source, _feed} =
-        insert_test_feed_with_subscription(user.id, title: "Subscribed Feed")
+      {_news_source, _news} = subscribed_news_fixture(user.id, title: "Subscribed Feed")
 
-      other_source = feed_source_fixture(name: "Other Source")
-      feed_fixture(title: "Unsubscribed Feed", news_source_id: other_source.id)
+      other_source = news_source_fixture(name: "Other Source")
+      news_fixture(title: "Unsubscribed Feed", news_source_id: other_source.id)
 
       {:ok, _view, html} = live(conn, ~p"/")
 
@@ -36,7 +35,7 @@ defmodule BubbleWeb.FeedLiveTest do
     end
 
     test "assigns initial state correctly", %{conn: conn, user: user} do
-      {_feed_source, _feed} = insert_test_feed_with_subscription(user.id)
+      {_news_source, _news} = subscribed_news_fixture(user.id)
 
       {:ok, view, _html} = live(conn, ~p"/")
 
@@ -56,7 +55,7 @@ defmodule BubbleWeb.FeedLiveTest do
 
   describe "handle_event/3 - set_index" do
     test "sets current_index correctly", %{conn: conn, user: user} do
-      insert_multiple_test_feeds_with_subscription(user.id)
+      subscribed_news_list_fixture(user.id)
 
       {:ok, view, _html} = live(conn, ~p"/")
 
@@ -66,7 +65,7 @@ defmodule BubbleWeb.FeedLiveTest do
     end
 
     test "clamps index to valid range", %{conn: conn, user: user} do
-      insert_multiple_test_feeds_with_subscription(user.id)
+      subscribed_news_list_fixture(user.id)
 
       {:ok, view, _html} = live(conn, ~p"/")
 
@@ -80,7 +79,7 @@ defmodule BubbleWeb.FeedLiveTest do
 
   describe "render/1" do
     test "displays news content directly without expand", %{conn: conn, user: user} do
-      {_feed_source, _feed} = insert_test_feed_with_subscription(user.id)
+      {_news_source, _news} = subscribed_news_fixture(user.id)
 
       {:ok, _view, html} = live(conn, ~p"/")
 
@@ -88,16 +87,16 @@ defmodule BubbleWeb.FeedLiveTest do
     end
 
     test "displays external link to article source", %{conn: conn, user: user} do
-      {_feed_source, feed} = insert_test_feed_with_subscription(user.id)
+      {_news_source, news} = subscribed_news_fixture(user.id)
 
       {:ok, _view, html} = live(conn, ~p"/")
 
-      assert html =~ "href=\"#{feed.url}\""
+      assert html =~ "href=\"#{news.url}\""
       assert html =~ "target=\"_blank\""
     end
 
     test "displays published date", %{conn: conn, user: user} do
-      {_feed_source, _feed} = insert_test_feed_with_subscription(user.id)
+      {_news_source, _news} = subscribed_news_fixture(user.id)
 
       {:ok, _view, html} = live(conn, ~p"/")
 
@@ -106,7 +105,7 @@ defmodule BubbleWeb.FeedLiveTest do
     end
 
     test "renders multiple news items", %{conn: conn, user: user} do
-      insert_multiple_test_feeds_with_subscription(user.id)
+      subscribed_news_list_fixture(user.id)
 
       {:ok, _view, html} = live(conn, ~p"/")
 
@@ -116,7 +115,7 @@ defmodule BubbleWeb.FeedLiveTest do
     end
 
     test "includes keyboard navigation hint", %{conn: conn, user: user} do
-      {_feed_source, _feed} = insert_test_feed_with_subscription(user.id)
+      {_news_source, _news} = subscribed_news_fixture(user.id)
 
       {:ok, _view, html} = live(conn, ~p"/")
 
@@ -133,7 +132,7 @@ defmodule BubbleWeb.FeedLiveTest do
 
   describe "integration tests" do
     test "browse news items with keyboard nav", %{conn: conn, user: user} do
-      insert_multiple_test_feeds_with_subscription(user.id)
+      subscribed_news_list_fixture(user.id)
 
       {:ok, view, html} = live(conn, ~p"/")
 
@@ -142,46 +141,6 @@ defmodule BubbleWeb.FeedLiveTest do
 
       render_hook(view, "set_index", %{"index" => 1})
       assert has_element?(view, "[data-active='1']")
-    end
-  end
-
-  # Helper functions
-  defp insert_test_feed_with_subscription(user_id, attrs \\ []) do
-    feed_source = feed_source_fixture()
-    subscribe_user_to_source(user_id, feed_source.id)
-
-    now = DateTime.utc_now() |> DateTime.truncate(:second)
-
-    feed_attrs =
-      Keyword.merge(
-        [
-          title: "Test News Title",
-          description: "Test description for the news article",
-          content: "Test content for the news article",
-          published_at: now,
-          news_source_id: feed_source.id
-        ],
-        attrs
-      )
-
-    feed = feed_fixture(feed_attrs)
-    {feed_source, feed}
-  end
-
-  defp insert_multiple_test_feeds_with_subscription(user_id) do
-    feed_source = feed_source_fixture()
-    subscribe_user_to_source(user_id, feed_source.id)
-
-    now = DateTime.utc_now() |> DateTime.truncate(:second)
-
-    for i <- 1..3 do
-      feed_fixture(
-        title: "Test News Title #{i}",
-        description: "Test description for the news article #{i}",
-        content: "Test content for the news article #{i}",
-        published_at: DateTime.add(now, -i, :minute),
-        news_source_id: feed_source.id
-      )
     end
   end
 end
