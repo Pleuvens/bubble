@@ -4,10 +4,7 @@ defmodule Bubble.Sources.NewsProcessor do
   Handles content extraction, date parsing, and database insertion.
   """
 
-  import Ecto.Query
-
   alias Bubble.News.News
-  alias Bubble.News.NewsSource
   alias Bubble.Repo
   alias Bubble.Sources.MetaScraper
 
@@ -44,58 +41,6 @@ defmodule Bubble.Sources.NewsProcessor do
     |> Repo.update()
 
     Logger.info("Successfully fetched #{length(news_items)} items from #{source.url}")
-    :ok
-  end
-
-  @doc """
-  Processes news items for multiple sources and saves them to the database.
-  Updates all sources' last_fetched_at timestamps.
-
-  Takes a list of sources and a map of fetched news keyed by URL.
-  Returns :ok on success.
-  """
-  def process_and_save_news_batch(sources, fetched_news) when is_list(sources) do
-    # Create a map of url -> news_source_id for quick lookup
-    url_to_source_id =
-      sources
-      |> Enum.map(fn source -> {source.url, source.id} end)
-      |> Map.new()
-
-    news_to_insert =
-      Enum.flat_map(fetched_news, fn {source_url, {:ok, news_items}} ->
-        news_source_id = Map.get(url_to_source_id, source_url)
-
-        Enum.map(news_items, fn news ->
-          content = fetch_content_with_fallback(news)
-
-          published_at =
-            case DateTime.from_iso8601(news.published_at) do
-              {:ok, dt, _offset} -> dt
-              {:error, _} -> DateTime.utc_now() |> DateTime.truncate(:second)
-            end
-
-          news
-          |> Map.put(:published_at, published_at)
-          |> Map.put(:content, content)
-          |> Map.put(:news_source_id, news_source_id)
-        end)
-      end)
-
-    # Insert news items, skipping any that violate the unique URL constraint
-    Repo.insert_all(News, news_to_insert, on_conflict: :nothing)
-
-    # Update last_fetched_at only for successfully fetched sources
-    successfully_fetched_source_ids =
-      fetched_news
-      |> Enum.filter(fn {_url, result} -> match?({:ok, _}, result) end)
-      |> Enum.map(fn {source_url, _result} -> Map.get(url_to_source_id, source_url) end)
-      |> Enum.reject(&is_nil/1)
-
-    if successfully_fetched_source_ids != [] do
-      from(ns in NewsSource, where: ns.id in ^successfully_fetched_source_ids)
-      |> Repo.update_all(set: [last_fetched_at: DateTime.utc_now()])
-    end
-
     :ok
   end
 

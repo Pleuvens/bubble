@@ -7,18 +7,6 @@ defmodule Bubble.News do
   alias Bubble.Repo
 
   @doc """
-  Lists all news (for backward compatibility or admin views).
-  """
-  def list_news do
-    Repo.all(
-      from(n in News,
-        order_by: [desc: n.published_at],
-        limit: 10
-      )
-    )
-  end
-
-  @doc """
   Lists news from sources the user is subscribed to and has active.
   Shows news from today and yesterday only.
   """
