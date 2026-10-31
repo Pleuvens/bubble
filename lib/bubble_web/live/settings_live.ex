@@ -2,6 +2,7 @@ defmodule BubbleWeb.SettingsLive do
   use BubbleWeb, :live_view
 
   import BubbleWeb.Components.ActiveToggle
+  import BubbleWeb.Components.IconButton
 
   alias Bubble.News.FetchSingleSourceJob
   alias Bubble.News.SourceOverride
@@ -100,64 +101,26 @@ defmodule BubbleWeb.SettingsLive do
                 <%= if sub && elem(sub, 0).id != @editing_featured_id do %>
                   <% {db_source, _} = sub %>
                   <div class="flex items-center justify-end gap-1 pt-3 mt-3 border-t border-gray-100 dark:border-[#1f1f22]">
-                    <button
-                      phx-click="edit_featured"
-                      phx-value-id={db_source.id}
+                    <.icon_button
+                      click="edit_featured"
+                      source_id={db_source.id}
                       title="Edit feed URL"
-                      class="w-11 h-11 flex items-center justify-center text-gray-500 dark:text-[#71717a] hover:text-orange-400 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-[#1f1f22]"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="w-4 h-4"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" />
-                      </svg>
-                    </button>
-                    <button
-                      phx-click="fetch_source"
-                      phx-value-id={db_source.id}
+                      icon={:pencil}
+                    />
+                    <.icon_button
+                      click="fetch_source"
+                      source_id={db_source.id}
                       title="Fetch now"
-                      class="w-11 h-11 flex items-center justify-center text-gray-500 dark:text-[#71717a] hover:text-orange-400 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-[#1f1f22]"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="w-4 h-4"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" />
-                      </svg>
-                    </button>
-                    <button
-                      phx-click="delete_source"
-                      phx-value-id={db_source.id}
-                      data-confirm={"Unsubscribe from #{source.name}?"}
+                      icon={:refresh}
+                    />
+                    <.icon_button
+                      click="delete_source"
+                      source_id={db_source.id}
                       title="Unsubscribe"
-                      class="w-11 h-11 flex items-center justify-center text-gray-500 dark:text-[#71717a] hover:text-red-500 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-[#1f1f22]"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="w-4 h-4"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                      </svg>
-                    </button>
+                      icon={:trash}
+                      hover_tone={:red}
+                      confirm={"Unsubscribe from #{source.name}?"}
+                    />
                   </div>
                 <% end %>
               </div>
@@ -266,65 +229,26 @@ defmodule BubbleWeb.SettingsLive do
                         Subscribed {Calendar.strftime(user_source.inserted_at, "%b %d, %Y")}
                       </p>
                       <div class="flex gap-1">
-                        <button
-                          phx-click="edit_source"
-                          phx-value-id={source.id}
+                        <.icon_button
+                          click="edit_source"
+                          source_id={source.id}
                           title="Edit source"
-                          class="w-11 h-11 flex items-center justify-center text-gray-500 dark:text-[#71717a] hover:text-orange-400 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-[#1f1f22]"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="w-4 h-4"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" />
-                          </svg>
-                        </button>
-                        <button
-                          phx-click="fetch_source"
-                          phx-value-id={source.id}
+                          icon={:pencil}
+                        />
+                        <.icon_button
+                          click="fetch_source"
+                          source_id={source.id}
                           title="Fetch now"
-                          class="w-11 h-11 flex items-center justify-center text-gray-500 dark:text-[#71717a] hover:text-orange-400 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-[#1f1f22]"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="w-4 h-4"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
-                            <path d="M21 3v5h-5" />
-                          </svg>
-                        </button>
-                        <button
-                          phx-click="delete_source"
-                          phx-value-id={source.id}
-                          data-confirm="Are you sure you want to unsubscribe from this RSS source?"
+                          icon={:refresh}
+                        />
+                        <.icon_button
+                          click="delete_source"
+                          source_id={source.id}
                           title="Unsubscribe"
-                          class="w-11 h-11 flex items-center justify-center text-gray-500 dark:text-[#71717a] hover:text-red-500 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-[#1f1f22]"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="w-4 h-4"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                          </svg>
-                        </button>
+                          icon={:trash}
+                          hover_tone={:red}
+                          confirm="Are you sure you want to unsubscribe from this RSS source?"
+                        />
                       </div>
                     </div>
                   </div>
