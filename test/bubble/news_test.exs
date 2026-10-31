@@ -25,14 +25,14 @@ defmodule Bubble.NewsTest do
       now = DateTime.utc_now() |> DateTime.truncate(:second)
 
       # Create feeds for both sources
-      active_feed =
+      active_news =
         news_fixture(
           title: "News from Active Source",
           news_source_id: active_source.id,
           published_at: DateTime.add(now, -1, :hour)
         )
 
-      inactive_feed =
+      inactive_news =
         news_fixture(
           title: "News from Inactive Source",
           news_source_id: inactive_source.id,
@@ -48,9 +48,9 @@ defmodule Bubble.NewsTest do
 
       # Should only include news from active source
       assert length(news) == 1
-      assert hd(news).id == active_feed.id
+      assert hd(news).id == active_news.id
       assert hd(news).title == "News from Active Source"
-      refute Enum.any?(news, fn n -> n.id == inactive_feed.id end)
+      refute Enum.any?(news, fn n -> n.id == inactive_news.id end)
     end
 
     test "returns empty list when all subscriptions are inactive", %{user: user} do
@@ -87,21 +87,21 @@ defmodule Bubble.NewsTest do
       now = DateTime.utc_now() |> DateTime.truncate(:second)
 
       # Create feeds for all sources
-      feed1 =
+      news1 =
         news_fixture(
           title: "News 1",
           news_source_id: source1.id,
           published_at: DateTime.add(now, -1, :hour)
         )
 
-      feed2 =
+      news2 =
         news_fixture(
           title: "News 2",
           news_source_id: source2.id,
           published_at: DateTime.add(now, -2, :hour)
         )
 
-      feed3 =
+      news3 =
         news_fixture(
           title: "News 3",
           news_source_id: source3.id,
@@ -118,9 +118,9 @@ defmodule Bubble.NewsTest do
       # Should include news from source1 and source3, but not source2
       assert length(news) == 2
       news_ids = Enum.map(news, & &1.id)
-      assert feed1.id in news_ids
-      assert feed3.id in news_ids
-      refute feed2.id in news_ids
+      assert news1.id in news_ids
+      assert news3.id in news_ids
+      refute news2.id in news_ids
     end
 
     test "returns news ordered by published_at descending", %{user: user} do
@@ -133,21 +133,21 @@ defmodule Bubble.NewsTest do
       now = DateTime.utc_now() |> DateTime.truncate(:second)
 
       # Create feeds with different publish dates
-      old_feed =
+      old_news =
         news_fixture(
           title: "Old News",
           news_source_id: source.id,
           published_at: DateTime.add(now, -3, :hour)
         )
 
-      recent_feed =
+      recent_news =
         news_fixture(
           title: "Recent News",
           news_source_id: source.id,
           published_at: DateTime.add(now, -1, :hour)
         )
 
-      middle_feed =
+      middle_news =
         news_fixture(
           title: "Middle News",
           news_source_id: source.id,
@@ -159,9 +159,9 @@ defmodule Bubble.NewsTest do
 
       # Should be ordered by published_at descending
       assert length(news) == 3
-      assert Enum.at(news, 0).id == recent_feed.id
-      assert Enum.at(news, 1).id == middle_feed.id
-      assert Enum.at(news, 2).id == old_feed.id
+      assert Enum.at(news, 0).id == recent_news.id
+      assert Enum.at(news, 1).id == middle_news.id
+      assert Enum.at(news, 2).id == old_news.id
     end
 
     test "limits results to 50 items", %{user: user} do
@@ -202,12 +202,12 @@ defmodule Bubble.NewsTest do
       {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
 
       # Create feed
-      feed = news_fixture(title: "Test News", news_source_id: source.id)
+      created_news = news_fixture(title: "Test News", news_source_id: source.id)
 
       # Initially should see the feed
       news = News.list_user_news(user.id)
       assert length(news) == 1
-      assert hd(news).id == feed.id
+      assert hd(news).id == created_news.id
 
       # Deactivate subscription
       user_news_source = NewsSources.get_user_news_source(user.id, source.id)
@@ -224,7 +224,7 @@ defmodule Bubble.NewsTest do
       # Should see the feed again
       news = News.list_user_news(user.id)
       assert length(news) == 1
-      assert hd(news).id == feed.id
+      assert hd(news).id == created_news.id
     end
   end
 
