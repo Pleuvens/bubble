@@ -5,30 +5,29 @@ defmodule Bubble.Sources.Extractors.Utils do
   Provides common functionality for:
   - Text cleaning and normalization
   - HTML entity decoding
-  - Meta tag extraction with regex patterns
+  - Meta tag and element selection with Floki
   """
 
-  @doc """
-  Extracts content from meta tags using a list of regex patterns.
+  @type locator :: {:meta_content, String.t()} | {:element_text, String.t()}
 
-  Tries each pattern in order and returns the first match found.
-  Returns cleaned text if found, `nil` otherwise.
+  @spec extract_content(String.t(), locator()) :: String.t() | nil
+  def extract_content(html, locator) when is_binary(html) do
+    case Floki.parse_document(html) do
+      {:ok, document} -> document |> read_locator(locator) |> clean_text()
+      {:error, _reason} -> nil
+    end
+  end
 
-  ## Examples
+  defp read_locator(document, {:meta_content, selector}) do
+    document
+    |> Floki.attribute(selector, "content")
+    |> List.first()
+  end
 
-      iex> html = ~s(<meta property="og:title" content="Hello World">)
-      iex> patterns = [~r/<meta\\s+property="og:title"\\s+content="([^"]+)"/i]
-      iex> Utils.extract_meta_content(html, patterns)
-      "Hello World"
-  """
-  @spec extract_meta_content(String.t(), [Regex.t()]) :: String.t() | nil
-  def extract_meta_content(html, patterns) when is_list(patterns) do
-    Enum.find_value(patterns, fn pattern ->
-      case Regex.run(pattern, html) do
-        [_, content] -> clean_text(content)
-        _ -> nil
-      end
-    end)
+  defp read_locator(document, {:element_text, selector}) do
+    document
+    |> Floki.find(selector)
+    |> Floki.text()
   end
 
   @doc """

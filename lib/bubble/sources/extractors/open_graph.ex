@@ -12,18 +12,8 @@ defmodule Bubble.Sources.Extractors.OpenGraph do
   use Bubble.Sources.Extractors.Extractor
 
   @impl true
-  def description_patterns do
-    [
-      ~r/<meta\s+property=["']og:description["']\s+content=["']([^"']+)["']/i,
-      ~r/<meta\s+content=["']([^"']+)["']\s+property=["']og:description["']/i
-    ]
-  end
+  def description_locator, do: {:meta_content, ~s(meta[property="og:description"])}
 
   @impl true
-  def title_patterns do
-    [
-      ~r/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i,
-      ~r/<meta\s+content=["']([^"']+)["']\s+property=["']og:title["']/i
-    ]
-  end
+  def title_locator, do: {:meta_content, ~s(meta[property="og:title"])}
 end
