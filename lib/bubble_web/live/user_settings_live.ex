@@ -6,18 +6,7 @@ defmodule BubbleWeb.UserSettingsLive do
   def render(assigns) do
     ~H"""
     <div class="min-h-screen bg-gray-50 py-16">
-      <!-- Header -->
-      <div class="fixed top-0 left-0 right-0 z-10 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-        <div class="flex items-center justify-between px-6 py-4">
-          <h1 class="text-sm uppercase tracking-wider text-gray-600">Account Settings</h1>
-          <.link
-            navigate={~p"/"}
-            class="text-xs uppercase tracking-wider text-gray-600 hover:text-orange-400 transition-colors px-4 py-2 rounded-md hover:bg-gray-100"
-          >
-            <span class="inline-block mr-2">✕</span> Close
-          </.link>
-        </div>
-      </div>
+      <.app_header current_user={@current_user} />
 
       <div class="max-w-2xl mx-auto px-8 mt-8">
         <!-- Change Email Section -->
