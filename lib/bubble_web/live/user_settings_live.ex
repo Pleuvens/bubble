@@ -43,13 +43,7 @@ defmodule BubbleWeb.UserSettingsLive do
                     phx-debounce="blur"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
                   />
-                  <%= if @email_form[:email].errors && @email_form[:email].errors != [] do %>
-                    <%= for error <- @email_form[:email].errors do %>
-                      <p class="text-red-600 text-xs mt-1">
-                        {BubbleWeb.CoreComponents.translate_error(error)}
-                      </p>
-                    <% end %>
-                  <% end %>
+                  <.field_errors field={@email_form[:email]} />
                 </div>
 
                 <!-- Current Password Input -->
@@ -68,11 +62,7 @@ defmodule BubbleWeb.UserSettingsLive do
                     required
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
                   />
-                  <%= if @email_form.errors[:current_password] do %>
-                    <p class="text-red-600 text-xs mt-1">
-                      {BubbleWeb.CoreComponents.translate_error(@email_form.errors[:current_password])}
-                    </p>
-                  <% end %>
+                  <.form_error error={@email_form.errors[:current_password]} />
                 </div>
 
                 <!-- Submit Button -->
@@ -124,13 +114,7 @@ defmodule BubbleWeb.UserSettingsLive do
                     phx-debounce="blur"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
                   />
-                  <%= if @password_form[:password].errors && @password_form[:password].errors != [] do %>
-                    <%= for error <- @password_form[:password].errors do %>
-                      <p class="text-red-600 text-xs mt-1">
-                        {BubbleWeb.CoreComponents.translate_error(error)}
-                      </p>
-                    <% end %>
-                  <% end %>
+                  <.field_errors field={@password_form[:password]} />
                 </div>
 
                 <!-- Confirm Password Input -->
@@ -149,14 +133,7 @@ defmodule BubbleWeb.UserSettingsLive do
                     phx-debounce="blur"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
                   />
-                  <%= if @password_form[:password_confirmation].errors &&
-                        @password_form[:password_confirmation].errors != [] do %>
-                    <%= for error <- @password_form[:password_confirmation].errors do %>
-                      <p class="text-red-600 text-xs mt-1">
-                        {BubbleWeb.CoreComponents.translate_error(error)}
-                      </p>
-                    <% end %>
-                  <% end %>
+                  <.field_errors field={@password_form[:password_confirmation]} />
                 </div>
 
                 <!-- Current Password Input -->
@@ -175,13 +152,7 @@ defmodule BubbleWeb.UserSettingsLive do
                     required
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
                   />
-                  <%= if @password_form.errors[:current_password] do %>
-                    <p class="text-red-600 text-xs mt-1">
-                      {BubbleWeb.CoreComponents.translate_error(
-                        @password_form.errors[:current_password]
-                      )}
-                    </p>
-                  <% end %>
+                  <.form_error error={@password_form.errors[:current_password]} />
                 </div>
 
                 <!-- Submit Button -->
