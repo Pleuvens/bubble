@@ -6,10 +6,6 @@ defmodule Bubble.NewsSources do
   alias Bubble.News.UserNewsSource
   alias Bubble.Repo
 
-  def list_sources do
-    Repo.all(NewsSource)
-  end
-
   def list_user_sources(user_id) do
     from(ns in NewsSource,
       join: uns in UserNewsSource,
