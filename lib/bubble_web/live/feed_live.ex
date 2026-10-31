@@ -175,8 +175,12 @@ defmodule BubbleWeb.FeedLive do
     |> String.upcase()
   end
 
-  defp truncate(text, max) when byte_size(text) <= max, do: text
-  defp truncate(text, max), do: String.slice(text, 0, max) <> "…"
+  defp truncate(text, max_characters) do
+    case String.split_at(text, max_characters) do
+      {kept, ""} -> kept
+      {kept, _dropped} -> kept <> "…"
+    end
+  end
 
   @url_regex ~r/(https?:\/\/[^\s]+)/
 
