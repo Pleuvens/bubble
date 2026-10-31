@@ -108,6 +108,24 @@ defmodule BubbleWeb.CoreComponents do
     )
   end
 
+  attr :field, Phoenix.HTML.FormField, required: true
+  attr :class, :string, default: "text-red-600 text-xs mt-1"
+
+  def field_errors(assigns) do
+    ~H"""
+    <p :for={error <- @field.errors} class={@class}>{translate_error(error)}</p>
+    """
+  end
+
+  attr :error, :any, required: true
+  attr :class, :string, default: "text-red-600 text-xs mt-1"
+
+  def form_error(assigns) do
+    ~H"""
+    <p :if={@error} class={@class}>{translate_error(@error)}</p>
+    """
+  end
+
   def translate_error({msg, opts}) do
     if count = opts[:count] do
       Gettext.dngettext(BubbleWeb.Gettext, "errors", msg, msg, count, opts)
