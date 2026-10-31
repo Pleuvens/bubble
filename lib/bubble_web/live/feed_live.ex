@@ -83,13 +83,7 @@ defmodule BubbleWeb.FeedLive do
 
                     <%= if item.description not in [nil, ""] do %>
                       <p class="text-[13.5px] text-gray-500 dark:text-[#a1a1aa] leading-relaxed mb-2.5">
-                        <.text_with_links text={
-                          item.description
-                          |> HtmlSanitizeEx.strip_tags()
-                          |> HtmlEntities.decode()
-                          |> String.trim()
-                          |> truncate(280)
-                        } />
+                        <.text_with_links text={description_preview(item.description)} />
                       </p>
                     <% end %>
 
@@ -176,6 +170,16 @@ defmodule BubbleWeb.FeedLive do
     |> Enum.map(&String.first/1)
     |> Enum.join("")
     |> String.upcase()
+  end
+
+  @preview_characters 280
+
+  defp description_preview(description) do
+    description
+    |> HtmlSanitizeEx.strip_tags()
+    |> HtmlEntities.decode()
+    |> String.trim()
+    |> truncate(@preview_characters)
   end
 
   defp truncate(text, max_characters) do
