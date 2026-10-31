@@ -45,6 +45,46 @@ defmodule Bubble.NewsSources do
     Repo.delete_all(from s in NewsSource, where: s.id == ^id)
   end
 
+  def stamp_newly_orphaned_sources(orphaned_at) do
+    {stamped_count, _} =
+      sources_without_subscription()
+      |> where([source: ns], is_nil(ns.orphaned_at))
+      |> Repo.update_all(set: [orphaned_at: orphaned_at])
+
+    stamped_count
+  end
+
+  def clear_orphan_mark_on_subscribed_sources do
+    {cleared_count, _} =
+      sources_with_subscription()
+      |> where([source: ns], not is_nil(ns.orphaned_at))
+      |> Repo.update_all(set: [orphaned_at: nil])
+
+    cleared_count
+  end
+
+  def list_source_ids_orphaned_before(cutoff) do
+    Repo.all(
+      from ns in NewsSource,
+        where: not is_nil(ns.orphaned_at) and ns.orphaned_at < ^cutoff,
+        select: ns.id
+    )
+  end
+
+  defp sources_without_subscription do
+    from ns in NewsSource, as: :source, where: not exists(subscriptions_of_source())
+  end
+
+  defp sources_with_subscription do
+    from ns in NewsSource, as: :source, where: exists(subscriptions_of_source())
+  end
+
+  defp subscriptions_of_source do
+    from uns in UserNewsSource,
+      where: uns.news_source_id == parent_as(:source).id,
+      select: 1
+  end
+
   def subscribe_user_and_fetch(user_id, news_source_id) do
     with {:ok, user_news_source} <- insert_user_source(user_id, news_source_id) do
       enqueue_fetch_when_stale(news_source_id)

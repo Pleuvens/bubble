@@ -4,7 +4,10 @@ defmodule Bubble.NewsFixtures do
   entities via the `Bubble.News` and `Bubble.NewsSources` contexts.
   """
 
+  import Ecto.Query
+
   alias Bubble.News.News
+  alias Bubble.News.NewsSource
   alias Bubble.NewsSources
   alias Bubble.Repo
 
@@ -21,6 +24,21 @@ defmodule Bubble.NewsFixtures do
 
     {:ok, news_source} = NewsSources.create_source(attrs)
     news_source
+  end
+
+  @doc """
+  Generate a news source already stamped as orphaned.
+  """
+  def orphaned_news_source_fixture(orphaned_at, attrs \\ %{}) do
+    source = news_source_fixture(attrs)
+
+    {1, _} =
+      Repo.update_all(
+        from(ns in NewsSource, where: ns.id == ^source.id),
+        set: [orphaned_at: orphaned_at]
+      )
+
+    %{source | orphaned_at: orphaned_at}
   end
 
   @doc """

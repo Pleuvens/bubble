@@ -16,6 +16,7 @@ defmodule Bubble.News.NewsSource do
     field :last_fetched_at, :utc_datetime_usec
     field :content_type, Ecto.Enum, values: [:article, :video], default: :article
     field :is_featured, :boolean, default: false
+    field :orphaned_at, :utc_datetime_usec
 
     has_many :news, News
     many_to_many :users, User, join_through: UserNewsSource
