@@ -10,6 +10,8 @@ defmodule Bubble.Sources.NewsProcessor do
 
   require Logger
 
+  @minimum_substantial_content_length 20
+
   @doc """
   Processes news items for a given source and saves them to the database.
   Updates the source's last_fetched_at timestamp.
@@ -69,13 +71,12 @@ defmodule Bubble.Sources.NewsProcessor do
     end
   end
 
-  # Check if content is substantial (not empty, not just whitespace, has meaningful length)
   defp has_substantial_content?(nil), do: false
   defp has_substantial_content?(""), do: false
 
   defp has_substantial_content?(content) when is_binary(content) do
     trimmed = String.trim(content)
-    trimmed != "" and String.length(trimmed) > 20
+    String.length(trimmed) > @minimum_substantial_content_length
   end
 
   defp has_substantial_content?(_), do: false

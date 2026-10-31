@@ -11,12 +11,26 @@ defmodule Bubble.Sources.Extractors.Utils do
 
   @type locator :: {:meta_content, String.t()} | {:element_text, String.t()}
 
+  @minimum_metadata_length 10
+
   @spec extract_content(String.t(), locator()) :: String.t() | nil
   def extract_content(html, locator) when is_binary(html) do
     case Floki.parse_document(html) do
-      {:ok, document} -> document |> read_locator(locator) |> clean_text()
-      {:error, _reason} -> nil
+      {:ok, document} ->
+        document
+        |> read_locator(locator)
+        |> clean_text()
+        |> keep_long_enough_metadata()
+
+      {:error, _reason} ->
+        nil
     end
+  end
+
+  defp keep_long_enough_metadata(nil), do: nil
+
+  defp keep_long_enough_metadata(text) do
+    if String.length(text) > @minimum_metadata_length, do: text, else: nil
   end
 
   defp read_locator(document, {:meta_content, selector}) do
@@ -32,19 +46,18 @@ defmodule Bubble.Sources.Extractors.Utils do
   end
 
   @doc """
-  Cleans and validates text content.
+  Cleans text content.
 
   - Trims whitespace
   - Decodes HTML entities
-  - Ensures minimum length (> 10 characters)
-  - Returns `nil` for invalid text
+  - Returns `nil` for text that is empty once trimmed
 
   ## Examples
 
       iex> Utils.clean_text("  Hello &amp; World  ")
       "Hello & World"
 
-      iex> Utils.clean_text("Hi")
+      iex> Utils.clean_text("   ")
       nil
 
       iex> Utils.clean_text(nil)
@@ -60,11 +73,7 @@ defmodule Bubble.Sources.Extractors.Utils do
       |> String.trim()
       |> HtmlEntities.decode()
 
-    if cleaned != "" and String.length(cleaned) > 10 do
-      cleaned
-    else
-      nil
-    end
+    if cleaned == "", do: nil, else: cleaned
   end
 
   def clean_text(_), do: nil
