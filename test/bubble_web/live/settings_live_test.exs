@@ -209,8 +209,12 @@ defmodule BubbleWeb.SettingsLiveTest do
 
   describe "RSS Sources list - editing a source" do
     setup %{user: user} do
-      source = news_source_fixture(%{name: "Shared Name", url: "https://shared.example.com/rss"})
-      subscribe_user_to_source(user.id, source.id)
+      source =
+        subscribed_news_source_fixture(user.id, %{
+          name: "Shared Name",
+          url: "https://shared.example.com/rss"
+        })
+
       {:ok, source: source}
     end
 

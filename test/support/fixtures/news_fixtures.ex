@@ -48,6 +48,33 @@ defmodule Bubble.NewsFixtures do
     {:ok, _} = NewsSources.add_user_source(user_id, news_source_id)
   end
 
+  def subscribed_news_source_fixture(user_id, attrs \\ %{}) do
+    news_source = news_source_fixture(attrs)
+    subscribe_user_to_source(user_id, news_source.id)
+    news_source
+  end
+
+  def subscribed_news_fixture(user_id, attrs \\ []) do
+    news_source = subscribed_news_source_fixture(user_id)
+    news = news_fixture(Keyword.put(attrs, :news_source_id, news_source.id))
+    {news_source, news}
+  end
+
+  def subscribed_news_list_fixture(user_id, count \\ 3) do
+    news_source = subscribed_news_source_fixture(user_id)
+    now = DateTime.utc_now() |> DateTime.truncate(:second)
+
+    for position <- 1..count do
+      news_fixture(
+        title: "Test News Title #{position}",
+        description: "Test description for the news article #{position}",
+        content: "Test content for the news article #{position}",
+        published_at: DateTime.add(now, -position, :minute),
+        news_source_id: news_source.id
+      )
+    end
+  end
+
   # Backward compatibility aliases
   def feed_source_fixture(attrs \\ %{}), do: news_source_fixture(attrs)
   def feed_fixture(attrs \\ %{}), do: news_fixture(attrs)
