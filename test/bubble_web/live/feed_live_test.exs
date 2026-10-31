@@ -44,6 +44,16 @@ defmodule BubbleWeb.FeedLiveTest do
     end
   end
 
+  describe "mount/3 - unauthenticated" do
+    test "shows the landing page instead of news", %{conn: _} do
+      conn = build_conn()
+
+      {:ok, _view, html} = live(conn, ~p"/")
+
+      assert html =~ "Your feed, your way."
+    end
+  end
+
   describe "handle_event/3 - set_index" do
     test "sets current_index correctly", %{conn: conn, user: user} do
       insert_multiple_test_feeds_with_subscription(user.id)
