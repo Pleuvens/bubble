@@ -16,8 +16,8 @@ defmodule BubbleWeb.UserConfirmationInstructionsLive do
             We'll send a new confirmation link to your inbox
           </p>
         </div>
-        
-    <!-- Form Card -->
+
+        <!-- Form Card -->
         <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
           <form id="resend_confirmation_form" phx-submit="send_instructions">
             <div class="space-y-4">
@@ -35,8 +35,8 @@ defmodule BubbleWeb.UserConfirmationInstructionsLive do
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
                 />
               </div>
-              
-    <!-- Submit Button -->
+
+              <!-- Submit Button -->
               <button
                 type="submit"
                 class="w-full bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-md uppercase tracking-wider transition-colors"
@@ -46,8 +46,8 @@ defmodule BubbleWeb.UserConfirmationInstructionsLive do
             </div>
           </form>
         </div>
-        
-    <!-- Links -->
+
+        <!-- Links -->
         <div class="text-center mt-6 space-x-2 text-sm text-gray-600">
           <.link
             href={~p"/users/register"}
