@@ -1,6 +1,7 @@
 defmodule BubbleWeb.SettingsLive do
   use BubbleWeb, :live_view
 
+  import BubbleWeb.Components.FeaturedSourceCard
   import BubbleWeb.Components.ActiveToggle
   import BubbleWeb.Components.IconButton
 
@@ -34,97 +35,12 @@ defmodule BubbleWeb.SettingsLive do
           </div>
 
           <div class="flex flex-col gap-3.5">
-            <%= for source <- @featured_sources do %>
-              <% sub = Map.get(@featured_subscriptions, source.name) %>
-              <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
-                <div class="flex items-start justify-between gap-4">
-                  <div class="flex-1">
-                    <div class="flex items-center gap-2 mb-1">
-                      <span class="text-[14.5px] font-semibold text-gray-900 dark:text-white">
-                        {source.name}
-                      </span>
-                      <%= if source.content_type == :video do %>
-                        <span class="text-[11px] font-semibold uppercase tracking-wide bg-orange-50 dark:bg-orange-400/[0.14] text-orange-500 dark:text-orange-300 px-1.5 py-0.5 rounded-full">
-                          Video
-                        </span>
-                      <% end %>
-                    </div>
-                    <p class="text-[13.5px] text-gray-500 dark:text-[#a1a1aa] leading-relaxed">
-                      {source.description}
-                    </p>
-                  </div>
-                  <%= if sub do %>
-                    <% {db_source, user_source} = sub %>
-                    <.active_toggle source_id={db_source.id} active={user_source.is_active} />
-                  <% else %>
-                    <button
-                      phx-click="subscribe_featured"
-                      phx-value-url={source.url}
-                      class="shrink-0 border border-orange-400 text-orange-400 hover:bg-orange-400 hover:text-white uppercase tracking-wider px-3 py-1.5 rounded-lg transition-all text-[12px] font-semibold"
-                    >
-                      Subscribe
-                    </button>
-                  <% end %>
-                </div>
-                <%!-- Edit URL form --%>
-                <%= if sub && elem(sub, 0).id == @editing_featured_id do %>
-                  <% {db_source, db_user_source} = sub %>
-                  <form
-                    phx-submit="save_featured_url"
-                    phx-value-id={db_source.id}
-                    class="mt-4 flex gap-2"
-                  >
-                    <input
-                      type="url"
-                      name="url"
-                      value={db_user_source.custom_url || db_source.url}
-                      placeholder="https://www.youtube.com/feeds/videos.xml?..."
-                      required
-                      class="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white"
-                    />
-                    <button
-                      type="submit"
-                      class="px-3 py-2 bg-orange-400 hover:bg-orange-500 text-white rounded-lg text-xs uppercase tracking-wider transition-colors"
-                    >
-                      Save
-                    </button>
-                    <button
-                      type="button"
-                      phx-click="cancel_edit_featured"
-                      class="px-3 py-2 border border-gray-200 dark:border-[#26262a] text-gray-600 dark:text-[#a1a1aa] rounded-lg text-xs uppercase tracking-wider hover:bg-gray-50 dark:hover:bg-[#1f1f22] transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </form>
-                <% end %>
-                <%!-- Controls row (only when subscribed and not editing) --%>
-                <%= if sub && elem(sub, 0).id != @editing_featured_id do %>
-                  <% {db_source, _} = sub %>
-                  <div class="flex items-center justify-end gap-1 pt-3 mt-3 border-t border-gray-100 dark:border-[#1f1f22]">
-                    <.icon_button
-                      click="edit_featured"
-                      source_id={db_source.id}
-                      title="Edit feed URL"
-                      icon={:pencil}
-                    />
-                    <.icon_button
-                      click="fetch_source"
-                      source_id={db_source.id}
-                      title="Fetch now"
-                      icon={:refresh}
-                    />
-                    <.icon_button
-                      click="delete_source"
-                      source_id={db_source.id}
-                      title="Unsubscribe"
-                      icon={:trash}
-                      hover_tone={:red}
-                      confirm={"Unsubscribe from #{source.name}?"}
-                    />
-                  </div>
-                <% end %>
-              </div>
-            <% end %>
+            <.featured_source_card
+              :for={source <- @featured_sources}
+              source={source}
+              subscription={Map.get(@featured_subscriptions, source.name)}
+              editing_featured_id={@editing_featured_id}
+            />
           </div>
         </section>
 
