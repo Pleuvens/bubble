@@ -45,7 +45,7 @@ defmodule Bubble.NewsFixtures do
   Subscribe a user to a news source.
   """
   def subscribe_user_to_source(user_id, news_source_id) do
-    {:ok, _} = NewsSources.add_user_source(user_id, news_source_id)
+    {:ok, _} = NewsSources.subscribe_user_and_fetch(user_id, news_source_id)
   end
 
   def subscribed_news_source_fixture(user_id, attrs \\ %{}) do

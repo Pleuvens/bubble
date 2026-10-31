@@ -45,17 +45,17 @@ defmodule Bubble.NewsSources do
     Repo.delete_all(from s in NewsSource, where: s.id == ^id)
   end
 
-  def add_user_source(user_id, news_source_id) do
+  def subscribe_user_and_fetch(user_id, news_source_id) do
     with {:ok, user_news_source} <- insert_user_source(user_id, news_source_id) do
       enqueue_fetch_when_stale(news_source_id)
       {:ok, user_news_source}
     end
   end
 
-  def create_and_add_user_source(user_id, attrs) do
+  def create_source_and_subscribe(user_id, attrs) do
     Repo.transact(fn ->
       with {:ok, source} <- create_source(attrs),
-           {:ok, _user_news_source} <- add_user_source(user_id, source.id) do
+           {:ok, _user_news_source} <- subscribe_user_and_fetch(user_id, source.id) do
         {:ok, source}
       end
     end)

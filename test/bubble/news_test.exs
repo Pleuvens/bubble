@@ -19,8 +19,8 @@ defmodule Bubble.NewsTest do
       inactive_source = feed_source_fixture(name: "Inactive Source")
 
       # Subscribe user to both sources
-      {:ok, _} = NewsSources.add_user_source(user.id, active_source.id)
-      {:ok, _} = NewsSources.add_user_source(user.id, inactive_source.id)
+      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, active_source.id)
+      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, inactive_source.id)
 
       now = DateTime.utc_now() |> DateTime.truncate(:second)
 
@@ -58,7 +58,7 @@ defmodule Bubble.NewsTest do
       source = feed_source_fixture()
 
       # Subscribe user
-      {:ok, _} = NewsSources.add_user_source(user.id, source.id)
+      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
 
       # Create feed
       feed_fixture(title: "Test News", news_source_id: source.id)
@@ -80,9 +80,9 @@ defmodule Bubble.NewsTest do
       source3 = feed_source_fixture(name: "Source 3")
 
       # Subscribe user to all three
-      {:ok, _} = NewsSources.add_user_source(user.id, source1.id)
-      {:ok, _} = NewsSources.add_user_source(user.id, source2.id)
-      {:ok, _} = NewsSources.add_user_source(user.id, source3.id)
+      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source1.id)
+      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source2.id)
+      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source3.id)
 
       now = DateTime.utc_now() |> DateTime.truncate(:second)
 
@@ -128,7 +128,7 @@ defmodule Bubble.NewsTest do
       source = feed_source_fixture()
 
       # Subscribe user
-      {:ok, _} = NewsSources.add_user_source(user.id, source.id)
+      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
 
       now = DateTime.utc_now() |> DateTime.truncate(:second)
 
@@ -166,7 +166,7 @@ defmodule Bubble.NewsTest do
 
     test "limits results to 50 items", %{user: user} do
       source = feed_source_fixture()
-      {:ok, _} = NewsSources.add_user_source(user.id, source.id)
+      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
 
       now = DateTime.utc_now() |> DateTime.truncate(:second)
 
@@ -199,7 +199,7 @@ defmodule Bubble.NewsTest do
       source = feed_source_fixture()
 
       # Subscribe user
-      {:ok, _} = NewsSources.add_user_source(user.id, source.id)
+      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
 
       # Create feed
       feed = feed_fixture(title: "Test News", news_source_id: source.id)
@@ -234,8 +234,8 @@ defmodule Bubble.NewsTest do
       other_user = user_fixture()
       source = feed_source_fixture(name: "Shared Name", description: "Shared description")
 
-      {:ok, _} = NewsSources.add_user_source(user.id, source.id)
-      {:ok, _} = NewsSources.add_user_source(other_user.id, source.id)
+      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
+      {:ok, _} = NewsSources.subscribe_user_and_fetch(other_user.id, source.id)
 
       feed_fixture(
         title: "An article",

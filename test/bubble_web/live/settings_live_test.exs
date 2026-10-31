@@ -105,7 +105,7 @@ defmodule BubbleWeb.SettingsLiveTest do
           is_featured: true
         })
 
-      {:ok, _} = NewsSources.add_user_source(user.id, source.id)
+      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
       {:ok, source: source}
     end
 
@@ -180,10 +180,10 @@ defmodule BubbleWeb.SettingsLiveTest do
         content_type: :video,
         is_featured: true
       })
-      |> then(fn source -> NewsSources.add_user_source(user.id, source.id) end)
+      |> then(fn source -> NewsSources.subscribe_user_and_fetch(user.id, source.id) end)
 
       regular = news_source_fixture(%{name: "Hacker News", url: "https://hnrss.org/frontpage"})
-      NewsSources.add_user_source(user.id, regular.id)
+      NewsSources.subscribe_user_and_fetch(user.id, regular.id)
 
       {:ok, _view, html} = live(conn, ~p"/settings")
 
@@ -199,7 +199,7 @@ defmodule BubbleWeb.SettingsLiveTest do
 
     test "manually added sources appear in RSS Sources list", %{conn: conn, user: user} do
       source = news_source_fixture(%{name: "My Blog", url: "https://myblog.com/rss"})
-      NewsSources.add_user_source(user.id, source.id)
+      NewsSources.subscribe_user_and_fetch(user.id, source.id)
 
       {:ok, _view, html} = live(conn, ~p"/settings")
 
