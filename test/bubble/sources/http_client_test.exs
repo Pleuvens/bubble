@@ -51,6 +51,33 @@ defmodule Bubble.Sources.HttpClientTest do
                HttpClient.fetch_html("https://example.com", max_redirects: 0)
     end
 
+    test "refuses a URL that resolves to an internal address" do
+      assert {:error, :blocked_url} = HttpClient.fetch_html("https://loopback.test/page")
+      assert {:error, :blocked_url} = HttpClient.fetch_html("https://metadata.test/page")
+      assert {:error, :blocked_url} = HttpClient.fetch_html("https://private.test/page")
+    end
+
+    test "refuses an internal address written as an IP literal" do
+      assert {:error, :blocked_url} =
+               HttpClient.fetch_html("http://169.254.169.254/latest/meta-data/")
+    end
+
+    test "refuses a public URL that redirects to an internal address" do
+      Req.Test.stub(HttpClient, fn conn ->
+        case conn.request_path do
+          "/page" ->
+            conn
+            |> Plug.Conn.put_resp_header("location", "http://169.254.169.254/latest/meta-data/")
+            |> Plug.Conn.send_resp(302, "")
+
+          _ ->
+            Req.Test.html(conn, "<html>secret</html>")
+        end
+      end)
+
+      assert {:error, :blocked_url} = HttpClient.fetch_html("https://public.test/page")
+    end
+
     test "returns error for timeout" do
       Req.Test.expect(HttpClient, fn conn ->
         Req.Test.transport_error(conn, :timeout)

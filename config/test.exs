@@ -48,4 +48,7 @@ config :bubble,
   http_client_req_options: [
     plug: {Req.Test, Bubble.Sources.HttpClient},
     retry: false
+  ],
+  ssrf_check_options: [
+    resolver: &Bubble.Support.StubResolver.resolve/3
   ]
