@@ -82,11 +82,12 @@ defmodule BubbleWeb.FeedLive do
 
                     <%= if item.description not in [nil, ""] do %>
                       <p class="text-[13.5px] text-gray-500 dark:text-[#a1a1aa] leading-relaxed mb-2.5">
-                        {item.description
-                        |> HtmlSanitizeEx.strip_tags()
-                        |> String.trim()
-                        |> truncate(280)
-                        |> linkify()}
+                        <.text_with_links text={
+                          item.description
+                          |> HtmlSanitizeEx.strip_tags()
+                          |> String.trim()
+                          |> truncate(280)
+                        } />
                       </p>
                     <% end %>
 
@@ -182,17 +183,38 @@ defmodule BubbleWeb.FeedLive do
     end
   end
 
-  @url_regex ~r/(https?:\/\/[^\s]+)/
+  @url_regex ~r/https?:\/\/[^\s]+/
 
-  defp linkify(text) do
-    escaped = Phoenix.HTML.html_escape(text) |> Phoenix.HTML.safe_to_string()
+  attr :text, :string, required: true
 
-    result =
-      Regex.replace(@url_regex, escaped, fn url ->
-        ~s(<a href="#{url}" target="_blank" rel="noopener" class="text-orange-400 hover:text-orange-500 underline underline-offset-2 break-all">#{url}</a>)
-      end)
+  defp text_with_links(assigns) do
+    assigns = assign(assigns, :parts, split_around_urls(assigns.text))
 
-    Phoenix.HTML.raw(result)
+    ~H"""
+    <%= for part <- @parts do %>
+      <%= case part do %>
+        <% {:url, url} -> %>
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener"
+            class="text-orange-400 hover:text-orange-500 underline underline-offset-2 break-all"
+          >{url}</a>
+        <% {:plain, plain} -> %>
+          {plain}
+      <% end %>
+    <% end %>
+    """
+  end
+
+  defp split_around_urls(text) do
+    @url_regex
+    |> Regex.split(text, include_captures: true, trim: true)
+    |> Enum.map(&tag_part/1)
+  end
+
+  defp tag_part(part) do
+    if Regex.match?(@url_regex, part), do: {:url, part}, else: {:plain, part}
   end
 
   def mount(_params, _session, socket) do
