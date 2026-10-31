@@ -1,6 +1,8 @@
 defmodule BubbleWeb.SettingsLive do
   use BubbleWeb, :live_view
 
+  import BubbleWeb.Components.ActiveToggle
+
   alias Bubble.News.FetchSingleSourceJob
   alias Bubble.News.SourceOverride
   alias Bubble.NewsSources
@@ -52,23 +54,7 @@ defmodule BubbleWeb.SettingsLive do
                   </div>
                   <%= if sub do %>
                     <% {db_source, user_source} = sub %>
-                    <button
-                      phx-click="toggle_active"
-                      phx-value-id={db_source.id}
-                      class={[
-                        "shrink-0 relative inline-flex items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2",
-                        "w-[46px] h-[27px]",
-                        if(user_source.is_active,
-                          do: "bg-orange-400",
-                          else: "bg-gray-200 dark:bg-[#3f3f46]"
-                        )
-                      ]}
-                    >
-                      <span class={[
-                        "inline-block w-[21px] h-[21px] transform rounded-full bg-white transition-transform",
-                        if(user_source.is_active, do: "translate-x-[22px]", else: "translate-x-[3px]")
-                      ]}></span>
-                    </button>
+                    <.active_toggle source_id={db_source.id} active={user_source.is_active} />
                   <% else %>
                     <button
                       phx-click="subscribe_featured"
@@ -273,26 +259,7 @@ defmodule BubbleWeb.SettingsLive do
                           {SourceOverride.description(source, user_source) || "No description"}
                         </p>
                       </div>
-                      <button
-                        phx-click="toggle_active"
-                        phx-value-id={source.id}
-                        class={[
-                          "shrink-0 relative inline-flex items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2",
-                          "w-[46px] h-[27px]",
-                          if(user_source.is_active,
-                            do: "bg-orange-400",
-                            else: "bg-gray-200 dark:bg-[#3f3f46]"
-                          )
-                        ]}
-                      >
-                        <span class={[
-                          "inline-block w-[21px] h-[21px] transform rounded-full bg-white transition-transform",
-                          if(user_source.is_active,
-                            do: "translate-x-[22px]",
-                            else: "translate-x-[3px]"
-                          )
-                        ]}></span>
-                      </button>
+                      <.active_toggle source_id={source.id} active={user_source.is_active} />
                     </div>
                     <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-[#1f1f22]">
                       <p class="text-[12px] text-gray-400 dark:text-[#52525b]">
