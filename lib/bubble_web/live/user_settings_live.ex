@@ -1,6 +1,9 @@
 defmodule BubbleWeb.UserSettingsLive do
   use BubbleWeb, :live_view
 
+  import BubbleWeb.Components.UserEmailForm
+  import BubbleWeb.Components.UserPasswordForm
+
   alias Bubble.Accounts
 
   def render(assigns) do
@@ -9,151 +12,42 @@ defmodule BubbleWeb.UserSettingsLive do
       <.app_header current_user={@current_user} />
 
       <div class="max-w-[480px] mx-auto px-4 pt-[72px] pb-20">
-        <section class="mb-10">
-          <h2 class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a] mb-4">
-            Change email
-          </h2>
+        <.settings_section title="Change email" class="mb-10">
+          <.user_email_form
+            email_form={@email_form}
+            current_password={@email_form_current_password}
+          />
+        </.settings_section>
 
-          <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
-            <form id="email_form" phx-submit="update_email" phx-change="validate_email">
-              <div class="space-y-4">
-                <div class="space-y-1.5">
-                  <label
-                    for="user_email"
-                    class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
-                  >
-                    New Email
-                  </label>
-                  <input
-                    type="email"
-                    id="user_email"
-                    name="user[email]"
-                    value={@email_form[:email].value}
-                    required
-                    phx-debounce="blur"
-                    class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
-                  />
-                  <.field_errors field={@email_form[:email]} />
-                </div>
-
-                <div class="space-y-1.5">
-                  <label
-                    for="current_password_for_email"
-                    class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
-                  >
-                    Current Password
-                  </label>
-                  <input
-                    type="password"
-                    id="current_password_for_email"
-                    name="current_password"
-                    value={@email_form_current_password}
-                    required
-                    class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
-                  />
-                  <.form_error error={@email_form.errors[:current_password]} />
-                </div>
-
-                <button
-                  type="submit"
-                  class="w-full py-3.5 rounded-lg bg-orange-400 hover:bg-orange-500 text-white uppercase text-[13px] font-bold tracking-wide transition-colors"
-                >
-                  Change Email
-                </button>
-              </div>
-            </form>
-          </div>
-        </section>
-
-        <section>
-          <h2 class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a] mb-4">
-            Change password
-          </h2>
-
-          <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
-            <form
-              id="password_form"
-              action={~p"/users/log_in?_action=password_updated"}
-              method="post"
-              phx-change="validate_password"
-              phx-submit="update_password"
-              phx-trigger-action={@trigger_submit}
-            >
-              <input
-                name={@password_form[:email].name}
-                type="hidden"
-                id="hidden_user_email"
-                value={@current_email}
-              />
-
-              <div class="space-y-4">
-                <div class="space-y-1.5">
-                  <label
-                    for="user_password"
-                    class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
-                  >
-                    New Password
-                  </label>
-                  <input
-                    type="password"
-                    id="user_password"
-                    name="user[password]"
-                    value={@password_form[:password].value}
-                    required
-                    phx-debounce="blur"
-                    class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
-                  />
-                  <.field_errors field={@password_form[:password]} />
-                </div>
-
-                <div class="space-y-1.5">
-                  <label
-                    for="user_password_confirmation"
-                    class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
-                  >
-                    Confirm New Password
-                  </label>
-                  <input
-                    type="password"
-                    id="user_password_confirmation"
-                    name="user[password_confirmation]"
-                    value={@password_form[:password_confirmation].value}
-                    phx-debounce="blur"
-                    class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
-                  />
-                  <.field_errors field={@password_form[:password_confirmation]} />
-                </div>
-
-                <div class="space-y-1.5">
-                  <label
-                    for="current_password_for_password"
-                    class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
-                  >
-                    Current Password
-                  </label>
-                  <input
-                    type="password"
-                    id="current_password_for_password"
-                    name="current_password"
-                    value={@current_password}
-                    required
-                    class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
-                  />
-                  <.form_error error={@password_form.errors[:current_password]} />
-                </div>
-
-                <button
-                  type="submit"
-                  class="w-full py-3.5 rounded-lg bg-orange-400 hover:bg-orange-500 text-white uppercase text-[13px] font-bold tracking-wide transition-colors"
-                >
-                  Change Password
-                </button>
-              </div>
-            </form>
-          </div>
-        </section>
+        <.settings_section title="Change password">
+          <.user_password_form
+            password_form={@password_form}
+            current_email={@current_email}
+            current_password={@current_password}
+            trigger_submit={@trigger_submit}
+            log_in_action={~p"/users/log_in?_action=password_updated"}
+          />
+        </.settings_section>
       </div>
     </div>
+    """
+  end
+
+  attr :title, :string, required: true
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  defp settings_section(assigns) do
+    ~H"""
+    <section {@rest}>
+      <h2 class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a] mb-4">
+        {@title}
+      </h2>
+
+      <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
+        {render_slot(@inner_block)}
+      </div>
+    </section>
     """
   end
 
