@@ -2,8 +2,7 @@ defmodule BubbleWeb.SettingsLive do
   use BubbleWeb, :live_view
 
   import BubbleWeb.Components.FeaturedSourceCard
-  import BubbleWeb.Components.ActiveToggle
-  import BubbleWeb.Components.IconButton
+  import BubbleWeb.Components.SourceRow
 
   alias Bubble.News.FetchSingleSourceJob
   alias Bubble.News.SourceOverride
@@ -58,119 +57,13 @@ defmodule BubbleWeb.SettingsLive do
           </div>
 
           <div class="flex flex-col gap-3.5">
-            <%= for {source, user_source} <- @sources do %>
-              <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
-                <%= if @editing_source_id == source.id do %>
-                  <form phx-submit="save_source" phx-value-id={source.id} class="space-y-3">
-                    <div class="space-y-1.5">
-                      <label
-                        for={"edit_name_#{source.id}"}
-                        class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
-                      >
-                        Name
-                      </label>
-                      <input
-                        type="text"
-                        id={"edit_name_#{source.id}"}
-                        name="name"
-                        value={@edit_form.name}
-                        required
-                        class="w-full px-3 py-2 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white text-sm transition"
-                      />
-                    </div>
-                    <div class="space-y-1.5">
-                      <label
-                        for={"edit_url_#{source.id}"}
-                        class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
-                      >
-                        RSS URL
-                      </label>
-                      <input
-                        type="url"
-                        id={"edit_url_#{source.id}"}
-                        name="url"
-                        value={@edit_form.url}
-                        required
-                        class="w-full px-3 py-2 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white text-sm transition"
-                      />
-                    </div>
-                    <div class="space-y-1.5">
-                      <label
-                        for={"edit_description_#{source.id}"}
-                        class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
-                      >
-                        Description
-                      </label>
-                      <textarea
-                        id={"edit_description_#{source.id}"}
-                        name="description"
-                        rows="2"
-                        class="w-full px-3 py-2 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none resize-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white text-sm transition"
-                      ><%= @edit_form.description %></textarea>
-                    </div>
-                    <div class="flex gap-2">
-                      <button
-                        type="submit"
-                        class="flex-1 bg-orange-400 hover:bg-orange-500 text-white px-4 py-2 rounded-lg text-[13px] font-semibold uppercase tracking-wide transition-colors"
-                      >
-                        Save
-                      </button>
-                      <button
-                        type="button"
-                        phx-click="cancel_edit"
-                        class="flex-1 border border-gray-200 dark:border-[#26262a] text-gray-700 dark:text-[#a1a1aa] hover:bg-gray-50 dark:hover:bg-[#1f1f22] px-4 py-2 rounded-lg text-[13px] font-semibold uppercase tracking-wide transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                <% else %>
-                  <div>
-                    <div class="flex items-start justify-between gap-4 mb-3">
-                      <div class="flex-1 min-w-0">
-                        <span class="text-[14.5px] font-semibold text-gray-900 dark:text-white">
-                          {SourceOverride.name(source, user_source)}
-                        </span>
-                        <p class="text-[12px] text-gray-400 dark:text-[#52525b] mt-0.5 break-all">
-                          {SourceOverride.url(source, user_source)}
-                        </p>
-                        <p class="text-[13.5px] text-gray-500 dark:text-[#a1a1aa] leading-relaxed mt-1">
-                          {SourceOverride.description(source, user_source) || "No description"}
-                        </p>
-                      </div>
-                      <.active_toggle source_id={source.id} active={user_source.is_active} />
-                    </div>
-                    <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-[#1f1f22]">
-                      <p class="text-[12px] text-gray-400 dark:text-[#52525b]">
-                        Subscribed {Calendar.strftime(user_source.inserted_at, "%b %d, %Y")}
-                      </p>
-                      <div class="flex gap-1">
-                        <.icon_button
-                          click="edit_source"
-                          source_id={source.id}
-                          title="Edit source"
-                          icon={:pencil}
-                        />
-                        <.icon_button
-                          click="fetch_source"
-                          source_id={source.id}
-                          title="Fetch now"
-                          icon={:refresh}
-                        />
-                        <.icon_button
-                          click="delete_source"
-                          source_id={source.id}
-                          title="Unsubscribe"
-                          icon={:trash}
-                          hover_tone={:red}
-                          confirm="Are you sure you want to unsubscribe from this RSS source?"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                <% end %>
-              </div>
-            <% end %>
+            <.source_row
+              :for={{source, user_source} <- @sources}
+              source={source}
+              user_source={user_source}
+              editing_source_id={@editing_source_id}
+              edit_form={@edit_form}
+            />
           </div>
         </section>
       </div>
