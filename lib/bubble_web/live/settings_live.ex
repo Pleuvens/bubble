@@ -112,16 +112,7 @@ defmodule BubbleWeb.SettingsLive do
     user_id = socket.assigns.current_user.id
     attrs = Enum.find(@featured_sources, &(&1.url == url))
 
-    result =
-      case NewsSources.get_featured_source_by_name(attrs.name) do
-        nil ->
-          NewsSources.create_source_and_subscribe(user_id, Map.put(attrs, :is_featured, true))
-
-        existing ->
-          NewsSources.subscribe_user_and_fetch(user_id, existing.id)
-      end
-
-    case result do
+    case subscribe_to_featured_source(user_id, attrs) do
       {:ok, _} ->
         {:noreply,
          socket
@@ -303,6 +294,13 @@ defmodule BubbleWeb.SettingsLive do
 
       {0, _} ->
         {:noreply, socket |> put_flash(:error, "Failed to unsubscribe from source.")}
+    end
+  end
+
+  defp subscribe_to_featured_source(user_id, attrs) do
+    case NewsSources.get_featured_source_by_name(attrs.name) do
+      nil -> NewsSources.create_source_and_subscribe(user_id, Map.put(attrs, :is_featured, true))
+      existing -> NewsSources.subscribe_user_and_fetch(user_id, existing.id)
     end
   end
 
