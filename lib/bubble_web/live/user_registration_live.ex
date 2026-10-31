@@ -9,61 +9,7 @@ defmodule BubbleWeb.UserRegistrationLive do
   def render(assigns) do
     ~H"""
     <div class="min-h-screen bg-white dark:bg-[#0a0a0c]">
-      <header class="fixed top-0 left-0 right-0 z-10 bg-white/90 dark:bg-[#0a0a0c]/90 backdrop-blur-sm border-b border-gray-200 dark:border-[#26262a]">
-        <div class="max-w-[480px] mx-auto px-4 py-3 flex items-center justify-between">
-          <span class="text-[13px] font-bold tracking-[0.14em] uppercase text-gray-900 dark:text-white">
-            Bubble
-          </span>
-          <div class="flex items-center gap-2.5">
-            <button
-              id="dark-mode-toggle"
-              phx-hook="DarkModeToggle"
-              title="Toggle dark mode"
-              class="w-[38px] h-[38px] flex items-center justify-center rounded-full border border-gray-200 dark:border-[#26262a] text-gray-500 dark:text-[#a1a1aa] hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              <svg
-                class="dark:hidden w-[15px] h-[15px]"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-              </svg>
-              <svg
-                class="hidden dark:block w-[15px] h-[15px]"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-              </svg>
-            </button>
-            <.link
-              navigate={~p"/"}
-              class="w-11 h-11 flex items-center justify-center text-gray-500 dark:text-[#a1a1aa] hover:text-gray-900 dark:hover:text-white transition-colors rounded-full border border-gray-200 dark:border-[#26262a]"
-              aria-label="Back to feed"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                class="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M18 6 6 18M6 6l12 12" />
-              </svg>
-            </.link>
-          </div>
-        </div>
-      </header>
+      <.auth_header />
 
       <main class="max-w-[480px] mx-auto px-4 pt-[72px] pb-20">
         <div class="text-center mb-6">
