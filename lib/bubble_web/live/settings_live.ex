@@ -39,7 +39,8 @@ defmodule BubbleWeb.SettingsLive do
               :for={source <- @featured_sources}
               source={source}
               subscription={Map.get(@featured_subscriptions, source.name)}
-              editing_featured_id={@editing_featured_id}
+              editing_source_id={@editing_source_id}
+              edit_form={@edit_form}
             />
           </div>
         </section>
@@ -86,7 +87,6 @@ defmodule BubbleWeb.SettingsLive do
      socket
      |> assign_sources(user_id)
      |> assign(:featured_sources, @featured_sources)
-     |> assign(:editing_featured_id, nil)
      |> assign(:modal_step, nil)
      |> assign(:editing_source_id, nil)
      |> assign(:url_input, "")
@@ -121,27 +121,6 @@ defmodule BubbleWeb.SettingsLive do
 
       {:error, _} ->
         {:noreply, socket |> put_flash(:error, "Failed to subscribe.")}
-    end
-  end
-
-  def handle_event("edit_featured", %{"id" => id}, socket) do
-    {:noreply, assign(socket, :editing_featured_id, id)}
-  end
-
-  def handle_event("cancel_edit_featured", _params, socket) do
-    {:noreply, assign(socket, :editing_featured_id, nil)}
-  end
-
-  def handle_event("save_featured_url", %{"id" => id, "url" => url}, socket) do
-    case NewsSources.get_user_news_source(socket.assigns.current_user.id, id) do
-      nil ->
-        {:noreply,
-         socket
-         |> assign(:editing_featured_id, nil)
-         |> refresh_with_error("You are not subscribed to that source.")}
-
-      user_source ->
-        save_user_source_url(socket, user_source, url)
     end
   end
 
@@ -301,20 +280,6 @@ defmodule BubbleWeb.SettingsLive do
     case NewsSources.get_featured_source_by_name(attrs.name) do
       nil -> NewsSources.create_source_and_subscribe(user_id, Map.put(attrs, :is_featured, true))
       existing -> NewsSources.subscribe_user_and_fetch(user_id, existing.id)
-    end
-  end
-
-  defp save_user_source_url(socket, user_source, url) do
-    case NewsSources.update_user_news_source(user_source, %{custom_url: url}) do
-      {:ok, _} ->
-        {:noreply,
-         socket
-         |> assign_sources(socket.assigns.current_user.id)
-         |> assign(:editing_featured_id, nil)
-         |> put_flash(:info, "Feed URL updated.")}
-
-      {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Failed to update URL.")}
     end
   end
 
