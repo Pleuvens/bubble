@@ -39,13 +39,7 @@ defmodule BubbleWeb.UserResetPasswordLive do
                   phx-debounce="blur"
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
                 />
-                <%= if @form[:password].errors && @form[:password].errors != [] do %>
-                  <%= for error <- @form[:password].errors do %>
-                    <p class="text-red-600 text-xs mt-1">
-                      {BubbleWeb.CoreComponents.translate_error(error)}
-                    </p>
-                  <% end %>
-                <% end %>
+                <.field_errors field={@form[:password]} />
               </div>
 
               <!-- Confirm Password Input -->
@@ -65,13 +59,7 @@ defmodule BubbleWeb.UserResetPasswordLive do
                   phx-debounce="blur"
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none transition"
                 />
-                <%= if @form[:password_confirmation].errors && @form[:password_confirmation].errors != [] do %>
-                  <%= for error <- @form[:password_confirmation].errors do %>
-                    <p class="text-red-600 text-xs mt-1">
-                      {BubbleWeb.CoreComponents.translate_error(error)}
-                    </p>
-                  <% end %>
-                <% end %>
+                <.field_errors field={@form[:password_confirmation]} />
               </div>
 
               <!-- Submit Button -->

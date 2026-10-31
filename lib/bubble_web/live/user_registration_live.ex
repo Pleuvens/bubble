@@ -113,13 +113,10 @@ defmodule BubbleWeb.UserRegistrationLive do
                   phx-debounce="blur"
                   class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                 />
-                <%= if @form[:email].errors && @form[:email].errors != [] do %>
-                  <%= for error <- @form[:email].errors do %>
-                    <p class="text-red-600 dark:text-red-400 text-[12px] mt-1">
-                      {BubbleWeb.CoreComponents.translate_error(error)}
-                    </p>
-                  <% end %>
-                <% end %>
+                <.field_errors
+                  field={@form[:email]}
+                  class="text-red-600 dark:text-red-400 text-[12px] mt-1"
+                />
               </div>
 
               <div class="space-y-1.5">
@@ -138,13 +135,10 @@ defmodule BubbleWeb.UserRegistrationLive do
                   phx-debounce="blur"
                   class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                 />
-                <%= if @form[:password].errors && @form[:password].errors != [] do %>
-                  <%= for error <- @form[:password].errors do %>
-                    <p class="text-red-600 dark:text-red-400 text-[12px] mt-1">
-                      {BubbleWeb.CoreComponents.translate_error(error)}
-                    </p>
-                  <% end %>
-                <% end %>
+                <.field_errors
+                  field={@form[:password]}
+                  class="text-red-600 dark:text-red-400 text-[12px] mt-1"
+                />
               </div>
 
               <button
