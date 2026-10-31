@@ -24,6 +24,40 @@ defmodule Bubble.Sources.HttpClientTest do
       assert byte_size(html) == 1000
     end
 
+    test "cuts a multi-byte character off rather than splitting it" do
+      body = String.duplicate("e", 998) <> "\u00e9"
+
+      Req.Test.expect(HttpClient, fn conn ->
+        Req.Test.html(conn, body)
+      end)
+
+      assert {:ok, html} = HttpClient.fetch_html("https://example.com", max_size: 999)
+      assert String.valid?(html)
+      assert byte_size(html) == 998
+    end
+
+    test "keeps a multi-byte character that fits whole" do
+      body = String.duplicate("e", 998) <> "\u00e9"
+
+      Req.Test.expect(HttpClient, fn conn ->
+        Req.Test.html(conn, body)
+      end)
+
+      assert {:ok, html} = HttpClient.fetch_html("https://example.com", max_size: 1000)
+      assert html == body
+    end
+
+    test "falls back to a byte cut when the body is not valid UTF-8" do
+      body = String.duplicate(<<0xFF>>, 2000)
+
+      Req.Test.expect(HttpClient, fn conn ->
+        Req.Test.html(conn, body)
+      end)
+
+      assert {:ok, html} = HttpClient.fetch_html("https://example.com", max_size: 1000)
+      assert byte_size(html) == 1000
+    end
+
     test "returns error for 404 response" do
       Req.Test.expect(HttpClient, fn conn ->
         Plug.Conn.send_resp(conn, 404, "Not Found")
