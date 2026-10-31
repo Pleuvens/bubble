@@ -2,6 +2,7 @@ defmodule Bubble.News.NewsSource do
   use Bubble.Schema
 
   import Ecto.Changeset
+  import Ecto.Query
 
   alias Bubble.Accounts.User
   alias Bubble.News.News
@@ -28,5 +29,10 @@ defmodule Bubble.News.NewsSource do
     |> validate_required([:name, :url, :content_type])
     |> FeedUrl.validate_fetchable(:url)
     |> unique_constraint(:url)
+  end
+
+  def due_for_fetch(query \\ __MODULE__) do
+    from ns in query,
+      where: is_nil(ns.last_fetched_at) or fragment("now() - ? > '23 hours'", ns.last_fetched_at)
   end
 end

@@ -62,10 +62,9 @@ defmodule Bubble.News.FetchNewsCronJob do
   end
 
   defp subscribed_sources_due_for_fetch do
-    from(ns in NewsSource,
+    from(ns in NewsSource.due_for_fetch(),
       join: uns in UserNewsSource,
       on: uns.news_source_id == ns.id,
-      where: is_nil(ns.last_fetched_at) or fragment("now() - ? > '23 hours'", ns.last_fetched_at),
       distinct: true
     )
   end
