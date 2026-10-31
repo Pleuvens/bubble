@@ -61,6 +61,14 @@ defmodule BubbleWeb.SettingsLiveTest do
       assert has_element?(view, "button[phx-click='toggle_active']")
     end
 
+    test "shows the flash message after subscribing", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/settings")
+
+      html = view |> element("button[phx-click='subscribe_featured']") |> render_click()
+
+      assert html =~ "Subscribed to NBA Game Recaps."
+    end
+
     test "reuses existing featured source instead of creating a duplicate", %{
       conn: conn,
       user: user
