@@ -4,10 +4,12 @@ defmodule BubbleWeb.Components.FeaturedSourceCard do
 
   import BubbleWeb.Components.ActiveToggle
   import BubbleWeb.Components.IconButton
+  import BubbleWeb.Components.SourceEditForm
 
   attr :source, :map, required: true
   attr :subscription, :any, default: nil
-  attr :editing_featured_id, :any, default: nil
+  attr :editing_source_id, :any, default: nil
+  attr :edit_form, :map, required: true
 
   def featured_source_card(assigns) do
     assigns = assign_subscription(assigns)
@@ -32,7 +34,9 @@ defmodule BubbleWeb.Components.FeaturedSourceCard do
           user_source={@user_source}
         />
       </div>
-      <.featured_url_form :if={@editing?} db_source={@db_source} user_source={@user_source} />
+      <div :if={@editing?} class="mt-4">
+        <.source_edit_form source_id={@db_source.id} edit_form={@edit_form} />
+      </div>
       <.featured_card_actions
         :if={@subscribed? and not @editing?}
         source_id={@db_source.id}
@@ -45,7 +49,7 @@ defmodule BubbleWeb.Components.FeaturedSourceCard do
   defp assign_subscription(%{subscription: {db_source, user_source}} = assigns) do
     assigns
     |> assign(db_source: db_source, user_source: user_source, subscribed?: true)
-    |> assign(editing?: db_source.id == assigns.editing_featured_id)
+    |> assign(editing?: db_source.id == assigns.editing_source_id)
   end
 
   defp assign_subscription(assigns) do
@@ -82,37 +86,6 @@ defmodule BubbleWeb.Components.FeaturedSourceCard do
     """
   end
 
-  attr :db_source, :map, required: true
-  attr :user_source, :map, required: true
-
-  defp featured_url_form(assigns) do
-    ~H"""
-    <form phx-submit="save_featured_url" phx-value-id={@db_source.id} class="mt-4 flex gap-2">
-      <input
-        type="url"
-        name="url"
-        value={@user_source.custom_url || @db_source.url}
-        placeholder="https://www.youtube.com/feeds/videos.xml?..."
-        required
-        class="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white"
-      />
-      <button
-        type="submit"
-        class="px-3 py-2 bg-orange-400 hover:bg-orange-500 text-white rounded-lg text-xs uppercase tracking-wider transition-colors"
-      >
-        Save
-      </button>
-      <button
-        type="button"
-        phx-click="cancel_edit_featured"
-        class="px-3 py-2 border border-gray-200 dark:border-[#26262a] text-gray-600 dark:text-[#a1a1aa] rounded-lg text-xs uppercase tracking-wider hover:bg-gray-50 dark:hover:bg-[#1f1f22] transition-colors"
-      >
-        Cancel
-      </button>
-    </form>
-    """
-  end
-
   attr :source_id, :any, required: true
   attr :source_name, :string, required: true
 
@@ -120,9 +93,9 @@ defmodule BubbleWeb.Components.FeaturedSourceCard do
     ~H"""
     <div class="flex items-center justify-end gap-1 pt-3 mt-3 border-t border-gray-100 dark:border-[#1f1f22]">
       <.icon_button
-        click="edit_featured"
+        click="edit_source"
         source_id={@source_id}
-        title="Edit feed URL"
+        title="Edit source"
         icon={:pencil}
       />
       <.icon_button click="fetch_source" source_id={@source_id} title="Fetch now" icon={:refresh} />

@@ -126,16 +126,18 @@ defmodule BubbleWeb.SettingsLiveTest do
       assert user_source.is_active == false
     end
 
-    test "edit pencil shows URL input form", %{conn: conn} do
+    test "edit pencil shows the shared edit form", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/settings")
 
-      view |> element("button[phx-click='edit_featured']") |> render_click()
+      view |> element("button[phx-click='edit_source']") |> render_click()
 
-      assert has_element?(view, "form[phx-submit='save_featured_url']")
+      assert has_element?(view, "form[phx-submit='save_source']")
+      assert has_element?(view, "input[name='name']")
       assert has_element?(view, "input[name='url']")
+      assert has_element?(view, "textarea[name='description']")
     end
 
-    test "save_featured_url updates the user's custom_url, not the shared source URL", %{
+    test "save_source stores name, URL and description on the subscription", %{
       conn: conn,
       source: source,
       user: user
@@ -143,32 +145,38 @@ defmodule BubbleWeb.SettingsLiveTest do
       new_url = "https://www.youtube.com/feeds/videos.xml?playlist_id=NEWPLAYLIST"
       {:ok, view, _html} = live(conn, ~p"/settings")
 
-      view |> element("button[phx-click='edit_featured']") |> render_click()
+      view |> element("button[phx-click='edit_source']") |> render_click()
 
       view
-      |> form("form[phx-submit='save_featured_url']", %{url: new_url})
+      |> form("form[phx-submit='save_source']", %{
+        name: "My Recaps",
+        url: new_url,
+        description: "My description"
+      })
       |> render_submit()
 
-      user_source =
-        Repo.get_by(Bubble.News.UserNewsSource, user_id: user.id, news_source_id: source.id)
+      user_source = NewsSources.get_user_news_source(user.id, source.id)
 
+      assert user_source.custom_name == "My Recaps"
       assert user_source.custom_url == new_url
+      assert user_source.custom_description == "My description"
 
-      # Shared source URL must remain unchanged
       shared = Repo.get(Bubble.News.NewsSource, source.id)
+
+      assert shared.name == "NBA Game Recaps"
 
       assert shared.url ==
                "https://www.youtube.com/feeds/videos.xml?channel_id=UCWJ2lWNubArHWmf3FIHbfcQ"
     end
 
-    test "cancel_edit_featured hides the URL form", %{conn: conn} do
+    test "cancel_edit hides the edit form", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/settings")
 
-      view |> element("button[phx-click='edit_featured']") |> render_click()
-      assert has_element?(view, "form[phx-submit='save_featured_url']")
+      view |> element("button[phx-click='edit_source']") |> render_click()
+      assert has_element?(view, "form[phx-submit='save_source']")
 
-      view |> element("button[phx-click='cancel_edit_featured']") |> render_click()
-      refute has_element?(view, "form[phx-submit='save_featured_url']")
+      view |> element("button[phx-click='cancel_edit']") |> render_click()
+      refute has_element?(view, "form[phx-submit='save_source']")
     end
   end
 
@@ -307,20 +315,6 @@ defmodule BubbleWeb.SettingsLiveTest do
 
       shared = Repo.get(Bubble.News.NewsSource, stranger_source.id)
       assert shared.name == "Not Mine"
-    end
-
-    test "save_featured_url survives a subscription that is gone", %{conn: conn, user: user} do
-      stranger_source = news_source_fixture(%{name: "Not Mine"})
-
-      {:ok, view, _html} = live(conn, ~p"/settings")
-
-      render_click(view, "save_featured_url", %{
-        "id" => stranger_source.id,
-        "url" => "https://hijacked.example.com/rss"
-      })
-
-      assert render(view) =~ "Your Sources"
-      assert is_nil(NewsSources.get_user_news_source(user.id, stranger_source.id))
     end
 
     test "toggle_active survives a subscription that is gone", %{conn: conn, user: user} do
