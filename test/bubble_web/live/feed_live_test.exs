@@ -95,6 +95,26 @@ defmodule BubbleWeb.FeedLiveTest do
       assert html =~ "target=\"_blank\""
     end
 
+    test "turns a URL in the description into a link", %{conn: conn, user: user} do
+      subscribed_news_fixture(user.id,
+        description: "More at https://example.com/story and that is all"
+      )
+
+      {:ok, _view, html} = live(conn, ~p"/")
+
+      assert html =~ ~s(href="https://example.com/story")
+      assert html =~ "More at"
+      assert html =~ "and that is all"
+    end
+
+    test "does not double-escape a linked URL", %{conn: conn, user: user} do
+      subscribed_news_fixture(user.id, description: "See https://example.com/a?x=1&y=2")
+
+      {:ok, _view, html} = live(conn, ~p"/")
+
+      refute html =~ "&amp;amp;"
+    end
+
     test "displays published date", %{conn: conn, user: user} do
       {_news_source, _news} = subscribed_news_fixture(user.id)
 
