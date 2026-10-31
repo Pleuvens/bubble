@@ -15,8 +15,8 @@ defmodule Bubble.NewsTest do
 
     test "returns news from active subscriptions only", %{user: user} do
       # Create two feed sources
-      active_source = feed_source_fixture(name: "Active Source")
-      inactive_source = feed_source_fixture(name: "Inactive Source")
+      active_source = news_source_fixture(name: "Active Source")
+      inactive_source = news_source_fixture(name: "Inactive Source")
 
       # Subscribe user to both sources
       {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, active_source.id)
@@ -26,14 +26,14 @@ defmodule Bubble.NewsTest do
 
       # Create feeds for both sources
       active_feed =
-        feed_fixture(
+        news_fixture(
           title: "News from Active Source",
           news_source_id: active_source.id,
           published_at: DateTime.add(now, -1, :hour)
         )
 
       inactive_feed =
-        feed_fixture(
+        news_fixture(
           title: "News from Inactive Source",
           news_source_id: inactive_source.id,
           published_at: DateTime.add(now, -2, :hour)
@@ -55,13 +55,13 @@ defmodule Bubble.NewsTest do
 
     test "returns empty list when all subscriptions are inactive", %{user: user} do
       # Create feed source
-      source = feed_source_fixture()
+      source = news_source_fixture()
 
       # Subscribe user
       {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
 
       # Create feed
-      feed_fixture(title: "Test News", news_source_id: source.id)
+      news_fixture(title: "Test News", news_source_id: source.id)
 
       # Deactivate subscription
       user_news_source = NewsSources.get_user_news_source(user.id, source.id)
@@ -75,9 +75,9 @@ defmodule Bubble.NewsTest do
 
     test "returns news from multiple active subscriptions", %{user: user} do
       # Create three feed sources
-      source1 = feed_source_fixture(name: "Source 1")
-      source2 = feed_source_fixture(name: "Source 2")
-      source3 = feed_source_fixture(name: "Source 3")
+      source1 = news_source_fixture(name: "Source 1")
+      source2 = news_source_fixture(name: "Source 2")
+      source3 = news_source_fixture(name: "Source 3")
 
       # Subscribe user to all three
       {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source1.id)
@@ -88,21 +88,21 @@ defmodule Bubble.NewsTest do
 
       # Create feeds for all sources
       feed1 =
-        feed_fixture(
+        news_fixture(
           title: "News 1",
           news_source_id: source1.id,
           published_at: DateTime.add(now, -1, :hour)
         )
 
       feed2 =
-        feed_fixture(
+        news_fixture(
           title: "News 2",
           news_source_id: source2.id,
           published_at: DateTime.add(now, -2, :hour)
         )
 
       feed3 =
-        feed_fixture(
+        news_fixture(
           title: "News 3",
           news_source_id: source3.id,
           published_at: DateTime.add(now, -3, :hour)
@@ -125,7 +125,7 @@ defmodule Bubble.NewsTest do
 
     test "returns news ordered by published_at descending", %{user: user} do
       # Create feed source
-      source = feed_source_fixture()
+      source = news_source_fixture()
 
       # Subscribe user
       {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
@@ -134,21 +134,21 @@ defmodule Bubble.NewsTest do
 
       # Create feeds with different publish dates
       old_feed =
-        feed_fixture(
+        news_fixture(
           title: "Old News",
           news_source_id: source.id,
           published_at: DateTime.add(now, -3, :hour)
         )
 
       recent_feed =
-        feed_fixture(
+        news_fixture(
           title: "Recent News",
           news_source_id: source.id,
           published_at: DateTime.add(now, -1, :hour)
         )
 
       middle_feed =
-        feed_fixture(
+        news_fixture(
           title: "Middle News",
           news_source_id: source.id,
           published_at: DateTime.add(now, -2, :hour)
@@ -165,13 +165,13 @@ defmodule Bubble.NewsTest do
     end
 
     test "limits results to 50 items", %{user: user} do
-      source = feed_source_fixture()
+      source = news_source_fixture()
       {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
 
       now = DateTime.utc_now() |> DateTime.truncate(:second)
 
       for i <- 1..60 do
-        feed_fixture(
+        news_fixture(
           title: "News #{i}",
           news_source_id: source.id,
           published_at: DateTime.add(now, -i, :minute)
@@ -185,8 +185,8 @@ defmodule Bubble.NewsTest do
 
     test "returns empty list when user has no subscriptions", %{user: user} do
       # Create feed source and feed but don't subscribe user
-      source = feed_source_fixture()
-      feed_fixture(news_source_id: source.id)
+      source = news_source_fixture()
+      news_fixture(news_source_id: source.id)
 
       # Get user news
       news = News.list_user_news(user.id)
@@ -196,13 +196,13 @@ defmodule Bubble.NewsTest do
 
     test "reactivating a subscription shows its news again", %{user: user} do
       # Create feed source
-      source = feed_source_fixture()
+      source = news_source_fixture()
 
       # Subscribe user
       {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
 
       # Create feed
-      feed = feed_fixture(title: "Test News", news_source_id: source.id)
+      feed = news_fixture(title: "Test News", news_source_id: source.id)
 
       # Initially should see the feed
       news = News.list_user_news(user.id)
@@ -232,12 +232,12 @@ defmodule Bubble.NewsTest do
     setup do
       user = user_fixture()
       other_user = user_fixture()
-      source = feed_source_fixture(name: "Shared Name", description: "Shared description")
+      source = news_source_fixture(name: "Shared Name", description: "Shared description")
 
       {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
       {:ok, _} = NewsSources.subscribe_user_and_fetch(other_user.id, source.id)
 
-      feed_fixture(
+      news_fixture(
         title: "An article",
         news_source_id: source.id,
         published_at: DateTime.utc_now() |> DateTime.truncate(:second)
