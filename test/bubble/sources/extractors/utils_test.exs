@@ -44,37 +44,38 @@ defmodule Bubble.Sources.Extractors.UtilsTest do
     end
   end
 
-  describe "extract_meta_content/2" do
-    test "extracts content using first matching pattern" do
+  describe "extract_content/2" do
+    test "reads the content attribute of a matching meta tag" do
       html = ~s(<meta name="description" content="Test Description">)
-      patterns = [~r/<meta\s+name="description"\s+content="([^"]+)"/i]
 
-      assert "Test Description" = Utils.extract_meta_content(html, patterns)
+      assert "Test Description" =
+               Utils.extract_content(html, {:meta_content, ~s(meta[name="description"])})
     end
 
-    test "tries multiple patterns in order" do
+    test "ignores attribute order" do
       html = ~s(<meta content="Found it here for testing" property="og:description">)
 
-      patterns = [
-        ~r/<meta\s+property="og:description"\s+content="([^"]+)"/i,
-        ~r/<meta\s+content="([^"]+)"\s+property="og:description"/i
-      ]
-
-      assert "Found it here for testing" = Utils.extract_meta_content(html, patterns)
+      assert "Found it here for testing" =
+               Utils.extract_content(html, {:meta_content, ~s(meta[property="og:description"])})
     end
 
-    test "returns nil when no pattern matches" do
+    test "returns nil when nothing matches the locator" do
       html = ~s(<meta name="keywords" content="test">)
-      patterns = [~r/<meta\s+name="description"\s+content="([^"]+)"/i]
 
-      assert nil == Utils.extract_meta_content(html, patterns)
+      assert nil == Utils.extract_content(html, {:meta_content, ~s(meta[name="description"])})
     end
 
-    test "cleans extracted text" do
+    test "cleans the extracted text" do
       html = ~s(<meta name="description" content="  Clean &amp; trim  ">)
-      patterns = [~r/<meta\s+name="description"\s+content="([^"]+)"/i]
 
-      assert "Clean & trim" = Utils.extract_meta_content(html, patterns)
+      assert "Clean & trim" =
+               Utils.extract_content(html, {:meta_content, ~s(meta[name="description"])})
+    end
+
+    test "reads the text of a matching element" do
+      html = "<html><head><title>A Page Title</title></head><body>body</body></html>"
+
+      assert "A Page Title" = Utils.extract_content(html, {:element_text, "title"})
     end
   end
 end

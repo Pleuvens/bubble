@@ -2,48 +2,38 @@ defmodule Bubble.Sources.Extractors.Extractor do
   @moduledoc """
   Behaviour for extracting metadata from HTML content.
 
-  Implementations should define patterns for extracting specific metadata
-  (like titles, descriptions) from HTML using their specific patterns
-  (OpenGraph, Twitter Card, standard HTML meta tags, etc.).
+  Implementations say where their metadata lives, as a `Utils.locator/0`:
+  a meta tag whose `content` attribute holds the value, or an element whose
+  text holds it.
 
   ## Usage
-
-  To implement an extractor, use this module and define the pattern callbacks:
 
       defmodule MyExtractor do
         use Bubble.Sources.Extractors.Extractor
 
         @impl true
-        def description_patterns do
-          [
-            ~r/<meta\\s+name="description"\\s+content="([^"]+)"/i
-          ]
-        end
+        def description_locator, do: {:meta_content, ~s(meta[name="description"])}
 
         @impl true
-        def title_patterns do
-          [
-            ~r/<title>([^<]+)<\\/title>/i
-          ]
-        end
+        def title_locator, do: {:element_text, "title"}
       end
 
   The default implementations of `extract_description/1` and `extract_title/1`
-  will use these patterns automatically. You can override these functions
+  will use these locators automatically. You can override these functions
   if you need custom extraction logic.
   """
 
   alias Bubble.Sources.Extractors.Utils
 
   @doc """
-  Returns regex patterns for extracting description from HTML.
+  Returns the locator for the description.
   """
-  @callback description_patterns() :: [Regex.t()]
+  @callback description_locator() :: Utils.locator()
 
   @doc """
-  Returns regex patterns for extracting title from HTML.
+  Returns the locator for the title.
   """
-  @callback title_patterns() :: [Regex.t()]
+  @callback title_locator() :: Utils.locator()
 
   @doc """
   Extracts a description from the HTML content.
@@ -64,30 +54,26 @@ defmodule Bubble.Sources.Extractors.Extractor do
       @behaviour Bubble.Sources.Extractors.Extractor
 
       @doc """
-      Extracts description from HTML using the module's patterns.
+      Extracts description from HTML using the module's locator.
       """
       def extract_description(html) do
-        patterns = description_patterns()
-        extract_with_patterns(html, patterns)
+        extract_with_locator(html, description_locator())
       end
 
       @doc """
-      Extracts title from HTML using the module's patterns.
+      Extracts title from HTML using the module's locator.
       """
       def extract_title(html) do
-        patterns = title_patterns()
-        extract_with_patterns(html, patterns)
+        extract_with_locator(html, title_locator())
       end
 
-      # Helper to extract content using a list of patterns
-      defp extract_with_patterns(html, patterns) do
-        case Utils.extract_meta_content(html, patterns) do
+      defp extract_with_locator(html, locator) do
+        case Utils.extract_content(html, locator) do
           nil -> {:error, :not_found}
           content -> {:ok, content}
         end
       end
 
-      # Allow overriding the default implementations
       defoverridable extract_description: 1, extract_title: 1
     end
   end

@@ -65,6 +65,7 @@ defmodule Bubble.MixProject do
       {:sweet_xml, "~> 0.7.5"},
       {:oban, "~> 2.19"},
       {:html_sanitize_ex, "~> 1.4"},
+      {:floki, "~> 0.38"},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false}
     ]
   end

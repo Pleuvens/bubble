@@ -11,18 +11,8 @@ defmodule Bubble.Sources.Extractors.TwitterCard do
   use Bubble.Sources.Extractors.Extractor
 
   @impl true
-  def description_patterns do
-    [
-      ~r/<meta\s+name=["']twitter:description["']\s+content=["']([^"']+)["']/i,
-      ~r/<meta\s+content=["']([^"']+)["']\s+name=["']twitter:description["']/i
-    ]
-  end
+  def description_locator, do: {:meta_content, ~s(meta[name="twitter:description"])}
 
   @impl true
-  def title_patterns do
-    [
-      ~r/<meta\s+name=["']twitter:title["']\s+content=["']([^"']+)["']/i,
-      ~r/<meta\s+content=["']([^"']+)["']\s+name=["']twitter:title["']/i
-    ]
-  end
+  def title_locator, do: {:meta_content, ~s(meta[name="twitter:title"])}
 end
