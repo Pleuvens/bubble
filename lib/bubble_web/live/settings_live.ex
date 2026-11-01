@@ -5,19 +5,11 @@ defmodule BubbleWeb.SettingsLive do
   import BubbleWeb.Components.FeaturedSourceCard
   import BubbleWeb.Components.SourceRow
 
+  alias Bubble.News.FeaturedSources
   alias Bubble.News.FetchSingleSourceJob
   alias Bubble.News.SourceOverride
   alias Bubble.NewsSources
   alias Bubble.Subscriptions
-
-  @featured_sources [
-    %{
-      name: "NBA Game Recaps",
-      url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCWJ2lWNubArHWmf3FIHbfcQ",
-      description: "Official NBA YouTube channel — game recaps and last night's summaries.",
-      content_type: :video
-    }
-  ]
 
   def render(assigns) do
     ~H"""
@@ -83,7 +75,7 @@ defmodule BubbleWeb.SettingsLive do
     {:ok,
      socket
      |> assign_sources(user_id)
-     |> assign(:featured_sources, @featured_sources)
+     |> assign(:featured_sources, FeaturedSources.all())
      |> assign(:modal_step, nil)
      |> assign(:editing_source_id, nil)
      |> assign(:url_input, "")
@@ -107,7 +99,7 @@ defmodule BubbleWeb.SettingsLive do
 
   def handle_event("subscribe_featured", %{"url" => url}, socket) do
     user_id = socket.assigns.current_user.id
-    attrs = Enum.find(@featured_sources, &(&1.url == url))
+    attrs = FeaturedSources.find_by_url(url)
 
     case subscribe_to_featured_source(user_id, attrs) do
       {:ok, _} ->
@@ -326,7 +318,7 @@ defmodule BubbleWeb.SettingsLive do
   defp override_or_nil(submitted, _shared), do: submitted
 
   defp assign_sources(socket, user_id) do
-    featured_names = MapSet.new(@featured_sources, & &1.name)
+    featured_names = FeaturedSources.names()
     all_sources = Subscriptions.list_user_sources(user_id)
 
     is_featured_source? = fn {s, _} ->
