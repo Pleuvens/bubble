@@ -1,12 +1,15 @@
 defmodule Bubble.Sources.NewsProcessor do
   alias Bubble.News.News
+  alias Bubble.News.NewsSource
   alias Bubble.Repo
   alias Bubble.Sources.MetaScraper
+  alias Bubble.Sources.RSSValidator
 
   require Logger
 
   @minimum_substantial_content_length 20
 
+  @spec process_and_save_news([RSSValidator.feed_item()], NewsSource.t()) :: :ok
   def process_and_save_news(news_items, source) when is_list(news_items) do
     news_items
     |> build_news_rows(source)
@@ -50,10 +53,10 @@ defmodule Bubble.Sources.NewsProcessor do
     if video?(news), do: video_content(news), else: article_content(news)
   end
 
-  defp video?(news), do: news[:video_id] not in [nil, ""]
+  defp video?(%{video_id: video_id}), do: video_id != ""
 
-  defp video_content(news) do
-    if has_substantial_content?(news[:description]), do: news[:description], else: ""
+  defp video_content(%{description: description}) do
+    if has_substantial_content?(description), do: description, else: ""
   end
 
   defp article_content(news) do
@@ -75,13 +78,7 @@ defmodule Bubble.Sources.NewsProcessor do
     end
   end
 
-  defp has_substantial_content?(nil), do: false
-  defp has_substantial_content?(""), do: false
-
   defp has_substantial_content?(content) when is_binary(content) do
-    trimmed = String.trim(content)
-    String.length(trimmed) > @minimum_substantial_content_length
+    String.length(String.trim(content)) > @minimum_substantial_content_length
   end
-
-  defp has_substantial_content?(_), do: false
 end
