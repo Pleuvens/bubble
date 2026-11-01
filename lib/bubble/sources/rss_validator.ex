@@ -28,12 +28,9 @@ defmodule Bubble.Sources.RSSValidator do
     end
   end
 
-  # Safely parse XML with error handling
   defp safe_parse_xml(xml) do
     try do
-      # Trim leading/trailing whitespace before parsing
-      cleaned_xml = String.trim(xml)
-      parsed = SweetXml.parse(cleaned_xml, dtd: :none)
+      parsed = SweetXml.parse(String.trim(xml), dtd: :none)
       {:ok, parsed}
     catch
       :exit, {:fatal, error} ->
@@ -46,7 +43,6 @@ defmodule Bubble.Sources.RSSValidator do
     end
   end
 
-  # Extract items from both RSS and Atom feeds
   defp extract_items(parsed_xml) do
     try do
       items =
@@ -54,19 +50,14 @@ defmodule Bubble.Sources.RSSValidator do
         |> xpath(
           ~x"//entry | //item"l,
           title: ~x"./title/text()"s,
-          # Extract each URL source separately to avoid concatenation
           link_href: ~x"./link/@href"s,
           link_text: ~x"./link/text()"s,
           guid: ~x"./guid/text()"s,
-          # Extract each description source separately to avoid concatenation
           description: ~x"./description/text()"s,
           summary: ~x"./summary/text()"s,
           content: ~x"./content/text()"s,
-          # Extract each date source separately to avoid concatenation
           published: ~x"./published/text()"s,
           pub_date: ~x"./pubDate/text()"s,
-          # YouTube (yt:videoId) and MRSS (media:thumbnail) — match by local name
-          # so we don't need namespace declarations. Empty on non-video feeds.
           video_id: ~x"./*[local-name()='videoId']/text()"s,
           thumbnail_url: ~x".//*[local-name()='thumbnail']/@url"s
         )
@@ -79,7 +70,6 @@ defmodule Bubble.Sources.RSSValidator do
     end
   end
 
-  # Validate extracted items
   defp validate_items(items) when is_list(items) do
     validated =
       items
@@ -93,48 +83,28 @@ defmodule Bubble.Sources.RSSValidator do
     end
   end
 
-  # Normalize an item to ensure all fields are present
+  @url_keys [:link_href, :link_text, :guid]
+  @description_keys [:description, :summary]
+  @published_at_keys [:published, :pub_date]
+
   defp normalize_item(item) when is_map(item) do
-    # Select the first non-empty URL from the available sources
-    url =
-      [
-        Map.get(item, :link_href, ""),
-        Map.get(item, :link_text, ""),
-        Map.get(item, :guid, "")
-      ]
-      |> Enum.map(&clean_string/1)
-      |> Enum.find("", fn url -> url != "" end)
-
-    # Select the first non-empty description from the available sources
-    description =
-      [
-        Map.get(item, :description, ""),
-        Map.get(item, :summary, "")
-      ]
-      |> Enum.map(&clean_string/1)
-      |> Enum.find("", fn desc -> desc != "" end)
-
-    # Select the first non-empty published date from the available sources
-    published_at =
-      [
-        Map.get(item, :published, ""),
-        Map.get(item, :pub_date, "")
-      ]
-      |> Enum.map(&clean_string/1)
-      |> Enum.find("", fn date -> date != "" end)
-
     %{
       title: clean_string(Map.get(item, :title, "")),
-      url: url,
-      description: description,
+      url: first_non_empty(item, @url_keys),
+      description: first_non_empty(item, @description_keys),
       content: clean_string(Map.get(item, :content, "")),
-      published_at: published_at,
+      published_at: first_non_empty(item, @published_at_keys),
       video_id: clean_string(Map.get(item, :video_id, "")),
       thumbnail_url: clean_string(Map.get(item, :thumbnail_url, ""))
     }
   end
 
-  # Check if an item is valid (has at least title or description, and a URL)
+  defp first_non_empty(item, keys) do
+    keys
+    |> Enum.map(fn key -> clean_string(Map.get(item, key, "")) end)
+    |> Enum.find("", fn value -> value != "" end)
+  end
+
   defp valid_item?(%{title: title, url: url, description: desc}) do
     has_content = title != "" or desc != ""
     has_url = url != "" and valid_url?(url)
@@ -144,7 +114,6 @@ defmodule Bubble.Sources.RSSValidator do
 
   defp valid_item?(_), do: false
 
-  # Validate URL format
   defp valid_url?(url) when is_binary(url) do
     uri = URI.parse(url)
     uri.scheme in ["http", "https"] and not is_nil(uri.host)
@@ -154,7 +123,6 @@ defmodule Bubble.Sources.RSSValidator do
 
   defp valid_url?(_), do: false
 
-  # Clean and trim strings
   defp clean_string(nil), do: ""
   defp clean_string(""), do: ""
 
