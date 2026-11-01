@@ -1,6 +1,7 @@
 defmodule BubbleWeb.UserRegistrationLive do
   use BubbleWeb, :live_view
 
+  import BubbleWeb.Components.FieldLabel
   import Plug.CSRFProtection, only: [get_csrf_token: 0]
 
   alias Bubble.Accounts
@@ -44,12 +45,7 @@ defmodule BubbleWeb.UserRegistrationLive do
               <% end %>
 
               <div class="space-y-1.5">
-                <label
-                  for="user_email"
-                  class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
-                >
-                  Email
-                </label>
+                <.field_label for="user_email">Email</.field_label>
                 <.text_input
                   type="email"
                   id="user_email"
@@ -65,12 +61,7 @@ defmodule BubbleWeb.UserRegistrationLive do
               </div>
 
               <div class="space-y-1.5">
-                <label
-                  for="user_password"
-                  class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
-                >
-                  Password
-                </label>
+                <.field_label for="user_password">Password</.field_label>
                 <.text_input
                   type="password"
                   id="user_password"

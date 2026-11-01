@@ -1,6 +1,8 @@
 defmodule BubbleWeb.UserResetPasswordLive do
   use BubbleWeb, :live_view
 
+  import BubbleWeb.Components.FieldLabel
+
   alias Bubble.Accounts
 
   def render(assigns) do
@@ -23,12 +25,7 @@ defmodule BubbleWeb.UserResetPasswordLive do
               <% end %>
 
               <div class="space-y-1.5">
-                <label
-                  for="user_password"
-                  class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
-                >
-                  New Password
-                </label>
+                <.field_label for="user_password">New Password</.field_label>
                 <.text_input
                   type="password"
                   id="user_password"
@@ -41,12 +38,7 @@ defmodule BubbleWeb.UserResetPasswordLive do
               </div>
 
               <div class="space-y-1.5">
-                <label
-                  for="user_password_confirmation"
-                  class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
-                >
-                  Confirm New Password
-                </label>
+                <.field_label for="user_password_confirmation">Confirm New Password</.field_label>
                 <.text_input
                   type="password"
                   id="user_password_confirmation"

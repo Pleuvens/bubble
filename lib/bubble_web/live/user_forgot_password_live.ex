@@ -1,6 +1,8 @@
 defmodule BubbleWeb.UserForgotPasswordLive do
   use BubbleWeb, :live_view
 
+  import BubbleWeb.Components.FieldLabel
+
   alias Bubble.Accounts
 
   def render(assigns) do
@@ -20,12 +22,7 @@ defmodule BubbleWeb.UserForgotPasswordLive do
           <form id="reset_password_form" phx-submit="send_email">
             <div class="space-y-4">
               <div class="space-y-1.5">
-                <label
-                  for="user_email"
-                  class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
-                >
-                  Email
-                </label>
+                <.field_label for="user_email">Email</.field_label>
                 <.text_input
                   type="email"
                   id="user_email"
