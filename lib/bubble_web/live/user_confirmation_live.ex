@@ -22,12 +22,7 @@ defmodule BubbleWeb.UserConfirmationLive do
                 Click the button below to confirm your account.
               </p>
 
-              <button
-                type="submit"
-                class="w-full py-3.5 rounded-lg bg-orange-400 hover:bg-orange-500 text-white uppercase text-[13px] font-bold tracking-wide transition-colors"
-              >
-                Confirm My Account
-              </button>
+              <.submit_button>Confirm My Account</.submit_button>
             </div>
           </form>
         </div>

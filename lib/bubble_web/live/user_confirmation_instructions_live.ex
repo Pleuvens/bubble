@@ -32,12 +32,7 @@ defmodule BubbleWeb.UserConfirmationInstructionsLive do
                 />
               </div>
 
-              <button
-                type="submit"
-                class="w-full py-3.5 rounded-lg bg-orange-400 hover:bg-orange-500 text-white uppercase text-[13px] font-bold tracking-wide transition-colors"
-              >
-                Resend Confirmation Instructions
-              </button>
+              <.submit_button>Resend Confirmation Instructions</.submit_button>
             </div>
           </form>
         </div>

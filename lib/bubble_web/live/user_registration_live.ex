@@ -76,12 +76,7 @@ defmodule BubbleWeb.UserRegistrationLive do
                 />
               </div>
 
-              <button
-                type="submit"
-                class="w-full py-3.5 rounded-lg bg-orange-400 hover:bg-orange-500 text-white uppercase text-[13px] font-bold tracking-wide transition-colors"
-              >
-                Create Account
-              </button>
+              <.submit_button>Create Account</.submit_button>
             </div>
           </form>
         </div>

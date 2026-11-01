@@ -50,12 +50,7 @@ defmodule BubbleWeb.UserResetPasswordLive do
                 <.field_errors field={@form[:password_confirmation]} />
               </div>
 
-              <button
-                type="submit"
-                class="w-full py-3.5 rounded-lg bg-orange-400 hover:bg-orange-500 text-white uppercase text-[13px] font-bold tracking-wide transition-colors"
-              >
-                Reset Password
-              </button>
+              <.submit_button>Reset Password</.submit_button>
             </div>
           </form>
         </div>

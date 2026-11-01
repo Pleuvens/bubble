@@ -30,17 +30,4 @@ defmodule BubbleWeb.Components.SettingsField do
     </div>
     """
   end
-
-  slot :inner_block, required: true
-
-  def settings_submit_button(assigns) do
-    ~H"""
-    <button
-      type="submit"
-      class="w-full py-3.5 rounded-lg bg-orange-400 hover:bg-orange-500 text-white uppercase text-[13px] font-bold tracking-wide transition-colors"
-    >
-      {render_slot(@inner_block)}
-    </button>
-    """
-  end
 end

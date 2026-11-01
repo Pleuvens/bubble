@@ -149,6 +149,19 @@ defmodule BubbleWeb.CoreComponents do
     """
   end
 
+  slot :inner_block, required: true
+
+  def submit_button(assigns) do
+    ~H"""
+    <button
+      type="submit"
+      class="w-full py-3.5 rounded-lg bg-orange-400 hover:bg-orange-500 text-white uppercase text-[13px] font-bold tracking-wide transition-colors"
+    >
+      {render_slot(@inner_block)}
+    </button>
+    """
+  end
+
   defp field_classes do
     "w-full px-3 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
   end
