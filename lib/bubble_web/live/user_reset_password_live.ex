@@ -13,62 +13,41 @@ defmodule BubbleWeb.UserResetPasswordLive do
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Reset password</h1>
         </div>
 
-        <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
+        <.card>
           <form id="reset_password_form" phx-submit="reset_password" phx-change="validate">
             <div class="space-y-4">
-              <%= if @form.errors && @form.errors != [] do %>
-                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-[13.5px]">
-                  Oops, something went wrong! Please check the errors below.
-                </div>
-              <% end %>
+              <.form_errors_banner :if={@form.errors != []} />
 
               <div class="space-y-1.5">
-                <label
-                  for="user_password"
-                  class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
-                >
-                  New Password
-                </label>
-                <input
+                <.field_label for="user_password">New Password</.field_label>
+                <.text_input
                   type="password"
                   id="user_password"
                   name="user[password]"
                   value={@form[:password].value}
                   required
                   phx-debounce="blur"
-                  class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                 />
                 <.field_errors field={@form[:password]} />
               </div>
 
               <div class="space-y-1.5">
-                <label
-                  for="user_password_confirmation"
-                  class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
-                >
-                  Confirm New Password
-                </label>
-                <input
+                <.field_label for="user_password_confirmation">Confirm New Password</.field_label>
+                <.text_input
                   type="password"
                   id="user_password_confirmation"
                   name="user[password_confirmation]"
                   value={@form[:password_confirmation].value}
                   required
                   phx-debounce="blur"
-                  class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                 />
                 <.field_errors field={@form[:password_confirmation]} />
               </div>
 
-              <button
-                type="submit"
-                class="w-full py-3.5 rounded-lg bg-orange-400 hover:bg-orange-500 text-white uppercase text-[13px] font-bold tracking-wide transition-colors"
-              >
-                Reset Password
-              </button>
+              <.submit_button>Reset Password</.submit_button>
             </div>
           </form>
-        </div>
+        </.card>
 
         <.auth_footer_links />
       </main>

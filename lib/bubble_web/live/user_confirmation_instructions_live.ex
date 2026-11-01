@@ -16,35 +16,24 @@ defmodule BubbleWeb.UserConfirmationInstructionsLive do
           </p>
         </div>
 
-        <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
+        <.card>
           <form id="resend_confirmation_form" phx-submit="send_instructions">
             <div class="space-y-4">
               <div class="space-y-1.5">
-                <label
-                  for="user_email"
-                  class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
-                >
-                  Email
-                </label>
-                <input
+                <.field_label for="user_email">Email</.field_label>
+                <.text_input
                   type="email"
                   id="user_email"
                   name="user[email]"
                   placeholder="your@email.com"
                   required
-                  class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                 />
               </div>
 
-              <button
-                type="submit"
-                class="w-full py-3.5 rounded-lg bg-orange-400 hover:bg-orange-500 text-white uppercase text-[13px] font-bold tracking-wide transition-colors"
-              >
-                Resend Confirmation Instructions
-              </button>
+              <.submit_button>Resend Confirmation Instructions</.submit_button>
             </div>
           </form>
-        </div>
+        </.card>
 
         <.auth_footer_links />
       </main>

@@ -13,7 +13,7 @@ defmodule BubbleWeb.UserConfirmationLive do
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Confirm account</h1>
         </div>
 
-        <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
+        <.card>
           <form id="confirmation_form" phx-submit="confirm_account">
             <input type="hidden" name={@form[:token].name} value={@form[:token].value} />
 
@@ -22,15 +22,10 @@ defmodule BubbleWeb.UserConfirmationLive do
                 Click the button below to confirm your account.
               </p>
 
-              <button
-                type="submit"
-                class="w-full py-3.5 rounded-lg bg-orange-400 hover:bg-orange-500 text-white uppercase text-[13px] font-bold tracking-wide transition-colors"
-              >
-                Confirm My Account
-              </button>
+              <.submit_button>Confirm My Account</.submit_button>
             </div>
           </form>
-        </div>
+        </.card>
 
         <.auth_footer_links />
       </main>

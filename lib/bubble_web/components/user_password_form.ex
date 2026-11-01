@@ -62,7 +62,7 @@ defmodule BubbleWeb.Components.UserPasswordForm do
           <:error><.form_error error={@password_form.errors[:current_password]} /></:error>
         </.settings_field>
 
-        <.settings_submit_button>Change Password</.settings_submit_button>
+        <.submit_button>Change Password</.submit_button>
       </div>
     </form>
     """

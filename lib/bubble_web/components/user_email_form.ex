@@ -33,7 +33,7 @@ defmodule BubbleWeb.Components.UserEmailForm do
           <:error><.form_error error={@email_form.errors[:current_password]} /></:error>
         </.settings_field>
 
-        <.settings_submit_button>Change Email</.settings_submit_button>
+        <.submit_button>Change Email</.submit_button>
       </div>
     </form>
     """

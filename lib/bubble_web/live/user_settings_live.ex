@@ -40,13 +40,11 @@ defmodule BubbleWeb.UserSettingsLive do
   defp settings_section(assigns) do
     ~H"""
     <section {@rest}>
-      <h2 class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a] mb-4">
-        {@title}
-      </h2>
+      <.section_heading class="mb-4">{@title}</.section_heading>
 
-      <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
+      <.card>
         {render_slot(@inner_block)}
-      </div>
+      </.card>
     </section>
     """
   end

@@ -25,7 +25,7 @@ defmodule BubbleWeb.UserRegistrationLive do
           </p>
         </div>
 
-        <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
+        <.card>
           <form
             id="registration_form"
             phx-submit="save"
@@ -37,27 +37,17 @@ defmodule BubbleWeb.UserRegistrationLive do
             <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
             <div class="space-y-4">
-              <%= if @check_errors do %>
-                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-[13.5px]">
-                  Oops, something went wrong! Please check the errors below.
-                </div>
-              <% end %>
+              <.form_errors_banner :if={@check_errors} />
 
               <div class="space-y-1.5">
-                <label
-                  for="user_email"
-                  class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
-                >
-                  Email
-                </label>
-                <input
+                <.field_label for="user_email">Email</.field_label>
+                <.text_input
                   type="email"
                   id="user_email"
                   name="user[email]"
                   value={@form[:email].value}
                   required
                   phx-debounce="blur"
-                  class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                 />
                 <.field_errors
                   field={@form[:email]}
@@ -66,20 +56,14 @@ defmodule BubbleWeb.UserRegistrationLive do
               </div>
 
               <div class="space-y-1.5">
-                <label
-                  for="user_password"
-                  class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
-                >
-                  Password
-                </label>
-                <input
+                <.field_label for="user_password">Password</.field_label>
+                <.text_input
                   type="password"
                   id="user_password"
                   name="user[password]"
                   value={@form[:password].value}
                   required
                   phx-debounce="blur"
-                  class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                 />
                 <.field_errors
                   field={@form[:password]}
@@ -87,15 +71,10 @@ defmodule BubbleWeb.UserRegistrationLive do
                 />
               </div>
 
-              <button
-                type="submit"
-                class="w-full py-3.5 rounded-lg bg-orange-400 hover:bg-orange-500 text-white uppercase text-[13px] font-bold tracking-wide transition-colors"
-              >
-                Create Account
-              </button>
+              <.submit_button>Create Account</.submit_button>
             </div>
           </form>
-        </div>
+        </.card>
       </main>
     </div>
     """

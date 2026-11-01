@@ -117,6 +117,91 @@ defmodule BubbleWeb.CoreComponents do
     """
   end
 
+  attr :type, :string, required: true
+  attr :name, :string, required: true
+  attr :id, :string, default: nil
+  attr :value, :any, default: nil
+  attr :class, :string, default: "py-2.5"
+  attr :rest, :global, include: ~w(placeholder required)
+
+  def text_input(assigns) do
+    ~H"""
+    <input
+      type={@type}
+      id={@id}
+      name={@name}
+      value={@value}
+      class={[field_classes(), @class]}
+      {@rest}
+    />
+    """
+  end
+
+  attr :name, :string, required: true
+  attr :id, :string, default: nil
+  attr :value, :any, default: nil
+  attr :class, :string, default: "py-2 text-sm resize-none"
+  attr :rest, :global, include: ~w(placeholder required rows)
+
+  def text_area(assigns) do
+    ~H"""
+    <textarea id={@id} name={@name} class={[field_classes(), @class]} {@rest}>{@value}</textarea>
+    """
+  end
+
+  slot :inner_block, required: true
+
+  def card(assigns) do
+    ~H"""
+    <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  attr :class, :string, default: nil
+  slot :inner_block, required: true
+
+  def section_heading(assigns) do
+    ~H"""
+    <h2 class={[label_classes(), @class]}>
+      {render_slot(@inner_block)}
+    </h2>
+    """
+  end
+
+  attr :for, :string, default: nil
+  slot :inner_block, required: true
+
+  def field_label(assigns) do
+    ~H"""
+    <label for={@for} class={label_classes()}>
+      {render_slot(@inner_block)}
+    </label>
+    """
+  end
+
+  slot :inner_block, required: true
+
+  def submit_button(assigns) do
+    ~H"""
+    <button
+      type="submit"
+      class="w-full py-3.5 rounded-lg bg-orange-400 hover:bg-orange-500 text-white uppercase text-[13px] font-bold tracking-wide transition-colors"
+    >
+      {render_slot(@inner_block)}
+    </button>
+    """
+  end
+
+  def form_errors_banner(assigns) do
+    ~H"""
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-[13.5px]">
+      Oops, something went wrong! Please check the errors below.
+    </div>
+    """
+  end
+
   attr :error, :any, required: true
   attr :class, :string, default: "text-red-600 dark:text-red-400 text-xs mt-1"
 
@@ -132,5 +217,13 @@ defmodule BubbleWeb.CoreComponents do
     else
       Gettext.dgettext(BubbleWeb.Gettext, "errors", msg, opts)
     end
+  end
+
+  defp label_classes do
+    "text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
+  end
+
+  defp field_classes do
+    "w-full px-3 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
   end
 end

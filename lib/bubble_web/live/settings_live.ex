@@ -26,9 +26,7 @@ defmodule BubbleWeb.SettingsLive do
       <div class="max-w-[480px] mx-auto px-4 pt-[72px] pb-20">
         <section class="mb-10">
           <div class="flex items-center justify-between mb-4">
-            <span class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]">
-              Discover
-            </span>
+            <.section_heading>Discover</.section_heading>
             <span class="text-[12px] text-gray-400 dark:text-[#52525b]">
               Curated sources, one click to subscribe
             </span>
@@ -47,9 +45,7 @@ defmodule BubbleWeb.SettingsLive do
 
         <section>
           <div class="flex items-center justify-between mb-4">
-            <span class="text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]">
-              Your Sources
-            </span>
+            <.section_heading>Your Sources</.section_heading>
             <button
               phx-click="show_add_form"
               class="text-[12px] font-semibold text-orange-400 hover:text-orange-500 transition-colors"

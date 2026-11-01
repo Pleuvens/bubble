@@ -2,7 +2,7 @@ defmodule BubbleWeb.Components.SourceEditForm do
   @moduledoc false
   use Phoenix.Component
 
-  import BubbleWeb.Components.FieldLabel
+  import BubbleWeb.CoreComponents
 
   attr :source_id, :any, required: true
   attr :edit_form, :map, required: true
@@ -12,30 +12,34 @@ defmodule BubbleWeb.Components.SourceEditForm do
     <form phx-submit="save_source" phx-value-id={@source_id} class="space-y-3">
       <div class="space-y-1.5">
         <.field_label for={"edit_name_#{@source_id}"}>Name</.field_label>
-        <.edit_text_field
+        <.text_input
           type="text"
           id={"edit_name_#{@source_id}"}
           name="name"
           value={@edit_form.name}
+          required
+          class="py-2 text-sm"
         />
       </div>
       <div class="space-y-1.5">
         <.field_label for={"edit_url_#{@source_id}"}>RSS URL</.field_label>
-        <.edit_text_field
+        <.text_input
           type="url"
           id={"edit_url_#{@source_id}"}
           name="url"
           value={@edit_form.url}
+          required
+          class="py-2 text-sm"
         />
       </div>
       <div class="space-y-1.5">
         <.field_label for={"edit_description_#{@source_id}"}>Description</.field_label>
-        <textarea
+        <.text_area
           id={"edit_description_#{@source_id}"}
           name="description"
           rows="2"
-          class="w-full px-3 py-2 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none resize-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white text-sm transition"
-        ><%= @edit_form.description %></textarea>
+          value={@edit_form.description}
+        />
       </div>
       <div class="flex gap-2">
         <button
@@ -53,24 +57,6 @@ defmodule BubbleWeb.Components.SourceEditForm do
         </button>
       </div>
     </form>
-    """
-  end
-
-  attr :type, :string, required: true
-  attr :id, :string, required: true
-  attr :name, :string, required: true
-  attr :value, :string, required: true
-
-  defp edit_text_field(assigns) do
-    ~H"""
-    <input
-      type={@type}
-      id={@id}
-      name={@name}
-      value={@value}
-      required
-      class="w-full px-3 py-2 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white text-sm transition"
-    />
     """
   end
 end
