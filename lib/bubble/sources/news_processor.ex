@@ -1,83 +1,84 @@
 defmodule Bubble.Sources.NewsProcessor do
-  @moduledoc """
-  Processes and saves news items from RSS feeds.
-  Handles content extraction, date parsing, and database insertion.
-  """
-
   alias Bubble.News.News
+  alias Bubble.News.NewsSource
   alias Bubble.Repo
   alias Bubble.Sources.MetaScraper
+  alias Bubble.Sources.RSSValidator
 
   require Logger
 
   @minimum_substantial_content_length 20
 
-  @doc """
-  Processes news items for a given source and saves them to the database.
-  Updates the source's last_fetched_at timestamp.
-
-  Returns :ok on success, {:error, reason} on failure.
-  """
+  @spec process_and_save_news([RSSValidator.feed_item()], NewsSource.t()) :: :ok
   def process_and_save_news(news_items, source) when is_list(news_items) do
-    news_to_insert =
-      Enum.map(news_items, fn news ->
-        content = fetch_content_with_fallback(news)
+    news_items
+    |> build_news_rows(source)
+    |> insert_skipping_duplicate_urls()
 
-        published_at =
-          case DateTime.from_iso8601(news.published_at) do
-            {:ok, dt, _offset} -> dt
-            {:error, _} -> DateTime.utc_now() |> DateTime.truncate(:second)
-          end
-
-        news
-        |> Map.put(:published_at, published_at)
-        |> Map.put(:content, content)
-        |> Map.put(:news_source_id, source.id)
-      end)
-
-    # Insert news items, skipping any that violate the unique URL constraint
-    Repo.insert_all(News, news_to_insert, on_conflict: :nothing)
-
-    source
-    |> Ecto.Changeset.change(last_fetched_at: DateTime.utc_now())
-    |> Repo.update()
+    touch_last_fetched_at(source)
 
     Logger.info("Successfully fetched #{length(news_items)} items from #{source.url}")
     :ok
   end
 
-  # For video items (YouTube etc.), use the RSS description directly — no scraping needed.
-  # For articles, try RSS content/description first, then fall back to MetaScraper.
-  defp fetch_content_with_fallback(news) do
-    cond do
-      news[:video_id] not in [nil, ""] ->
-        if has_substantial_content?(news[:description]), do: news[:description], else: ""
+  defp build_news_rows(news_items, source) do
+    Enum.map(news_items, &build_news_row(&1, source))
+  end
 
-      has_substantial_content?(news.content) ->
-        news.content
+  defp build_news_row(news, source) do
+    news
+    |> Map.put(:published_at, parse_published_at(news.published_at))
+    |> Map.put(:content, fetch_content_with_fallback(news))
+    |> Map.put(:news_source_id, source.id)
+  end
 
-      has_substantial_content?(news.description) ->
-        news.description
-
-      true ->
-        case MetaScraper.fetch_description(news.url) do
-          {:ok, description} ->
-            Logger.debug("Fetched description via MetaScraper for #{news.url}")
-            description
-
-          {:error, _reason} ->
-            "No description available"
-        end
+  defp parse_published_at(published_at) do
+    case DateTime.from_iso8601(published_at) do
+      {:ok, datetime, _offset} -> datetime
+      {:error, _reason} -> DateTime.utc_now() |> DateTime.truncate(:second)
     end
   end
 
-  defp has_substantial_content?(nil), do: false
-  defp has_substantial_content?(""), do: false
-
-  defp has_substantial_content?(content) when is_binary(content) do
-    trimmed = String.trim(content)
-    String.length(trimmed) > @minimum_substantial_content_length
+  defp insert_skipping_duplicate_urls(news_rows) do
+    Repo.insert_all(News, news_rows, on_conflict: :nothing)
   end
 
-  defp has_substantial_content?(_), do: false
+  defp touch_last_fetched_at(source) do
+    source
+    |> Ecto.Changeset.change(last_fetched_at: DateTime.utc_now())
+    |> Repo.update()
+  end
+
+  defp fetch_content_with_fallback(news) do
+    if video?(news), do: video_content(news), else: article_content(news)
+  end
+
+  defp video?(%{video_id: video_id}), do: video_id != ""
+
+  defp video_content(%{description: description}) do
+    if has_substantial_content?(description), do: description, else: ""
+  end
+
+  defp article_content(news) do
+    cond do
+      has_substantial_content?(news.content) -> news.content
+      has_substantial_content?(news.description) -> news.description
+      true -> scraped_description(news.url)
+    end
+  end
+
+  defp scraped_description(url) do
+    case MetaScraper.fetch_description(url) do
+      {:ok, description} ->
+        Logger.debug("Fetched description via MetaScraper for #{url}")
+        description
+
+      {:error, _reason} ->
+        "No description available"
+    end
+  end
+
+  defp has_substantial_content?(content) when is_binary(content) do
+    String.length(String.trim(content)) > @minimum_substantial_content_length
+  end
 end
