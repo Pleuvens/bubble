@@ -19,31 +19,42 @@ defmodule Bubble.Sources.NewsProcessor do
   Returns :ok on success, {:error, reason} on failure.
   """
   def process_and_save_news(news_items, source) when is_list(news_items) do
-    news_to_insert =
-      Enum.map(news_items, fn news ->
-        content = fetch_content_with_fallback(news)
+    news_items
+    |> build_news_rows(source)
+    |> insert_skipping_duplicate_urls()
 
-        published_at =
-          case DateTime.from_iso8601(news.published_at) do
-            {:ok, dt, _offset} -> dt
-            {:error, _} -> DateTime.utc_now() |> DateTime.truncate(:second)
-          end
-
-        news
-        |> Map.put(:published_at, published_at)
-        |> Map.put(:content, content)
-        |> Map.put(:news_source_id, source.id)
-      end)
-
-    # Insert news items, skipping any that violate the unique URL constraint
-    Repo.insert_all(News, news_to_insert, on_conflict: :nothing)
-
-    source
-    |> Ecto.Changeset.change(last_fetched_at: DateTime.utc_now())
-    |> Repo.update()
+    touch_last_fetched_at(source)
 
     Logger.info("Successfully fetched #{length(news_items)} items from #{source.url}")
     :ok
+  end
+
+  defp build_news_rows(news_items, source) do
+    Enum.map(news_items, &build_news_row(&1, source))
+  end
+
+  defp build_news_row(news, source) do
+    news
+    |> Map.put(:published_at, parse_published_at(news.published_at))
+    |> Map.put(:content, fetch_content_with_fallback(news))
+    |> Map.put(:news_source_id, source.id)
+  end
+
+  defp parse_published_at(published_at) do
+    case DateTime.from_iso8601(published_at) do
+      {:ok, datetime, _offset} -> datetime
+      {:error, _reason} -> DateTime.utc_now() |> DateTime.truncate(:second)
+    end
+  end
+
+  defp insert_skipping_duplicate_urls(news_rows) do
+    Repo.insert_all(News, news_rows, on_conflict: :nothing)
+  end
+
+  defp touch_last_fetched_at(source) do
+    source
+    |> Ecto.Changeset.change(last_fetched_at: DateTime.utc_now())
+    |> Repo.update()
   end
 
   # For video items (YouTube etc.), use the RSS description directly — no scraping needed.
