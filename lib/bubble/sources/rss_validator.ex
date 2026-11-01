@@ -1,12 +1,4 @@
 defmodule Bubble.Sources.RSSValidator do
-  @moduledoc """
-  Validates and parses RSS/Atom feeds with comprehensive error handling.
-
-  This module provides robust parsing for both RSS 2.0 and Atom feeds,
-  with validation to ensure feed items contain required fields and are
-  properly formatted.
-  """
-
   import SweetXml
 
   alias Utils.HtmlEntities
@@ -25,19 +17,6 @@ defmodule Bubble.Sources.RSSValidator do
 
   @type parse_result :: {:ok, [feed_item()]} | {:error, atom()}
 
-  @doc """
-  Parses and validates an RSS or Atom feed from XML content.
-
-  Returns `{:ok, items}` if parsing succeeds, where items is a list of maps
-  containing feed item data. Returns `{:error, reason}` if parsing fails.
-
-  ## Examples
-
-      iex> xml = ~s[<?xml version="1.0"?><rss><channel><item><title>Test</title></item></channel></rss>]
-      iex> Bubble.Sources.RSSValidator.parse_and_validate(xml)
-      {:ok, [%{title: "Test", url: "", description: "", content: "", published_at: ""}]}
-
-  """
   @spec parse_and_validate(String.t()) :: parse_result()
   def parse_and_validate(xml) when is_binary(xml) do
     with {:ok, parsed_xml} <- safe_parse_xml(xml),
