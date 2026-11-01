@@ -6,30 +6,31 @@ defmodule Bubble.News do
   alias Bubble.News.UserNewsSource
   alias Bubble.Repo
 
-  @doc """
-  Lists news from sources the user is subscribed to and has active.
-  Shows news from today and yesterday only.
-  """
+  @max_news_shown 50
+
   def list_user_news(user_id) do
-    yesterday_start =
-      DateTime.utc_now()
-      |> DateTime.shift(day: -1)
-      |> DateTime.to_date()
-      |> DateTime.new!(~T[00:00:00], "Etc/UTC")
+    published_since = start_of_yesterday()
 
     Repo.all(
       from(n in News,
         join: uns in UserNewsSource,
         on: uns.news_source_id == n.news_source_id,
         where: uns.user_id == ^user_id and uns.is_active == true,
-        where: n.published_at >= ^yesterday_start,
+        where: n.published_at >= ^published_since,
         order_by: [desc: n.published_at],
-        limit: 50,
+        limit: @max_news_shown,
         preload: [:news_source],
         select: {n, uns}
       )
     )
     |> Enum.map(&apply_source_override/1)
+  end
+
+  defp start_of_yesterday do
+    DateTime.utc_now()
+    |> DateTime.shift(day: -1)
+    |> DateTime.to_date()
+    |> DateTime.new!(~T[00:00:00], "Etc/UTC")
   end
 
   defp apply_source_override({news, user_source}) do
