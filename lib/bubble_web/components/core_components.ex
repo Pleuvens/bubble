@@ -131,13 +131,26 @@ defmodule BubbleWeb.CoreComponents do
       id={@id}
       name={@name}
       value={@value}
-      class={[
-        "w-full px-3 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition",
-        @class
-      ]}
+      class={[field_classes(), @class]}
       {@rest}
     />
     """
+  end
+
+  attr :name, :string, required: true
+  attr :id, :string, default: nil
+  attr :value, :any, default: nil
+  attr :class, :string, default: "py-2 text-sm resize-none"
+  attr :rest, :global, include: ~w(placeholder required rows)
+
+  def text_area(assigns) do
+    ~H"""
+    <textarea id={@id} name={@name} class={[field_classes(), @class]} {@rest}>{@value}</textarea>
+    """
+  end
+
+  defp field_classes do
+    "w-full px-3 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
   end
 
   attr :error, :any, required: true

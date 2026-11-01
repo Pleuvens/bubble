@@ -35,12 +35,12 @@ defmodule BubbleWeb.Components.SourceEditForm do
       </div>
       <div class="space-y-1.5">
         <.field_label for={"edit_description_#{@source_id}"}>Description</.field_label>
-        <textarea
+        <.text_area
           id={"edit_description_#{@source_id}"}
           name="description"
           rows="2"
-          class="w-full px-3 py-2 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none resize-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white text-sm transition"
-        ><%= @edit_form.description %></textarea>
+          value={@edit_form.description}
+        />
       </div>
       <div class="flex gap-2">
         <button
