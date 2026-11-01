@@ -2,6 +2,7 @@ defmodule BubbleWeb.Components.AddSourceModal do
   @moduledoc false
   use Phoenix.Component
 
+  import BubbleWeb.CoreComponents
   import BubbleWeb.Components.FieldLabel
 
   attr :modal_step, :atom, default: nil
@@ -70,14 +71,14 @@ defmodule BubbleWeb.Components.AddSourceModal do
     <form phx-submit="check_url" class="space-y-4">
       <div class="space-y-1.5">
         <.field_label for="modal_url">RSS URL</.field_label>
-        <input
+        <.text_input
           type="url"
           id="modal_url"
           name="url"
           value={@url_input}
           placeholder="https://example.com/rss"
           required
-          class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white text-sm transition"
+          class="py-2.5 text-sm"
         />
       </div>
       <div class="flex gap-2 mt-2">
@@ -125,14 +126,14 @@ defmodule BubbleWeb.Components.AddSourceModal do
       </div>
       <div class="space-y-1.5">
         <.field_label for="modal_name">Name</.field_label>
-        <input
+        <.text_input
           type="text"
           id="modal_name"
           name="name"
           value={@new_source.name}
           placeholder="e.g. Tech News"
           required
-          class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white text-sm transition"
+          class="py-2.5 text-sm"
         />
       </div>
       <div class="flex gap-2 mt-2">
