@@ -1,7 +1,8 @@
 defmodule Bubble.NewsFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `Bubble.News` and `Bubble.NewsSources` contexts.
+  entities via the `Bubble.News`, `Bubble.NewsSources` and
+  `Bubble.Subscriptions` contexts.
   """
 
   import Ecto.Query
@@ -10,6 +11,7 @@ defmodule Bubble.NewsFixtures do
   alias Bubble.News.NewsSource
   alias Bubble.NewsSources
   alias Bubble.Repo
+  alias Bubble.Subscriptions
 
   @doc """
   Generate a news source.
@@ -63,7 +65,7 @@ defmodule Bubble.NewsFixtures do
   Subscribe a user to a news source.
   """
   def subscribe_user_to_source(user_id, news_source_id) do
-    {:ok, _} = NewsSources.subscribe_user_and_fetch(user_id, news_source_id)
+    {:ok, _} = Subscriptions.subscribe_user_and_fetch(user_id, news_source_id)
   end
 
   def subscribed_news_source_fixture(user_id, attrs \\ %{}) do

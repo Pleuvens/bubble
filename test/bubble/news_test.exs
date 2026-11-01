@@ -5,7 +5,7 @@ defmodule Bubble.NewsTest do
   import Bubble.NewsFixtures
 
   alias Bubble.News
-  alias Bubble.NewsSources
+  alias Bubble.Subscriptions
 
   describe "list_user_news/1" do
     setup do
@@ -17,8 +17,8 @@ defmodule Bubble.NewsTest do
       active_source = news_source_fixture(name: "Active Source")
       inactive_source = news_source_fixture(name: "Inactive Source")
 
-      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, active_source.id)
-      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, inactive_source.id)
+      {:ok, _} = Subscriptions.subscribe_user_and_fetch(user.id, active_source.id)
+      {:ok, _} = Subscriptions.subscribe_user_and_fetch(user.id, inactive_source.id)
 
       now = DateTime.utc_now() |> DateTime.truncate(:second)
 
@@ -36,8 +36,8 @@ defmodule Bubble.NewsTest do
           published_at: DateTime.add(now, -2, :hour)
         )
 
-      user_news_source = NewsSources.get_user_news_source(user.id, inactive_source.id)
-      {:ok, _} = NewsSources.update_user_news_source(user_news_source, %{is_active: false})
+      user_news_source = Subscriptions.get_user_news_source(user.id, inactive_source.id)
+      {:ok, _} = Subscriptions.update_user_news_source(user_news_source, %{is_active: false})
 
       news = News.list_user_news(user.id)
 
@@ -50,12 +50,12 @@ defmodule Bubble.NewsTest do
     test "returns empty list when all subscriptions are inactive", %{user: user} do
       source = news_source_fixture()
 
-      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
+      {:ok, _} = Subscriptions.subscribe_user_and_fetch(user.id, source.id)
 
       news_fixture(title: "Test News", news_source_id: source.id)
 
-      user_news_source = NewsSources.get_user_news_source(user.id, source.id)
-      {:ok, _} = NewsSources.update_user_news_source(user_news_source, %{is_active: false})
+      user_news_source = Subscriptions.get_user_news_source(user.id, source.id)
+      {:ok, _} = Subscriptions.update_user_news_source(user_news_source, %{is_active: false})
 
       news = News.list_user_news(user.id)
 
@@ -67,9 +67,9 @@ defmodule Bubble.NewsTest do
       source2 = news_source_fixture(name: "Source 2")
       source3 = news_source_fixture(name: "Source 3")
 
-      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source1.id)
-      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source2.id)
-      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source3.id)
+      {:ok, _} = Subscriptions.subscribe_user_and_fetch(user.id, source1.id)
+      {:ok, _} = Subscriptions.subscribe_user_and_fetch(user.id, source2.id)
+      {:ok, _} = Subscriptions.subscribe_user_and_fetch(user.id, source3.id)
 
       now = DateTime.utc_now() |> DateTime.truncate(:second)
 
@@ -94,8 +94,8 @@ defmodule Bubble.NewsTest do
           published_at: DateTime.add(now, -3, :hour)
         )
 
-      user_news_source2 = NewsSources.get_user_news_source(user.id, source2.id)
-      {:ok, _} = NewsSources.update_user_news_source(user_news_source2, %{is_active: false})
+      user_news_source2 = Subscriptions.get_user_news_source(user.id, source2.id)
+      {:ok, _} = Subscriptions.update_user_news_source(user_news_source2, %{is_active: false})
 
       news = News.list_user_news(user.id)
 
@@ -109,7 +109,7 @@ defmodule Bubble.NewsTest do
     test "returns news ordered by published_at descending", %{user: user} do
       source = news_source_fixture()
 
-      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
+      {:ok, _} = Subscriptions.subscribe_user_and_fetch(user.id, source.id)
 
       now = DateTime.utc_now() |> DateTime.truncate(:second)
 
@@ -144,7 +144,7 @@ defmodule Bubble.NewsTest do
 
     test "limits results to 50 items", %{user: user} do
       source = news_source_fixture()
-      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
+      {:ok, _} = Subscriptions.subscribe_user_and_fetch(user.id, source.id)
 
       now = DateTime.utc_now() |> DateTime.truncate(:second)
 
@@ -173,7 +173,7 @@ defmodule Bubble.NewsTest do
     test "reactivating a subscription shows its news again", %{user: user} do
       source = news_source_fixture()
 
-      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
+      {:ok, _} = Subscriptions.subscribe_user_and_fetch(user.id, source.id)
 
       created_news = news_fixture(title: "Test News", news_source_id: source.id)
 
@@ -181,14 +181,14 @@ defmodule Bubble.NewsTest do
       assert length(news) == 1
       assert hd(news).id == created_news.id
 
-      user_news_source = NewsSources.get_user_news_source(user.id, source.id)
-      {:ok, _} = NewsSources.update_user_news_source(user_news_source, %{is_active: false})
+      user_news_source = Subscriptions.get_user_news_source(user.id, source.id)
+      {:ok, _} = Subscriptions.update_user_news_source(user_news_source, %{is_active: false})
 
       news = News.list_user_news(user.id)
       assert news == []
 
-      user_news_source = NewsSources.get_user_news_source(user.id, source.id)
-      {:ok, _} = NewsSources.update_user_news_source(user_news_source, %{is_active: true})
+      user_news_source = Subscriptions.get_user_news_source(user.id, source.id)
+      {:ok, _} = Subscriptions.update_user_news_source(user_news_source, %{is_active: true})
 
       news = News.list_user_news(user.id)
       assert length(news) == 1
@@ -202,8 +202,8 @@ defmodule Bubble.NewsTest do
       other_user = user_fixture()
       source = news_source_fixture(name: "Shared Name", description: "Shared description")
 
-      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
-      {:ok, _} = NewsSources.subscribe_user_and_fetch(other_user.id, source.id)
+      {:ok, _} = Subscriptions.subscribe_user_and_fetch(user.id, source.id)
+      {:ok, _} = Subscriptions.subscribe_user_and_fetch(other_user.id, source.id)
 
       news_fixture(
         title: "An article",
@@ -215,10 +215,10 @@ defmodule Bubble.NewsTest do
     end
 
     test "shows the subscriber's own name and description", %{user: user, source: source} do
-      user_source = NewsSources.get_user_news_source(user.id, source.id)
+      user_source = Subscriptions.get_user_news_source(user.id, source.id)
 
       {:ok, _} =
-        NewsSources.update_user_news_source(user_source, %{
+        Subscriptions.update_user_news_source(user_source, %{
           custom_name: "My Name",
           custom_description: "My description"
         })
@@ -234,8 +234,8 @@ defmodule Bubble.NewsTest do
       other_user: other_user,
       source: source
     } do
-      user_source = NewsSources.get_user_news_source(user.id, source.id)
-      {:ok, _} = NewsSources.update_user_news_source(user_source, %{custom_name: "My Name"})
+      user_source = Subscriptions.get_user_news_source(user.id, source.id)
+      {:ok, _} = Subscriptions.update_user_news_source(user_source, %{custom_name: "My Name"})
 
       news = News.list_user_news(other_user.id)
 

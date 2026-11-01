@@ -7,6 +7,7 @@ defmodule BubbleWeb.SettingsLiveTest do
 
   alias Bubble.NewsSources
   alias Bubble.Repo
+  alias Bubble.Subscriptions
 
   setup :register_and_log_in_user
 
@@ -49,7 +50,7 @@ defmodule BubbleWeb.SettingsLiveTest do
       source = NewsSources.get_featured_source_by_name("NBA Game Recaps")
       assert source != nil
       assert source.is_featured == true
-      assert NewsSources.user_subscribed?(user.id, source.id)
+      assert Subscriptions.user_subscribed?(user.id, source.id)
     end
 
     test "shows toggle after subscribing, no longer shows Subscribe button", %{conn: conn} do
@@ -91,7 +92,7 @@ defmodule BubbleWeb.SettingsLiveTest do
         )
 
       assert count == 1
-      assert NewsSources.user_subscribed?(user.id, existing.id)
+      assert Subscriptions.user_subscribed?(user.id, existing.id)
     end
   end
 
@@ -105,7 +106,7 @@ defmodule BubbleWeb.SettingsLiveTest do
           is_featured: true
         })
 
-      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
+      {:ok, _} = Subscriptions.subscribe_user_and_fetch(user.id, source.id)
       {:ok, source: source}
     end
 
@@ -122,7 +123,7 @@ defmodule BubbleWeb.SettingsLiveTest do
       # Source is active by default; toggle to inactive
       view |> element("button[phx-click='toggle_active']") |> render_click()
 
-      user_source = NewsSources.get_user_news_source(user.id, source.id)
+      user_source = Subscriptions.get_user_news_source(user.id, source.id)
       assert user_source.is_active == false
     end
 
@@ -155,7 +156,7 @@ defmodule BubbleWeb.SettingsLiveTest do
       })
       |> render_submit()
 
-      user_source = NewsSources.get_user_news_source(user.id, source.id)
+      user_source = Subscriptions.get_user_news_source(user.id, source.id)
 
       assert user_source.custom_name == "My Recaps"
       assert user_source.custom_url == new_url
@@ -188,10 +189,10 @@ defmodule BubbleWeb.SettingsLiveTest do
         content_type: :video,
         is_featured: true
       })
-      |> then(fn source -> NewsSources.subscribe_user_and_fetch(user.id, source.id) end)
+      |> then(fn source -> Subscriptions.subscribe_user_and_fetch(user.id, source.id) end)
 
       regular = news_source_fixture(%{name: "Hacker News", url: "https://hnrss.org/frontpage"})
-      NewsSources.subscribe_user_and_fetch(user.id, regular.id)
+      Subscriptions.subscribe_user_and_fetch(user.id, regular.id)
 
       {:ok, _view, html} = live(conn, ~p"/settings")
 
@@ -207,7 +208,7 @@ defmodule BubbleWeb.SettingsLiveTest do
 
     test "manually added sources appear in RSS Sources list", %{conn: conn, user: user} do
       source = news_source_fixture(%{name: "My Blog", url: "https://myblog.com/rss"})
-      NewsSources.subscribe_user_and_fetch(user.id, source.id)
+      Subscriptions.subscribe_user_and_fetch(user.id, source.id)
 
       {:ok, _view, html} = live(conn, ~p"/settings")
 
@@ -243,7 +244,7 @@ defmodule BubbleWeb.SettingsLiveTest do
       })
       |> render_submit()
 
-      user_source = NewsSources.get_user_news_source(user.id, source.id)
+      user_source = Subscriptions.get_user_news_source(user.id, source.id)
 
       assert user_source.custom_name == "My Name"
       assert user_source.custom_url == "https://mine.example.com/rss"
@@ -288,7 +289,7 @@ defmodule BubbleWeb.SettingsLiveTest do
       })
       |> render_submit()
 
-      other_source = NewsSources.get_user_news_source(other_user.id, source.id)
+      other_source = Subscriptions.get_user_news_source(other_user.id, source.id)
 
       assert is_nil(other_source.custom_name)
 
@@ -325,7 +326,7 @@ defmodule BubbleWeb.SettingsLiveTest do
       render_click(view, "toggle_active", %{"id" => stranger_source.id})
 
       assert render(view) =~ "Your Sources"
-      assert is_nil(NewsSources.get_user_news_source(user.id, stranger_source.id))
+      assert is_nil(Subscriptions.get_user_news_source(user.id, stranger_source.id))
     end
 
     test "the edit form opens with the user's own values", %{
@@ -333,10 +334,10 @@ defmodule BubbleWeb.SettingsLiveTest do
       user: user,
       source: source
     } do
-      user_source = NewsSources.get_user_news_source(user.id, source.id)
+      user_source = Subscriptions.get_user_news_source(user.id, source.id)
 
       {:ok, _} =
-        NewsSources.update_user_news_source(user_source, %{
+        Subscriptions.update_user_news_source(user_source, %{
           custom_name: "My Name",
           custom_url: "https://mine.example.com/rss",
           custom_description: "My description"

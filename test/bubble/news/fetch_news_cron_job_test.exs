@@ -4,8 +4,8 @@ defmodule Bubble.News.FetchNewsCronJobTest do
   import Bubble.AccountsFixtures
 
   alias Bubble.News.{News, NewsSource, FetchNewsCronJob}
-  alias Bubble.NewsSources
   alias Bubble.Repo
+  alias Bubble.Subscriptions
 
   setup do
     Repo.delete_all(News)
@@ -332,8 +332,8 @@ defmodule Bubble.News.FetchNewsCronJobTest do
           last_fetched_at: nil
         })
 
-      {:ok, user_source} = NewsSources.subscribe_user_and_fetch(user_fixture().id, source.id)
-      {:ok, _} = NewsSources.update_user_news_source(user_source, %{is_active: false})
+      {:ok, user_source} = Subscriptions.subscribe_user_and_fetch(user_fixture().id, source.id)
+      {:ok, _} = Subscriptions.update_user_news_source(user_source, %{is_active: false})
 
       Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
         Req.Test.text(conn, mock_rss_feed("https://example.com/news/paused"))
@@ -359,7 +359,7 @@ defmodule Bubble.News.FetchNewsCronJobTest do
       })
 
       source = Repo.one!(NewsSource)
-      {:ok, _} = NewsSources.subscribe_user_and_fetch(user_fixture().id, source.id)
+      {:ok, _} = Subscriptions.subscribe_user_and_fetch(user_fixture().id, source.id)
 
       Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
         Req.Test.text(conn, mock_rss_feed("https://example.com/news/shared"))
@@ -380,7 +380,7 @@ defmodule Bubble.News.FetchNewsCronJobTest do
 
   defp insert_subscribed_news_source(attrs) do
     source = insert_news_source(attrs)
-    {:ok, _} = NewsSources.subscribe_user_and_fetch(user_fixture().id, source.id)
+    {:ok, _} = Subscriptions.subscribe_user_and_fetch(user_fixture().id, source.id)
     source
   end
 

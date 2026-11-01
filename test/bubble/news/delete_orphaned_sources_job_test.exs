@@ -6,6 +6,7 @@ defmodule Bubble.News.DeleteOrphanedSourcesJobTest do
 
   alias Bubble.News.DeleteOrphanedSourcesJob
   alias Bubble.NewsSources
+  alias Bubble.Subscriptions
 
   describe "perform/1" do
     test "stamps a source that just lost its last subscriber" do
@@ -18,7 +19,7 @@ defmodule Bubble.News.DeleteOrphanedSourcesJobTest do
     test "clears the stamp when a subscriber came back" do
       user = user_fixture()
       source = orphaned_news_source_fixture(days_ago(40))
-      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
+      {:ok, _} = Subscriptions.subscribe_user_and_fetch(user.id, source.id)
 
       assert {:ok, %{deleted_count: 0}} = perform_job()
       assert NewsSources.get_source(source.id).orphaned_at == nil

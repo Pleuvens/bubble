@@ -8,6 +8,7 @@ defmodule BubbleWeb.SettingsLive do
   alias Bubble.News.FetchSingleSourceJob
   alias Bubble.News.SourceOverride
   alias Bubble.NewsSources
+  alias Bubble.Subscriptions
 
   @featured_sources [
     %{
@@ -133,7 +134,7 @@ defmodule BubbleWeb.SettingsLive do
       source ->
         user_id = socket.assigns.current_user.id
 
-        if NewsSources.user_subscribed?(user_id, source.id) do
+        if Subscriptions.user_subscribed?(user_id, source.id) do
           {:noreply,
            socket
            |> assign(:modal_step, nil)
@@ -153,7 +154,7 @@ defmodule BubbleWeb.SettingsLive do
     user_id = socket.assigns.current_user.id
     source = socket.assigns.found_source
 
-    case NewsSources.subscribe_user_and_fetch(user_id, source.id) do
+    case Subscriptions.subscribe_user_and_fetch(user_id, source.id) do
       {:ok, _} ->
         {:noreply,
          socket
@@ -210,7 +211,7 @@ defmodule BubbleWeb.SettingsLive do
   def handle_event("edit_source", %{"id" => id}, socket) do
     user_id = socket.assigns.current_user.id
 
-    case NewsSources.get_subscribed_source(user_id, id) do
+    case Subscriptions.get_subscribed_source(user_id, id) do
       nil ->
         {:noreply, put_flash(socket, :error, "You are not subscribed to that source.")}
 
@@ -236,7 +237,7 @@ defmodule BubbleWeb.SettingsLive do
   def handle_event("save_source", %{"id" => id} = params, socket) do
     user_id = socket.assigns.current_user.id
 
-    case NewsSources.get_subscribed_source(user_id, id) do
+    case Subscriptions.get_subscribed_source(user_id, id) do
       nil ->
         {:noreply, put_flash(socket, :error, "You are not subscribed to that source.")}
 
@@ -248,7 +249,7 @@ defmodule BubbleWeb.SettingsLive do
   def handle_event("toggle_active", %{"id" => source_id}, socket) do
     user_id = socket.assigns.current_user.id
 
-    case NewsSources.get_user_news_source(user_id, source_id) do
+    case Subscriptions.get_user_news_source(user_id, source_id) do
       nil ->
         {:noreply, refresh_with_error(socket, "You are not subscribed to that source.")}
 
@@ -260,7 +261,7 @@ defmodule BubbleWeb.SettingsLive do
   def handle_event("delete_source", %{"id" => source_id}, socket) do
     user_id = socket.assigns.current_user.id
 
-    case NewsSources.remove_user_source(user_id, source_id) do
+    case Subscriptions.remove_user_source(user_id, source_id) do
       {1, _} ->
         {:noreply,
          socket
@@ -275,12 +276,12 @@ defmodule BubbleWeb.SettingsLive do
   defp subscribe_to_featured_source(user_id, attrs) do
     case NewsSources.get_featured_source_by_name(attrs.name) do
       nil -> NewsSources.create_source_and_subscribe(user_id, Map.put(attrs, :is_featured, true))
-      existing -> NewsSources.subscribe_user_and_fetch(user_id, existing.id)
+      existing -> Subscriptions.subscribe_user_and_fetch(user_id, existing.id)
     end
   end
 
   defp toggle_user_source_active(socket, user_feed_source) do
-    case NewsSources.update_user_news_source(user_feed_source, %{
+    case Subscriptions.update_user_news_source(user_feed_source, %{
            is_active: !user_feed_source.is_active
          }) do
       {:ok, _user_feed_source} ->
@@ -306,7 +307,7 @@ defmodule BubbleWeb.SettingsLive do
       custom_description: override_or_nil(params["description"], source.description)
     }
 
-    case NewsSources.update_user_news_source(user_source, attrs) do
+    case Subscriptions.update_user_news_source(user_source, attrs) do
       {:ok, _user_source} ->
         {:noreply,
          socket
@@ -326,7 +327,7 @@ defmodule BubbleWeb.SettingsLive do
 
   defp assign_sources(socket, user_id) do
     featured_names = MapSet.new(@featured_sources, & &1.name)
-    all_sources = NewsSources.list_user_sources(user_id)
+    all_sources = Subscriptions.list_user_sources(user_id)
 
     is_featured_source? = fn {s, _} ->
       s.is_featured or MapSet.member?(featured_names, s.name)
