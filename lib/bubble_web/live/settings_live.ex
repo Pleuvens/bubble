@@ -114,32 +114,10 @@ defmodule BubbleWeb.SettingsLive do
   end
 
   def handle_event("check_url", %{"url" => url}, socket) do
-    case NewsSources.get_source_by_url(url) do
-      nil ->
-        {:noreply,
-         socket
-         |> assign(:modal_step, :new_source_form)
-         |> assign(:url_input, url)
-         |> assign(:found_source, nil)
-         |> assign(:new_source, %{name: "", url: url, description: ""})}
+    user_id = socket.assigns.current_user.id
+    source = NewsSources.get_source_by_url(url)
 
-      source ->
-        user_id = socket.assigns.current_user.id
-
-        if Subscriptions.user_subscribed?(user_id, source.id) do
-          {:noreply,
-           socket
-           |> assign(:modal_step, nil)
-           |> assign(:url_input, "")
-           |> put_flash(:error, "You are already subscribed to this source.")}
-        else
-          {:noreply,
-           socket
-           |> assign(:modal_step, :confirm_existing)
-           |> assign(:url_input, url)
-           |> assign(:found_source, source)}
-        end
-    end
+    {:noreply, assign_url_check_step(socket, url, source, subscribed?(source, user_id))}
   end
 
   def handle_event("confirm_existing_source", _params, socket) do
@@ -263,6 +241,31 @@ defmodule BubbleWeb.SettingsLive do
       {0, _} ->
         {:noreply, socket |> put_flash(:error, "Failed to unsubscribe from source.")}
     end
+  end
+
+  defp subscribed?(nil, _user_id), do: false
+  defp subscribed?(source, user_id), do: Subscriptions.user_subscribed?(user_id, source.id)
+
+  defp assign_url_check_step(socket, url, nil, _subscribed) do
+    socket
+    |> assign(:modal_step, :new_source_form)
+    |> assign(:url_input, url)
+    |> assign(:found_source, nil)
+    |> assign(:new_source, %{name: "", url: url, description: ""})
+  end
+
+  defp assign_url_check_step(socket, _url, _source, true) do
+    socket
+    |> assign(:modal_step, nil)
+    |> assign(:url_input, "")
+    |> put_flash(:error, "You are already subscribed to this source.")
+  end
+
+  defp assign_url_check_step(socket, url, source, false) do
+    socket
+    |> assign(:modal_step, :confirm_existing)
+    |> assign(:url_input, url)
+    |> assign(:found_source, source)
   end
 
   defp subscribe_to_featured_source(user_id, attrs) do
