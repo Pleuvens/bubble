@@ -117,6 +117,29 @@ defmodule BubbleWeb.CoreComponents do
     """
   end
 
+  attr :type, :string, required: true
+  attr :name, :string, required: true
+  attr :id, :string, default: nil
+  attr :value, :any, default: nil
+  attr :class, :string, default: "py-2.5"
+  attr :rest, :global
+
+  def text_input(assigns) do
+    ~H"""
+    <input
+      type={@type}
+      id={@id}
+      name={@name}
+      value={@value}
+      class={[
+        "w-full px-3 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition",
+        @class
+      ]}
+      {@rest}
+    />
+    """
+  end
+
   attr :error, :any, required: true
   attr :class, :string, default: "text-red-600 dark:text-red-400 text-xs mt-1"
 
