@@ -15,7 +15,7 @@ defmodule BubbleWeb.UserResetPasswordLive do
           <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Reset password</h1>
         </div>
 
-        <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
+        <.card>
           <form id="reset_password_form" phx-submit="reset_password" phx-change="validate">
             <div class="space-y-4">
               <%= if @form.errors && @form.errors != [] do %>
@@ -53,7 +53,7 @@ defmodule BubbleWeb.UserResetPasswordLive do
               <.submit_button>Reset Password</.submit_button>
             </div>
           </form>
-        </div>
+        </.card>
 
         <.auth_footer_links />
       </main>

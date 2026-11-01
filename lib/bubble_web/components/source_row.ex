@@ -2,6 +2,7 @@ defmodule BubbleWeb.Components.SourceRow do
   @moduledoc false
   use Phoenix.Component
 
+  import BubbleWeb.CoreComponents
   import BubbleWeb.Components.ActiveToggle
   import BubbleWeb.Components.IconButton
   import BubbleWeb.Components.SourceEditForm
@@ -17,10 +18,10 @@ defmodule BubbleWeb.Components.SourceRow do
     assigns = assign(assigns, :editing?, assigns.editing_source_id == assigns.source.id)
 
     ~H"""
-    <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
+    <.card>
       <.source_edit_form :if={@editing?} source_id={@source.id} edit_form={@edit_form} />
       <.source_details :if={not @editing?} source={@source} user_source={@user_source} />
-    </div>
+    </.card>
     """
   end
 

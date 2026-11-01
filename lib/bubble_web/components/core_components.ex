@@ -151,6 +151,16 @@ defmodule BubbleWeb.CoreComponents do
 
   slot :inner_block, required: true
 
+  def card(assigns) do
+    ~H"""
+    <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  slot :inner_block, required: true
+
   def submit_button(assigns) do
     ~H"""
     <button

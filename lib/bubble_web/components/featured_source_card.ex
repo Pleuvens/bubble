@@ -2,6 +2,7 @@ defmodule BubbleWeb.Components.FeaturedSourceCard do
   @moduledoc false
   use Phoenix.Component
 
+  import BubbleWeb.CoreComponents
   import BubbleWeb.Components.ActiveToggle
   import BubbleWeb.Components.IconButton
   import BubbleWeb.Components.SourceEditForm
@@ -15,7 +16,7 @@ defmodule BubbleWeb.Components.FeaturedSourceCard do
     assigns = assign_subscription(assigns)
 
     ~H"""
-    <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
+    <.card>
       <div class="flex items-start justify-between gap-4">
         <div class="flex-1">
           <div class="flex items-center gap-2 mb-1">
@@ -42,7 +43,7 @@ defmodule BubbleWeb.Components.FeaturedSourceCard do
         source_id={@db_source.id}
         source_name={@source.name}
       />
-    </div>
+    </.card>
     """
   end
 

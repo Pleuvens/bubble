@@ -18,7 +18,7 @@ defmodule BubbleWeb.UserConfirmationInstructionsLive do
           </p>
         </div>
 
-        <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
+        <.card>
           <form id="resend_confirmation_form" phx-submit="send_instructions">
             <div class="space-y-4">
               <div class="space-y-1.5">
@@ -35,7 +35,7 @@ defmodule BubbleWeb.UserConfirmationInstructionsLive do
               <.submit_button>Resend Confirmation Instructions</.submit_button>
             </div>
           </form>
-        </div>
+        </.card>
 
         <.auth_footer_links />
       </main>

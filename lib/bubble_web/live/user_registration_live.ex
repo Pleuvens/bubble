@@ -26,7 +26,7 @@ defmodule BubbleWeb.UserRegistrationLive do
           </p>
         </div>
 
-        <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
+        <.card>
           <form
             id="registration_form"
             phx-submit="save"
@@ -79,7 +79,7 @@ defmodule BubbleWeb.UserRegistrationLive do
               <.submit_button>Create Account</.submit_button>
             </div>
           </form>
-        </div>
+        </.card>
       </main>
     </div>
     """

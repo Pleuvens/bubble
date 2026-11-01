@@ -23,7 +23,7 @@ defmodule BubbleWeb.UserLoginLive do
           </p>
         </div>
 
-        <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
+        <.card>
           <form id="login_form" action={~p"/users/log_in"} method="post" phx-update="ignore">
             <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
@@ -76,7 +76,7 @@ defmodule BubbleWeb.UserLoginLive do
               <.submit_button>Log In</.submit_button>
             </div>
           </form>
-        </div>
+        </.card>
       </main>
     </div>
     """

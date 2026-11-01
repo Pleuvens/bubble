@@ -44,9 +44,9 @@ defmodule BubbleWeb.UserSettingsLive do
         {@title}
       </h2>
 
-      <div class="bg-white dark:bg-[#141416] rounded-xl border border-gray-200 dark:border-[#26262a] p-4">
+      <.card>
         {render_slot(@inner_block)}
-      </div>
+      </.card>
     </section>
     """
   end
