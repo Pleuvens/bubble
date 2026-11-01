@@ -47,6 +47,17 @@ defmodule Bubble.Sources.NewsProcessor do
     source
     |> Ecto.Changeset.change(last_fetched_at: DateTime.utc_now())
     |> Repo.update()
+    |> log_failed_touch(source)
+  end
+
+  defp log_failed_touch({:ok, _updated}, _source), do: :ok
+
+  defp log_failed_touch({:error, changeset}, source) do
+    Logger.warning(
+      "Failed to update last_fetched_at: #{inspect(changeset.errors)} for URL #{source.url}"
+    )
+
+    :ok
   end
 
   defp fetch_content_with_fallback(news) do
