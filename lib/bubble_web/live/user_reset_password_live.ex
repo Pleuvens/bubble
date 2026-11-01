@@ -29,14 +29,13 @@ defmodule BubbleWeb.UserResetPasswordLive do
                 >
                   New Password
                 </label>
-                <input
+                <.text_input
                   type="password"
                   id="user_password"
                   name="user[password]"
                   value={@form[:password].value}
                   required
                   phx-debounce="blur"
-                  class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                 />
                 <.field_errors field={@form[:password]} />
               </div>
@@ -48,14 +47,13 @@ defmodule BubbleWeb.UserResetPasswordLive do
                 >
                   Confirm New Password
                 </label>
-                <input
+                <.text_input
                   type="password"
                   id="user_password_confirmation"
                   name="user[password_confirmation]"
                   value={@form[:password_confirmation].value}
                   required
                   phx-debounce="blur"
-                  class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                 />
                 <.field_errors field={@form[:password_confirmation]} />
               </div>

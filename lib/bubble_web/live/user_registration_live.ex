@@ -50,14 +50,13 @@ defmodule BubbleWeb.UserRegistrationLive do
                 >
                   Email
                 </label>
-                <input
+                <.text_input
                   type="email"
                   id="user_email"
                   name="user[email]"
                   value={@form[:email].value}
                   required
                   phx-debounce="blur"
-                  class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                 />
                 <.field_errors
                   field={@form[:email]}
@@ -72,14 +71,13 @@ defmodule BubbleWeb.UserRegistrationLive do
                 >
                   Password
                 </label>
-                <input
+                <.text_input
                   type="password"
                   id="user_password"
                   name="user[password]"
                   value={@form[:password].value}
                   required
                   phx-debounce="blur"
-                  class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
                 />
                 <.field_errors
                   field={@form[:password]}
