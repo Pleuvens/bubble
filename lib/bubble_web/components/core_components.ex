@@ -172,10 +172,6 @@ defmodule BubbleWeb.CoreComponents do
     """
   end
 
-  defp field_classes do
-    "w-full px-3 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
-  end
-
   def form_errors_banner(assigns) do
     ~H"""
     <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-[13.5px]">
@@ -199,5 +195,9 @@ defmodule BubbleWeb.CoreComponents do
     else
       Gettext.dgettext(BubbleWeb.Gettext, "errors", msg, opts)
     end
+  end
+
+  defp field_classes do
+    "w-full px-3 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
   end
 end
