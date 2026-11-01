@@ -47,25 +47,31 @@ defmodule Bubble.Sources.NewsProcessor do
   end
 
   defp fetch_content_with_fallback(news) do
+    if video?(news), do: video_content(news), else: article_content(news)
+  end
+
+  defp video?(news), do: news[:video_id] not in [nil, ""]
+
+  defp video_content(news) do
+    if has_substantial_content?(news[:description]), do: news[:description], else: ""
+  end
+
+  defp article_content(news) do
     cond do
-      news[:video_id] not in [nil, ""] ->
-        if has_substantial_content?(news[:description]), do: news[:description], else: ""
+      has_substantial_content?(news.content) -> news.content
+      has_substantial_content?(news.description) -> news.description
+      true -> scraped_description(news.url)
+    end
+  end
 
-      has_substantial_content?(news.content) ->
-        news.content
+  defp scraped_description(url) do
+    case MetaScraper.fetch_description(url) do
+      {:ok, description} ->
+        Logger.debug("Fetched description via MetaScraper for #{url}")
+        description
 
-      has_substantial_content?(news.description) ->
-        news.description
-
-      true ->
-        case MetaScraper.fetch_description(news.url) do
-          {:ok, description} ->
-            Logger.debug("Fetched description via MetaScraper for #{news.url}")
-            description
-
-          {:error, _reason} ->
-            "No description available"
-        end
+      {:error, _reason} ->
+        "No description available"
     end
   end
 
