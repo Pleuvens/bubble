@@ -80,8 +80,8 @@ defmodule BubbleWeb.SettingsLive do
      |> assign(:editing_source_id, nil)
      |> assign(:url_input, "")
      |> assign(:found_source, nil)
-     |> assign(:new_source, %{name: "", url: "", description: ""})
-     |> assign(:edit_form, %{name: "", url: "", description: ""})}
+     |> assign(:new_source, blank_source_form())
+     |> assign(:edit_form, blank_source_form())}
   end
 
   def handle_event("show_add_form", _params, socket) do
@@ -91,10 +91,7 @@ defmodule BubbleWeb.SettingsLive do
   def handle_event("cancel_add", _params, socket) do
     {:noreply,
      socket
-     |> assign(:modal_step, nil)
-     |> assign(:url_input, "")
-     |> assign(:found_source, nil)
-     |> assign(:new_source, %{name: "", url: "", description: ""})}
+     |> close_add_modal()}
   end
 
   def handle_event("subscribe_featured", %{"url" => url}, socket) do
@@ -129,9 +126,7 @@ defmodule BubbleWeb.SettingsLive do
         {:noreply,
          socket
          |> assign_sources(user_id)
-         |> assign(:modal_step, nil)
-         |> assign(:url_input, "")
-         |> assign(:found_source, nil)
+         |> close_add_modal()
          |> put_flash(:info, "Successfully subscribed to #{source.name}.")}
 
       {:error, _} ->
@@ -143,14 +138,11 @@ defmodule BubbleWeb.SettingsLive do
     user_id = socket.assigns.current_user.id
     url = params["url"]
 
-    content_type =
-      if String.contains?(url, "youtube.com"), do: :video, else: :article
-
     attrs = %{
       name: params["name"],
       url: url,
       description: params["description"] || "",
-      content_type: content_type
+      content_type: content_type_for_url(url)
     }
 
     case NewsSources.create_source_and_subscribe(user_id, attrs) do
@@ -158,9 +150,7 @@ defmodule BubbleWeb.SettingsLive do
         {:noreply,
          socket
          |> assign_sources(user_id)
-         |> assign(:modal_step, nil)
-         |> assign(:url_input, "")
-         |> assign(:new_source, %{name: "", url: "", description: ""})
+         |> close_add_modal()
          |> put_flash(:info, "Source added successfully.")}
 
       {:error, _changeset} ->
@@ -200,8 +190,7 @@ defmodule BubbleWeb.SettingsLive do
   def handle_event("cancel_edit", _params, socket) do
     {:noreply,
      socket
-     |> assign(:editing_source_id, nil)
-     |> assign(:edit_form, %{name: "", url: "", description: ""})}
+     |> close_edit_form()}
   end
 
   def handle_event("save_source", %{"id" => id} = params, socket) do
@@ -243,6 +232,26 @@ defmodule BubbleWeb.SettingsLive do
     end
   end
 
+  defp blank_source_form(url \\ ""), do: %{name: "", url: url, description: ""}
+
+  defp content_type_for_url(url) do
+    if String.contains?(url, "youtube.com"), do: :video, else: :article
+  end
+
+  defp close_add_modal(socket) do
+    socket
+    |> assign(:modal_step, nil)
+    |> assign(:url_input, "")
+    |> assign(:found_source, nil)
+    |> assign(:new_source, blank_source_form())
+  end
+
+  defp close_edit_form(socket) do
+    socket
+    |> assign(:editing_source_id, nil)
+    |> assign(:edit_form, blank_source_form())
+  end
+
   defp subscribed?(nil, _user_id), do: false
   defp subscribed?(source, user_id), do: Subscriptions.user_subscribed?(user_id, source.id)
 
@@ -251,7 +260,7 @@ defmodule BubbleWeb.SettingsLive do
     |> assign(:modal_step, :new_source_form)
     |> assign(:url_input, url)
     |> assign(:found_source, nil)
-    |> assign(:new_source, %{name: "", url: url, description: ""})
+    |> assign(:new_source, blank_source_form(url))
   end
 
   defp assign_url_check_step(socket, _url, _source, true) do
@@ -307,8 +316,7 @@ defmodule BubbleWeb.SettingsLive do
         {:noreply,
          socket
          |> assign_sources(user_id)
-         |> assign(:editing_source_id, nil)
-         |> assign(:edit_form, %{name: "", url: "", description: ""})
+         |> close_edit_form()
          |> put_flash(:info, "Source updated successfully.")}
 
       {:error, _changeset} ->
