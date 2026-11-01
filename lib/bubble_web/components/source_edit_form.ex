@@ -3,7 +3,6 @@ defmodule BubbleWeb.Components.SourceEditForm do
   use Phoenix.Component
 
   import BubbleWeb.CoreComponents
-  import BubbleWeb.Components.FieldLabel
 
   attr :source_id, :any, required: true
   attr :edit_form, :map, required: true

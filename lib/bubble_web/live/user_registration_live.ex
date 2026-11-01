@@ -1,7 +1,6 @@
 defmodule BubbleWeb.UserRegistrationLive do
   use BubbleWeb, :live_view
 
-  import BubbleWeb.Components.FieldLabel
   import Plug.CSRFProtection, only: [get_csrf_token: 0]
 
   alias Bubble.Accounts

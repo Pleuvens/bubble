@@ -1,7 +1,6 @@
 defmodule BubbleWeb.UserLoginLive do
   use BubbleWeb, :live_view
 
-  import BubbleWeb.Components.FieldLabel
   import Plug.CSRFProtection, only: [get_csrf_token: 0]
 
   def render(assigns) do

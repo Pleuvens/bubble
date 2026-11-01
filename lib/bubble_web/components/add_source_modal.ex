@@ -3,7 +3,6 @@ defmodule BubbleWeb.Components.AddSourceModal do
   use Phoenix.Component
 
   import BubbleWeb.CoreComponents
-  import BubbleWeb.Components.FieldLabel
 
   attr :modal_step, :atom, default: nil
   attr :url_input, :string, default: ""

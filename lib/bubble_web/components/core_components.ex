@@ -164,12 +164,20 @@ defmodule BubbleWeb.CoreComponents do
 
   def section_heading(assigns) do
     ~H"""
-    <h2 class={[
-      "text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]",
-      @class
-    ]}>
+    <h2 class={[label_classes(), @class]}>
       {render_slot(@inner_block)}
     </h2>
+    """
+  end
+
+  attr :for, :string, default: nil
+  slot :inner_block, required: true
+
+  def field_label(assigns) do
+    ~H"""
+    <label for={@for} class={label_classes()}>
+      {render_slot(@inner_block)}
+    </label>
     """
   end
 
@@ -209,6 +217,10 @@ defmodule BubbleWeb.CoreComponents do
     else
       Gettext.dgettext(BubbleWeb.Gettext, "errors", msg, opts)
     end
+  end
+
+  defp label_classes do
+    "text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]"
   end
 
   defp field_classes do

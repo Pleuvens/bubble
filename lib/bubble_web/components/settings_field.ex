@@ -3,7 +3,6 @@ defmodule BubbleWeb.Components.SettingsField do
   use Phoenix.Component
 
   import BubbleWeb.CoreComponents
-  import BubbleWeb.Components.FieldLabel
 
   attr :id, :string, required: true
   attr :name, :string, required: true

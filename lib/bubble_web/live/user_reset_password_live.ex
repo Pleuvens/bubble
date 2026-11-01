@@ -1,8 +1,6 @@
 defmodule BubbleWeb.UserResetPasswordLive do
   use BubbleWeb, :live_view
 
-  import BubbleWeb.Components.FieldLabel
-
   alias Bubble.Accounts
 
   def render(assigns) do
