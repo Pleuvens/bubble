@@ -1,9 +1,4 @@
 defmodule Bubble.Sources.NewsProcessor do
-  @moduledoc """
-  Processes and saves news items from RSS feeds.
-  Handles content extraction, date parsing, and database insertion.
-  """
-
   alias Bubble.News.News
   alias Bubble.Repo
   alias Bubble.Sources.MetaScraper
@@ -12,12 +7,6 @@ defmodule Bubble.Sources.NewsProcessor do
 
   @minimum_substantial_content_length 20
 
-  @doc """
-  Processes news items for a given source and saves them to the database.
-  Updates the source's last_fetched_at timestamp.
-
-  Returns :ok on success, {:error, reason} on failure.
-  """
   def process_and_save_news(news_items, source) when is_list(news_items) do
     news_items
     |> build_news_rows(source)
@@ -57,8 +46,6 @@ defmodule Bubble.Sources.NewsProcessor do
     |> Repo.update()
   end
 
-  # For video items (YouTube etc.), use the RSS description directly — no scraping needed.
-  # For articles, try RSS content/description first, then fall back to MetaScraper.
   defp fetch_content_with_fallback(news) do
     cond do
       news[:video_id] not in [nil, ""] ->
