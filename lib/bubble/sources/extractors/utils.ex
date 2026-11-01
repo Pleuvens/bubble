@@ -13,6 +13,14 @@ defmodule Bubble.Sources.Extractors.Utils do
 
   @minimum_metadata_length 10
 
+  @spec fetch_content(String.t(), locator()) :: {:ok, String.t()} | {:error, :not_found}
+  def fetch_content(html, locator) do
+    case extract_content(html, locator) do
+      nil -> {:error, :not_found}
+      content -> {:ok, content}
+    end
+  end
+
   @spec extract_content(String.t(), locator()) :: String.t() | nil
   def extract_content(html, locator) when is_binary(html) do
     case Floki.parse_document(html) do
