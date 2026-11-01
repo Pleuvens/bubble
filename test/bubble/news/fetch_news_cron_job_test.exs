@@ -18,33 +18,33 @@ defmodule Bubble.News.FetchNewsCronJobTest do
       old_source =
         insert_subscribed_news_source(%{
           name: "Old Source",
-          url: "https://old.example.com/rss",
+          url: "https://feeds.example.com/old.rss",
           last_fetched_at: DateTime.add(DateTime.utc_now(), -2, :day)
         })
 
       recent_source =
         insert_subscribed_news_source(%{
           name: "Recent Source",
-          url: "https://recent.example.com/rss",
+          url: "https://feeds.example.com/recent.rss",
           last_fetched_at: DateTime.add(DateTime.utc_now(), -12, :hour)
         })
 
       never_fetched_source =
         insert_subscribed_news_source(%{
           name: "Never Fetched",
-          url: "https://never.example.com/rss",
+          url: "https://feeds.example.com/never.rss",
           last_fetched_at: nil
         })
 
       Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
-        case conn.host do
-          "old.example.com" ->
+        case conn.request_path do
+          "/old.rss" ->
             Req.Test.text(conn, mock_rss_feed("https://example.com/news/old"))
 
-          "never.example.com" ->
+          "/never.rss" ->
             Req.Test.text(conn, mock_rss_feed("https://example.com/news/never"))
 
-          "recent.example.com" ->
+          "/recent.rss" ->
             Req.Test.text(conn, mock_rss_feed("https://example.com/news/recent"))
         end
       end)
@@ -177,24 +177,21 @@ defmodule Bubble.News.FetchNewsCronJobTest do
       Enum.map(1..3, fn i ->
         insert_subscribed_news_source(%{
           name: "Source #{i}",
-          url: "https://source#{i}.example.com/rss",
+          url: "https://feeds.example.com/source#{i}.rss",
           last_fetched_at: nil
         })
       end)
 
       Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
         case conn.request_path do
-          "/rss" ->
-            case conn.host do
-              "source1.example.com" ->
-                Req.Test.text(conn, mock_rss_feed("https://example.com/news/6"))
+          "/source1.rss" ->
+            Req.Test.text(conn, mock_rss_feed("https://example.com/news/6"))
 
-              "source2.example.com" ->
-                Req.Test.text(conn, mock_rss_feed("https://example.com/news/7"))
+          "/source2.rss" ->
+            Req.Test.text(conn, mock_rss_feed("https://example.com/news/7"))
 
-              "source3.example.com" ->
-                Req.Test.text(conn, mock_rss_feed("https://example.com/news/8"))
-            end
+          "/source3.rss" ->
+            Req.Test.text(conn, mock_rss_feed("https://example.com/news/8"))
         end
       end)
 
@@ -261,20 +258,20 @@ defmodule Bubble.News.FetchNewsCronJobTest do
       Enum.map(1..3, fn i ->
         insert_subscribed_news_source(%{
           name: "Source #{i}",
-          url: "https://multi#{i}.example.com/rss",
+          url: "https://feeds.example.com/multi#{i}.rss",
           last_fetched_at: nil
         })
       end)
 
       Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
-        case conn.host do
-          "multi1.example.com" ->
+        case conn.request_path do
+          "/multi1.rss" ->
             Req.Test.text(conn, mock_rss_feed("https://example.com/news/multi1"))
 
-          "multi2.example.com" ->
+          "/multi2.rss" ->
             Plug.Conn.send_resp(conn, 500, "Server Error")
 
-          "multi3.example.com" ->
+          "/multi3.rss" ->
             Req.Test.text(conn, mock_rss_feed("https://example.com/news/multi3"))
         end
       end)
@@ -296,20 +293,20 @@ defmodule Bubble.News.FetchNewsCronJobTest do
     test "skips sources nobody subscribes to" do
       insert_news_source(%{
         name: "Orphan Source",
-        url: "https://orphan.example.com/rss",
+        url: "https://feeds.example.com/orphan.rss",
         last_fetched_at: nil
       })
 
       subscribed =
         insert_subscribed_news_source(%{
           name: "Subscribed Source",
-          url: "https://subscribed.example.com/rss",
+          url: "https://feeds.example.com/subscribed.rss",
           last_fetched_at: nil
         })
 
       Req.Test.stub(Bubble.Sources.RSSClient, fn conn ->
-        case conn.host do
-          "subscribed.example.com" ->
+        case conn.request_path do
+          "/subscribed.rss" ->
             Req.Test.text(conn, mock_rss_feed("https://example.com/news/subscribed"))
         end
       end)
