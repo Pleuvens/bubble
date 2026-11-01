@@ -1,12 +1,11 @@
 defmodule Bubble.NewsSourcesTest do
   use Bubble.DataCase
-  use Oban.Testing, repo: Bubble.Repo
 
   import Bubble.AccountsFixtures
   import Bubble.NewsFixtures
 
-  alias Bubble.News.FetchSingleSourceJob
   alias Bubble.NewsSources
+  alias Bubble.Subscriptions
 
   describe "get_featured_source_by_name/1" do
     test "returns a featured source matching the name" do
@@ -33,26 +32,6 @@ defmodule Bubble.NewsSourcesTest do
     end
   end
 
-  describe "subscribe_user_and_fetch/2" do
-    test "enqueues a fetch when the source has gone stale" do
-      user = user_fixture()
-      source = news_source_fixture()
-
-      assert {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
-
-      assert_enqueued worker: FetchSingleSourceJob, args: %{news_source_id: source.id}
-    end
-
-    test "does not enqueue a fetch when the source was fetched recently" do
-      user = user_fixture()
-      source = news_source_fixture(%{last_fetched_at: DateTime.utc_now()})
-
-      assert {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
-
-      refute_enqueued worker: FetchSingleSourceJob
-    end
-  end
-
   describe "stamp_newly_orphaned_sources/1" do
     test "stamps sources that have no subscriber" do
       orphan = news_source_fixture()
@@ -65,7 +44,7 @@ defmodule Bubble.NewsSourcesTest do
     test "leaves subscribed sources alone" do
       user = user_fixture()
       source = news_source_fixture()
-      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
+      {:ok, _} = Subscriptions.subscribe_user_and_fetch(user.id, source.id)
 
       assert 0 == NewsSources.stamp_newly_orphaned_sources(DateTime.utc_now())
       assert NewsSources.get_source(source.id).orphaned_at == nil
@@ -84,7 +63,7 @@ defmodule Bubble.NewsSourcesTest do
     test "clears the stamp when a subscriber came back" do
       user = user_fixture()
       source = orphaned_news_source_fixture(DateTime.utc_now())
-      {:ok, _} = NewsSources.subscribe_user_and_fetch(user.id, source.id)
+      {:ok, _} = Subscriptions.subscribe_user_and_fetch(user.id, source.id)
 
       assert 1 == NewsSources.clear_orphan_mark_on_subscribed_sources()
       assert NewsSources.get_source(source.id).orphaned_at == nil

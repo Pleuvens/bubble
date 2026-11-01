@@ -5,18 +5,11 @@ defmodule BubbleWeb.SettingsLive do
   import BubbleWeb.Components.FeaturedSourceCard
   import BubbleWeb.Components.SourceRow
 
+  alias Bubble.News.FeaturedSources
   alias Bubble.News.FetchSingleSourceJob
   alias Bubble.News.SourceOverride
   alias Bubble.NewsSources
-
-  @featured_sources [
-    %{
-      name: "NBA Game Recaps",
-      url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCWJ2lWNubArHWmf3FIHbfcQ",
-      description: "Official NBA YouTube channel — game recaps and last night's summaries.",
-      content_type: :video
-    }
-  ]
+  alias Bubble.Subscriptions
 
   def render(assigns) do
     ~H"""
@@ -82,13 +75,13 @@ defmodule BubbleWeb.SettingsLive do
     {:ok,
      socket
      |> assign_sources(user_id)
-     |> assign(:featured_sources, @featured_sources)
+     |> assign(:featured_sources, FeaturedSources.all())
      |> assign(:modal_step, nil)
      |> assign(:editing_source_id, nil)
      |> assign(:url_input, "")
      |> assign(:found_source, nil)
-     |> assign(:new_source, %{name: "", url: "", description: ""})
-     |> assign(:edit_form, %{name: "", url: "", description: ""})}
+     |> assign(:new_source, blank_source_form())
+     |> assign(:edit_form, blank_source_form())}
   end
 
   def handle_event("show_add_form", _params, socket) do
@@ -98,15 +91,12 @@ defmodule BubbleWeb.SettingsLive do
   def handle_event("cancel_add", _params, socket) do
     {:noreply,
      socket
-     |> assign(:modal_step, nil)
-     |> assign(:url_input, "")
-     |> assign(:found_source, nil)
-     |> assign(:new_source, %{name: "", url: "", description: ""})}
+     |> close_add_modal()}
   end
 
   def handle_event("subscribe_featured", %{"url" => url}, socket) do
     user_id = socket.assigns.current_user.id
-    attrs = Enum.find(@featured_sources, &(&1.url == url))
+    attrs = FeaturedSources.find_by_url(url)
 
     case subscribe_to_featured_source(user_id, attrs) do
       {:ok, _} ->
@@ -121,46 +111,22 @@ defmodule BubbleWeb.SettingsLive do
   end
 
   def handle_event("check_url", %{"url" => url}, socket) do
-    case NewsSources.get_source_by_url(url) do
-      nil ->
-        {:noreply,
-         socket
-         |> assign(:modal_step, :new_source_form)
-         |> assign(:url_input, url)
-         |> assign(:found_source, nil)
-         |> assign(:new_source, %{name: "", url: url, description: ""})}
+    user_id = socket.assigns.current_user.id
+    source = NewsSources.get_source_by_url(url)
 
-      source ->
-        user_id = socket.assigns.current_user.id
-
-        if NewsSources.user_subscribed?(user_id, source.id) do
-          {:noreply,
-           socket
-           |> assign(:modal_step, nil)
-           |> assign(:url_input, "")
-           |> put_flash(:error, "You are already subscribed to this source.")}
-        else
-          {:noreply,
-           socket
-           |> assign(:modal_step, :confirm_existing)
-           |> assign(:url_input, url)
-           |> assign(:found_source, source)}
-        end
-    end
+    {:noreply, assign_url_check_step(socket, url, source, subscribed?(source, user_id))}
   end
 
   def handle_event("confirm_existing_source", _params, socket) do
     user_id = socket.assigns.current_user.id
     source = socket.assigns.found_source
 
-    case NewsSources.subscribe_user_and_fetch(user_id, source.id) do
+    case Subscriptions.subscribe_user_and_fetch(user_id, source.id) do
       {:ok, _} ->
         {:noreply,
          socket
          |> assign_sources(user_id)
-         |> assign(:modal_step, nil)
-         |> assign(:url_input, "")
-         |> assign(:found_source, nil)
+         |> close_add_modal()
          |> put_flash(:info, "Successfully subscribed to #{source.name}.")}
 
       {:error, _} ->
@@ -172,14 +138,11 @@ defmodule BubbleWeb.SettingsLive do
     user_id = socket.assigns.current_user.id
     url = params["url"]
 
-    content_type =
-      if String.contains?(url, "youtube.com"), do: :video, else: :article
-
     attrs = %{
       name: params["name"],
       url: url,
       description: params["description"] || "",
-      content_type: content_type
+      content_type: content_type_for_url(url)
     }
 
     case NewsSources.create_source_and_subscribe(user_id, attrs) do
@@ -187,9 +150,7 @@ defmodule BubbleWeb.SettingsLive do
         {:noreply,
          socket
          |> assign_sources(user_id)
-         |> assign(:modal_step, nil)
-         |> assign(:url_input, "")
-         |> assign(:new_source, %{name: "", url: "", description: ""})
+         |> close_add_modal()
          |> put_flash(:info, "Source added successfully.")}
 
       {:error, _changeset} ->
@@ -210,7 +171,7 @@ defmodule BubbleWeb.SettingsLive do
   def handle_event("edit_source", %{"id" => id}, socket) do
     user_id = socket.assigns.current_user.id
 
-    case NewsSources.get_subscribed_source(user_id, id) do
+    case Subscriptions.get_subscribed_source(user_id, id) do
       nil ->
         {:noreply, put_flash(socket, :error, "You are not subscribed to that source.")}
 
@@ -229,14 +190,13 @@ defmodule BubbleWeb.SettingsLive do
   def handle_event("cancel_edit", _params, socket) do
     {:noreply,
      socket
-     |> assign(:editing_source_id, nil)
-     |> assign(:edit_form, %{name: "", url: "", description: ""})}
+     |> close_edit_form()}
   end
 
   def handle_event("save_source", %{"id" => id} = params, socket) do
     user_id = socket.assigns.current_user.id
 
-    case NewsSources.get_subscribed_source(user_id, id) do
+    case Subscriptions.get_subscribed_source(user_id, id) do
       nil ->
         {:noreply, put_flash(socket, :error, "You are not subscribed to that source.")}
 
@@ -248,7 +208,7 @@ defmodule BubbleWeb.SettingsLive do
   def handle_event("toggle_active", %{"id" => source_id}, socket) do
     user_id = socket.assigns.current_user.id
 
-    case NewsSources.get_user_news_source(user_id, source_id) do
+    case Subscriptions.get_user_news_source(user_id, source_id) do
       nil ->
         {:noreply, refresh_with_error(socket, "You are not subscribed to that source.")}
 
@@ -260,7 +220,7 @@ defmodule BubbleWeb.SettingsLive do
   def handle_event("delete_source", %{"id" => source_id}, socket) do
     user_id = socket.assigns.current_user.id
 
-    case NewsSources.remove_user_source(user_id, source_id) do
+    case Subscriptions.remove_user_source(user_id, source_id) do
       {1, _} ->
         {:noreply,
          socket
@@ -272,15 +232,60 @@ defmodule BubbleWeb.SettingsLive do
     end
   end
 
+  defp blank_source_form(url \\ ""), do: %{name: "", url: url, description: ""}
+
+  defp content_type_for_url(url) do
+    if String.contains?(url, "youtube.com"), do: :video, else: :article
+  end
+
+  defp close_add_modal(socket) do
+    socket
+    |> assign(:modal_step, nil)
+    |> assign(:url_input, "")
+    |> assign(:found_source, nil)
+    |> assign(:new_source, blank_source_form())
+  end
+
+  defp close_edit_form(socket) do
+    socket
+    |> assign(:editing_source_id, nil)
+    |> assign(:edit_form, blank_source_form())
+  end
+
+  defp subscribed?(nil, _user_id), do: false
+  defp subscribed?(source, user_id), do: Subscriptions.user_subscribed?(user_id, source.id)
+
+  defp assign_url_check_step(socket, url, nil, _subscribed) do
+    socket
+    |> assign(:modal_step, :new_source_form)
+    |> assign(:url_input, url)
+    |> assign(:found_source, nil)
+    |> assign(:new_source, blank_source_form(url))
+  end
+
+  defp assign_url_check_step(socket, _url, _source, true) do
+    socket
+    |> assign(:modal_step, nil)
+    |> assign(:url_input, "")
+    |> put_flash(:error, "You are already subscribed to this source.")
+  end
+
+  defp assign_url_check_step(socket, url, source, false) do
+    socket
+    |> assign(:modal_step, :confirm_existing)
+    |> assign(:url_input, url)
+    |> assign(:found_source, source)
+  end
+
   defp subscribe_to_featured_source(user_id, attrs) do
     case NewsSources.get_featured_source_by_name(attrs.name) do
       nil -> NewsSources.create_source_and_subscribe(user_id, Map.put(attrs, :is_featured, true))
-      existing -> NewsSources.subscribe_user_and_fetch(user_id, existing.id)
+      existing -> Subscriptions.subscribe_user_and_fetch(user_id, existing.id)
     end
   end
 
   defp toggle_user_source_active(socket, user_feed_source) do
-    case NewsSources.update_user_news_source(user_feed_source, %{
+    case Subscriptions.update_user_news_source(user_feed_source, %{
            is_active: !user_feed_source.is_active
          }) do
       {:ok, _user_feed_source} ->
@@ -306,13 +311,12 @@ defmodule BubbleWeb.SettingsLive do
       custom_description: override_or_nil(params["description"], source.description)
     }
 
-    case NewsSources.update_user_news_source(user_source, attrs) do
+    case Subscriptions.update_user_news_source(user_source, attrs) do
       {:ok, _user_source} ->
         {:noreply,
          socket
          |> assign_sources(user_id)
-         |> assign(:editing_source_id, nil)
-         |> assign(:edit_form, %{name: "", url: "", description: ""})
+         |> close_edit_form()
          |> put_flash(:info, "Source updated successfully.")}
 
       {:error, _changeset} ->
@@ -325,8 +329,8 @@ defmodule BubbleWeb.SettingsLive do
   defp override_or_nil(submitted, _shared), do: submitted
 
   defp assign_sources(socket, user_id) do
-    featured_names = MapSet.new(@featured_sources, & &1.name)
-    all_sources = NewsSources.list_user_sources(user_id)
+    featured_names = FeaturedSources.names()
+    all_sources = Subscriptions.list_user_sources(user_id)
 
     is_featured_source? = fn {s, _} ->
       s.is_featured or MapSet.member?(featured_names, s.name)
