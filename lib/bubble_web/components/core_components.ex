@@ -122,7 +122,7 @@ defmodule BubbleWeb.CoreComponents do
   attr :id, :string, default: nil
   attr :value, :any, default: nil
   attr :class, :string, default: "py-2.5"
-  attr :rest, :global
+  attr :rest, :global, include: ~w(placeholder required)
 
   def text_input(assigns) do
     ~H"""

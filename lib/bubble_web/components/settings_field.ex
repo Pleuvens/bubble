@@ -2,6 +2,7 @@ defmodule BubbleWeb.Components.SettingsField do
   @moduledoc false
   use Phoenix.Component
 
+  import BubbleWeb.CoreComponents
   import BubbleWeb.Components.FieldLabel
 
   attr :id, :string, required: true
@@ -17,14 +18,13 @@ defmodule BubbleWeb.Components.SettingsField do
     ~H"""
     <div class="space-y-1.5">
       <.field_label for={@id}>{@label}</.field_label>
-      <input
+      <.text_input
         type={@type}
         id={@id}
         name={@name}
         value={@value}
         required={@required}
         phx-debounce={@debounce && "blur"}
-        class="w-full px-3 py-2.5 border border-gray-200 dark:border-[#26262a] rounded-lg focus:border-orange-400 focus:ring focus:ring-orange-400 focus:ring-opacity-20 outline-none bg-white dark:bg-[#0a0a0c] text-gray-900 dark:text-white transition"
       />
       {render_slot(@error)}
     </div>
