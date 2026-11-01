@@ -159,6 +159,20 @@ defmodule BubbleWeb.CoreComponents do
     """
   end
 
+  attr :class, :string, default: nil
+  slot :inner_block, required: true
+
+  def section_heading(assigns) do
+    ~H"""
+    <h2 class={[
+      "text-[11.5px] font-semibold tracking-[0.14em] uppercase text-gray-500 dark:text-[#71717a]",
+      @class
+    ]}>
+      {render_slot(@inner_block)}
+    </h2>
+    """
+  end
+
   slot :inner_block, required: true
 
   def submit_button(assigns) do
