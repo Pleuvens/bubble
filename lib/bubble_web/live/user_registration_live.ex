@@ -38,11 +38,7 @@ defmodule BubbleWeb.UserRegistrationLive do
             <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
             <div class="space-y-4">
-              <%= if @check_errors do %>
-                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg text-[13.5px]">
-                  Oops, something went wrong! Please check the errors below.
-                </div>
-              <% end %>
+              <.form_errors_banner :if={@check_errors} />
 
               <div class="space-y-1.5">
                 <.field_label for="user_email">Email</.field_label>
